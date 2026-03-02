@@ -1,7 +1,7 @@
 {
   "name": "androjack-mcp",
   "version": "1.3.0",
-  "description": "AndroJack – An MCP server that equips AI coding assistants with live, verified Android knowledge. 20 tools grounded in official developer.android.com, kotlinlang.org, and Google Maven sources.",
+  "description": "AndroJack: AI that actually knows Android. Real-time dependency tracking, modern architectures, and zero hallucinations.",
   "keywords": [
     "ai",
     "android",
