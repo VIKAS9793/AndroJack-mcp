@@ -1,0 +1,21 @@
+{
+  "_comment": "Cursor IDE MCP Configuration for AndroJack",
+  "_instructions": [
+    "OPTION A – Project-level (recommended for Android repos):",
+    "  Place this file at: <your-android-project>/.cursor/mcp.json",
+    "  Cursor will auto-detect it when you open the project.",
+    "",
+    "OPTION B – Global:",
+    "  Mac/Linux: ~/.cursor/mcp.json",
+    "  Windows:   %USERPROFILE%\\.cursor\\mcp.json",
+    "",
+    "After saving, open Cursor → Settings → MCP to confirm 'androjack' appears with a green dot."
+  ],
+  "mcpServers": {
+    "androjack": {
+      "command": "npx",
+      "args": ["-y", "androjack-mcp"],
+      "env": {}
+    }
+  }
+}

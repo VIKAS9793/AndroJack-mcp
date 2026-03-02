@@ -1,0 +1,51 @@
+{
+  "name": "androjack-mcp",
+  "version": "1.0.0",
+  "description": "AndroJack \u2013 Documentation-grounded Android engineering MCP server. Forces AI tools to verify official docs before generating Android/Kotlin code.",
+  "keywords": [
+    "ai",
+    "android",
+    "androjack",
+    "compose",
+    "developer-tools",
+    "foldable",
+    "jetpack",
+    "kotlin",
+    "large-screen",
+    "mcp",
+    "offline-first",
+    "paging",
+    "scalability",
+    "tablet"
+  ],
+  "author": "AndroJack",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "androjack-mcp": "./build/index.js",
+    "androjack": "./build/install.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "install-mcp": "node build/install.js install",
+    "install-mcp:auto": "node build/install.js install --auto",
+    "install-mcp:list": "node build/install.js install --list",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.25.0",
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

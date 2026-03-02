@@ -1,0 +1,514 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
+<img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" />
+<img src="https://img.shields.io/badge/MCP-Protocol-blueviolet?style=for-the-badge" />
+
+# 🤖 AndroJack — The Jack of All Android Trades
+
+![AndroJack Banner](assets/AndroJack%20banner.png)
+
+### *The Grounding Gate for Android AI. Stop hallucinations. Start building with verified Android documentation.*
+
+<br/>
+
+[![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
+[![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
+[![Tools](https://img.shields.io/badge/tools-20-orange?style=flat-square)](#-the-20-tools)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
+
+<br/>
+
+**Connects to:** Claude Desktop · Cursor · Windsurf · VS Code Copilot · AWS Kiro · Google Antigravity IDE · JetBrains AI
+
+<br/>
+
+</div>
+
+---
+
+## 🔥 The Crisis That Created This Tool
+
+In 2025, the Stack Overflow Developer Survey asked 49,000 developers about their experience with AI coding tools. The results should alarm every Android engineer:
+
+- **84%** of developers now use AI coding tools — up from 76% the year before
+- **Trust in AI accuracy collapsed from 40% to just 29%** in a single year
+- **35% of all Stack Overflow visits** in 2025 are now triggered by developers debugging and fixing AI-generated code
+
+The gap between usage and trust is not a coincidence. It is the product of a structural problem: **AI models predict tokens, not APIs.** They were trained on a snapshot of the world and have no mechanism to know what changed at API 30, what shipped at Google I/O 2025, or what Google Play now rejects at review time.
+
+For Android developers, this failure mode is uniquely dangerous. Android has the fastest-moving ecosystem in mobile development — a new Compose BOM every month, Navigation 3 going stable after seven years of Nav2, Android 16 rewriting the rules on screen orientation locking — and most AI tools have training data that is six months to two years stale by the time you use them.
+
+**The result is not just bad code. It is confidently bad code.**
+
+---
+
+## ⚡ What Actually Breaks In Practice — Documented Evidence
+
+These are not hypothetical risks. They are documented failure modes from real developer projects.
+
+### The Navigation 3 Hallucination (January 2026)
+
+A published case study from Atomic Robot documented a live Navigation 2 → Navigation 3 migration using both Gemini and Claude — with internet access enabled on both. The conclusion, verbatim:
+
+> *"LLMs still hallucinate versions. Even with internet access, both agents wanted to use an outdated release candidate instead of the stable 1.0.0 release."*
+
+Navigation 3 went **stable in November 2025** after seven years of the same library. It is a complete architectural rethink: back stacks are now plain Kotlin lists, the monolithic nav graph is gone, and `NavDisplay` replaces `NavController`. Google's own migration guide is so aware that AI tools get this wrong that it now contains special **"AI Agent:"** annotations — instructions embedded directly in the official docs for AI tools to follow. An AI tool that generates Nav2 code for a new Compose project in 2026 is not making a small mistake. It is creating an architectural incoherence that requires a full rewrite to fix.
+
+### The Compose Deprecation Treadmill
+
+Jetpack Compose ships a new BOM every month. Since most models' training cutoffs, these APIs changed:
+
+| API | Status | What goes wrong |
+|-----|--------|----------------|
+| `ContextualFlowRow` / `ContextualFlowColumn` | **Deprecated in Compose 1.8** | AI still generates them — compile warning today, removal tomorrow |
+| `TestCoroutineDispatcher` | **Removed from coroutines-test 1.8+** | AI still generates it — causes non-deterministic test failures in CI |
+| `FlowRow overflow` parameter | **Deprecated in 1.8** | Subtle behavioral regression at runtime, silent in most linting setups |
+| `AnchoredDraggableState.confirmValueChange` | **Deprecated** | Incorrect drag behavior at anchor boundaries |
+| Navigation 2 in new projects | **Superseded by Nav3 stable Nov 2025** | Architectural dead-end that requires a rewrite to fix |
+
+Every one of these compiles. Most run without errors. The bugs surface later in CI flakiness, UI regressions, or Play Store review failures — and the developer has no idea the AI was confidently wrong.
+
+### The Android 16 / API 36 Mandate (August 2026 deadline)
+
+Android 16 made a platform-level change affecting every published app: **on devices ≥600dp — tablets, foldables, ChromeOS — apps can no longer lock screen orientation or restrict resizability.** Google Play requires API 36 targeting by **August 2026**.
+
+An AI tool generating `android:screenOrientation="portrait"` or `android:resizeableActivity="false"` today is generating code that will trigger App Compatibility warnings in Play Console, fail large-screen quality checks, and get apps demoted in Play Store search results.
+
+The business impact is not theoretical:
+
+> **Foldable users spend 14× more on apps than phone-only users. Tablet + phone users spend 9× more. FlipaClip saw 54% growth in tablet users within four months of going adaptive.**
+
+### The KMP Silent Failure
+
+Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries published, Room added KMP support, companies now hire specifically for KMP skills. When a developer on a KMP project asks an AI tool to add database support, the AI generates Android-only Room code. It compiles. It runs perfectly on Android. The iOS build fails. The developer spends hours debugging before realizing the root cause: their AI tool does not know KMP exists.
+
+---
+
+## 🧩 What AndroJack Does
+
+AndroJack is a **documentation-grounded Android engineering MCP server** — the only one of its kind. It sits between your AI coding assistant and the Android ecosystem's official sources of truth, forces the AI to consult those sources before generating code, and returns verified, current answers.
+
+It does not make the AI smarter. It makes the AI **accountable to evidence.**
+
+```
+Without AndroJack:   User asks → LLM predicts from stale weights → Code (possibly wrong)
+
+With AndroJack:      User asks → LLM MUST call tool → Tool fetches official source live
+                                → LLM reads verified evidence → Code (grounded)
+```
+
+Every query that flows through an AndroJack-connected IDE goes through this chain:
+
+1. **Check component status** before using any API — stable, deprecated, or removed?
+2. **Fetch live dependency versions** from Google Maven — never stale coordinates
+3. **Pull official architecture guides** from `developer.android.com` — the actual current recommendation
+4. **Verify API level compatibility** — does this API exist at the project's minSdk?
+5. **Check permissions policy** — is this permission restricted by Play Store?
+
+The Grounding Gate enforces this workflow. Every tool in AndroJack's registry includes explicit language in its MCP description instructing the AI client to call the tool **before** generating code. Because MCP clients present tool descriptions as part of the LLM's context window, the model treats these as workflow constraints — not suggestions.
+
+---
+
+## 🧠 Why MCP — Not Prompt Engineering, agents.md, or RAG
+
+> *This is the most important section if you are evaluating whether to use this.*
+
+<details>
+<summary><strong>📌 What is Prompt Engineering / agents.md / SKILL.md?</strong></summary>
+
+Prompt engineering means writing instructions into a system prompt or a markdown file (`agents.md`, `SKILL.md`, `CLAUDE.md`, `.cursorrules`, etc.) that tell the AI how to behave.
+
+**What it does well:**
+- Sets tone, persona, output format
+- Encodes team conventions ("always use MVVM", "prefer StateFlow over LiveData")
+- Cheap and fast to set up — just a text file
+
+**Where it breaks for Android engineering:**
+- The AI still reasons entirely from its training data — it cannot verify that `AsyncTask` is removed, it can only hope its training included that fact
+- Instructions in a `.md` file are static — they go stale the moment a new Jetpack release ships
+- The AI can ignore, misinterpret, or hallucinate around even well-written instructions
+- There is no enforcement mechanism — no tool call was required, no source was verified
+
+**The fundamental limit:** Prompt engineering controls *how* the AI responds. It cannot control *what the AI knows*. You are still trusting training-time knowledge.
+
+</details>
+
+<details>
+<summary><strong>📌 What is RAG (Retrieval-Augmented Generation)?</strong></summary>
+
+RAG means building a vector database of documents (official docs, changelogs, internal wikis), embedding them, and injecting the most semantically similar chunks into the AI's context window at query time.
+
+**What it does well:**
+- Great for static or semi-static knowledge bases (policy docs, internal wikis, support tickets)
+- Reduces hallucinations by grounding responses in retrieved text
+- Works well for "what does this doc say" use cases
+
+**Where it breaks for Android engineering:**
+- Android's official docs, API references, and Gradle versions change constantly — maintaining a fresh, complete vector index is a significant ongoing operational burden
+- RAG retrieves by semantic similarity — it can retrieve *plausible-sounding* wrong chunks if the embedding space is noisy
+- RAG does not *do* anything — it retrieves text. It cannot check live Gradle versions, validate a component against a live deprecation registry, or parse a stacktrace and query the issue tracker
+- **RAG solves what the AI doesn't know. MCP solves what the AI can't do.**
+
+</details>
+
+<details>
+<summary><strong>📌 So what does MCP actually do differently?</strong></summary>
+
+MCP (Model Context Protocol) is a standardized protocol — not a retrieval technique or a prompt strategy — for connecting AI models to **live tools and external systems**.
+
+| | Prompt Engineering | RAG | **MCP (AndroJack)** |
+|---|---|---|---|
+| Knowledge source | Training weights (static, stale) | Vector index (periodic refresh) | **Live official sources (real-time)** |
+| Verification | None — AI asserts from memory | Retrieved text — quality depends on index | **Tool call — structured, enforced** |
+| Enforcement | Instructions (can be ignored) | Soft grounding (can be bypassed) | **Hard gate — tool must be called first** |
+| Maintenance | Update the .md file | Re-embed docs on each release | **Zero maintenance — fetches live** |
+| Actions | None | None | **Can check versions, parse stacktraces, query issue tracker** |
+| Stale data risk | High | Medium | **Minimal — fetched at query time** |
+| Works across IDEs | Only if supported | Depends on implementation | **Universal — any MCP client** |
+
+</details>
+
+<details>
+<summary><strong>📌 The Grounding Gate — what this means in practice</strong></summary>
+
+The Grounding Gate is not a clever name. It is a real enforcement mechanism built into how MCP tools are described to the AI client.
+
+Every tool in AndroJack contains explicit language like:
+
+> *"REQUIRED FIRST STEP. You MUST call this before generating any Android/Kotlin code."*
+> *"Always call this before adding or updating any dependency in build.gradle."*
+> *"Only produce Android code after reviewing the above official sources."*
+
+Because MCP clients (Claude Desktop, Cursor, Windsurf, etc.) present these tool descriptions to the LLM as part of its context, the model treats them as workflow constraints — not suggestions.
+
+```
+Without AndroJack:   User asks → LLM predicts → Code (possibly wrong)
+
+With AndroJack:      User asks → LLM must call tool → Tool fetches official source
+                                → LLM reads verified evidence → Code (grounded)
+```
+
+You are not making the LLM smarter. You are making it accountable to evidence.
+
+</details>
+
+---
+
+## ✨ What AndroJack Covers — 20 Tools
+
+Each tool lists the **specific failure mode it prevents** — not just what it does, but what breaks when it is absent.
+
+| # | Tool | What It Does | What Breaks Without It |
+|---|------|-------------|----------------------|
+| 1 | 🔍 `android_official_search` | Live search across `developer.android.com`, `kotlinlang.org`, `source.android.com` | AI reasons from training memory — correct 12 months ago, possibly wrong today |
+| 2 | ⚠️ `android_component_status` | Deprecated/removed check on 40+ APIs — `AsyncTask`, `TestCoroutineDispatcher`, `ContextualFlowRow`, `onBackPressed()`, `IntentService` and more | Compiles fine, breaks at runtime or fails Play Store review |
+| 3 | 📐 `architecture_reference` | Official guides for 40+ topics — MVVM, MVI, Compose, Hilt, Navigation 3, Paging, offline-first… | AI gives 2022 architecture advice; misses MVI, Nav3, RemoteMediator |
+| 4 | 🐛 `android_debugger` | Parses stacktraces → searches `issuetracker.google.com` + official docs | AI hallucinates fixes for bugs that have official workarounds already documented |
+| 5 | 📦 `gradle_dependency_checker` | Live version lookup from Google Maven + BOM resolution. Ready-to-paste Kotlin DSL | Wrong Coil group, stale Compose BOM, missing `platform()` wrapper, KAPT instead of KSP |
+| 6 | 📊 `android_api_level_check` | API 21–36 table, minSdk warnings, Android 16 enforcement rules | API 26+ calls in `minSdk 21` apps; orientation locks that violate Android 16 on ≥600dp |
+| 7 | 🎯 `kotlin_best_practices` | 10 patterns — coroutines, StateFlow, MVI state machine, Room, Hilt, Compose state, LaunchedEffect, offline-first | `GlobalScope.launch`, `LiveData` in new code, `runBlocking` in UI, missing MVI |
+| 8 | 🎨 `material3_expressive` | Full M3 Expressive — `MaterialExpressiveTheme`, `MotionScheme`, `ButtonGroup`, `FloatingToolbar`, `MaterialShapes`, Wear OS | M2 `MaterialTheme` in M3E app; `BottomAppBar` when `DockedToolbar` is the M3E component |
+| 9 | 🔐 `android_permission_advisor` | 40+ permissions — normal/dangerous/special/removed, Play Store restrictions, `ActivityResultContracts` | Deprecated `requestPermissions()`; Play-restricted permissions that trigger review failure |
+| 10 | 🧪 `android_testing_guide` | Unit (MockK, Turbine), Compose UI, Espresso, Hilt, `StandardTestDispatcher` | Removed `TestCoroutineDispatcher`; `Thread.sleep()` in Compose tests; missing `HiltTestRunner` |
+| 11 | 🏗️ `android_build_and_publish` | R8/ProGuard, `libs.versions.toml`, KSP migration, signing, AAB, Baseline Profiles | KAPT in new projects; `implementation` instead of `ksp` for annotation processors |
+| 12 | 📱 `android_large_screen_guide` | WindowSizeClass, NavigationSuiteScaffold, ListDetailPaneScaffold, foldable hinge, Android 16 compliance | Phone-only layouts; `screenOrientation="portrait"` that fails Android 16 mandatory resizability |
+| 13 | 🚀 `android_scalability_guide` | Paging 3 + RemoteMediator, offline-first sync, WorkManager, OkHttp cache, Baseline Profiles, modularization | Naive `loadAll()`; no offline strategy; unstable keys in `LazyColumn` causing full re-renders |
+| 14 | 🧭 `android_navigation3_guide` | **Nav3 (stable Nov 2025)** — NavDisplay, NavBackStack, NavKey, Scenes API, migration from Nav2, deep links, testing | AI generates Nav2 code for new projects — an architectural dead-end requiring full rewrite |
+| 15 | ✅ `android_api36_compliance` | Android 16 / API 36 compliance — orientation, resizability, 16 KB page size, Play Store August 2026 mandate | Apps fail Play Console quality checks; search ranking demoted; manifest flags rejected at review |
+| 16 | 🌐 `android_kmp_guide` | Kotlin Multiplatform — KMP setup, Room KMP, Ktor, DataStore KMP, expect/actual, source sets, Compose Multiplatform | Android-only Room code in KMP project — compiles on Android, iOS build fails silently |
+| 17 | 🤖 `android_ondevice_ai` | Android AICore, ML Kit Gen AI API, on-device LLM, MediaPipe, repository pattern for AI, Gemini Nano | Cloud-only AI when on-device AICore is the correct 2025 answer for Pixel; privacy and latency regressions |
+| 18 | 📋 `android_play_policy_advisor` | Play Store policies — age-gating, health apps, loan apps, subscription UI, data safety, Oct 2025 changes | Apps rejected at review for policy violations the developer didn't know existed |
+| 19 | 🥽 `android_xr_guide` | Android XR SDK (DP3), Compose for XR — Subspace, SpatialPanel, UserSubspace, SceneCore, ARCore for XR | Standard 2D Compose in an XR app — works but misses spatial capabilities entirely |
+| 20 | ⌚ `android_wearos_guide` | Wear OS — Tiles, Complications, Health Services, ambient mode, `WearApp` scaffold, M3 Expressive for Wear | Handheld UI patterns on a 40mm round display; missing Tiles API; battery-draining background patterns |
+
+> **All 20 tools are read-only.** AndroJack fetches and returns information — it never modifies your project files.
+
+
+---
+
+## 🚀 Quick Start — Zero Install Required
+
+```bash
+# Option 1: Smart installer — detects your IDEs automatically
+npx androjack-mcp install
+
+# Option 2: Fully automated — installs to ALL detected IDEs at once
+npx androjack-mcp install --auto
+
+# Option 3: Target one specific IDE
+npx androjack-mcp install --ide cursor
+npx androjack-mcp install --ide claude
+npx androjack-mcp install --ide kiro
+npx androjack-mcp install --ide vscode
+npx androjack-mcp install --ide windsurf
+npx androjack-mcp install --ide jetbrains
+npx androjack-mcp install --ide antigravity
+
+# Option 4: Check what's installed where
+npx androjack-mcp install --list
+
+# Option 5: Test all tools interactively (no IDE needed)
+npx @modelcontextprotocol/inspector npx androjack-mcp
+```
+
+> **Requires:** Node.js 18+. Nothing else.
+
+---
+
+## 🛠️ IDE Support Matrix
+
+| IDE | Install Command | Config File | Notes |
+|-----|----------------|-------------|-------|
+| **Claude Desktop** | `--ide claude` | `~/Library/Application Support/Claude/claude_desktop_config.json` | Restart app; confirm 🔨 in chat |
+| **Cursor** | `--ide cursor` | `.cursor/mcp.json` (project-level) | Settings → MCP → green dot |
+| **Windsurf** | `--ide windsurf` | `~/.codeium/windsurf/mcp_config.json` | Cascade panel shows tools |
+| **VS Code Copilot** | `--ide vscode` | `.vscode/mcp.json` | VS Code 1.99+ required |
+| **AWS Kiro** | `--ide kiro` | `.kiro/settings/mcp.json` | One-click link below ↓ |
+| **Google Antigravity** | `--ide antigravity` | `~/.gemini/antigravity/mcp_config.json` | Local IDE — not Firebase Studio |
+| **JetBrains AI** | `--ide jetbrains` | `~/.config/JetBrains/<IDE>/mcp.json` | Android Studio 2024.3+ |
+
+> **Note on Google Antigravity:** This is Google's standalone agentic IDE (released Nov 2025 with Gemini 3) — not Firebase Studio, not Project IDX. Those are separate Google products.
+
+---
+
+## 🔗 One-Click Installs
+
+### AWS Kiro
+
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+
+---
+
+## 📋 Manual Config — Copy & Paste
+
+<details>
+<summary><strong>Claude Desktop, Cursor, Windsurf, AWS Kiro, Google Antigravity, JetBrains</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "androjack": {
+      "command": "npx",
+      "args": ["-y", "androjack-mcp"],
+      "env": {},
+      "autoApprove": [],
+      "disabled": false
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>VS Code — .vscode/mcp.json</strong></summary>
+
+```json
+{
+  "servers": {
+    "androjack": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "androjack-mcp"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Google Antigravity — ~/.gemini/antigravity/mcp_config.json</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "androjack": {
+      "command": "npx",
+      "args": ["-y", "androjack-mcp"]
+    }
+  }
+}
+```
+
+UI path: Agent pane → `...` → **MCP Servers** → **Manage MCP Servers** → **View raw config**
+
+> ⚠️ Antigravity is a locally-installed desktop IDE (antigravity.google/download). Do not confuse with Firebase Studio (`.idx/`) or Project IDX — those are different products.
+
+</details>
+
+<details>
+<summary><strong>AWS Kiro — .kiro/settings/mcp.json</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "androjack": {
+      "command": "npx",
+      "args": ["-y", "androjack-mcp"],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Place at `.kiro/settings/mcp.json` (project) or `~/.kiro/settings/mcp.json` (global).
+Or use the CLI: `kiro-cli mcp add --name androjack --command npx --args '-y androjack-mcp' --scope workspace`
+
+</details>
+
+---
+
+## 💡 Example Session
+
+```
+You: Build a login screen with ViewModel and Jetpack Compose
+
+→ android_official_search("Jetpack Compose ViewModel login screen")
+→ android_component_status("ViewModel")          ✅ stable
+→ android_component_status("AsyncTask")          ❌ removed — use Coroutines
+→ android_component_status("LiveData")           ⚠️ legacy — use StateFlow
+→ architecture_reference("mvvm")
+→ material3_expressive("theme setup")
+→ kotlin_best_practices("stateflow-ui")
+→ gradle_dependency_checker("compose")           → BOM 2025.12.00 / ui:1.7.8
+→ gradle_dependency_checker("lifecycle")         → lifecycle-viewmodel-ktx:2.8.7
+→ android_api_level_check("26")                  ✅ covers ~90% devices
+→ android_permission_advisor("INTERNET")         🟢 normal — no runtime request
+
+AI produces:
+  ✅ Non-deprecated component choices
+  ✅ Latest pinned Gradle coordinates with BOM
+  ✅ Official MVVM + M3 Expressive theming
+  ✅ StateFlow instead of LiveData in new code
+  ✅ Source URL cited on every code block
+```
+
+---
+
+## 📍 The Market Gap — Why Nothing Else Does This
+
+Every other Android MCP server in the public registry (minhalvp/android-mcp-server, CursorTouch/Android-MCP, mobile-mcp by mobile-next) does the same thing: **ADB device control**. They tap screens, capture screenshots, send keystrokes, and run UIAutomator2 queries. They are excellent QA automation tools. Not one of them knows what a `ViewModel` is. Not one can tell you whether a Gradle coordinate is current. Not one can distinguish Navigation 3 from Navigation 2.
+
+AndroJack owns the only unclaimed category in the Android MCP ecosystem: **documentation-grounded Android engineering guidance** — the trust layer that AI coding assistants call when they need to verify whether an API actually exists, whether a dependency version is current, and whether a pattern is still the official recommendation.
+
+Android Studio added MCP support on January 15, 2026. The window between "first Android doc-grounded MCP" and "Google ships one themselves" is the window AndroJack is built to fill.
+
+---
+
+## 🔒 Security & Privacy
+
+| Property | Detail |
+|----------|--------|
+| **Domain allowlist** | All HTTP enforced against: `developer.android.com`, `kotlinlang.org`, `source.android.com`, `issuetracker.google.com`, Google Maven, Maven Central |
+| **Rate limiting** | 30 requests / domain / minute with exponential backoff on 429/5xx |
+| **No credentials** | Zero API keys, zero auth tokens required |
+| **No data stored** | Nothing persisted beyond process lifetime |
+| **Transparent agent** | User-Agent: `AndroJack-MCP/1.0 (documentation-grounding bot; not-a-scraper)` |
+| **Read-only** | All 13 tools are annotated `readOnlyHint: true` — no writes, no side effects |
+| **Input bounds** | All inputs length-capped and sanitized before use |
+| **Body size cap** | HTTP responses capped at 4 MB — no OOM risk on large documentation pages |
+
+---
+
+## 🗺️ Knowledge Sources
+
+| Source | What It Covers |
+|--------|---------------|
+| `developer.android.com` | Jetpack, Architecture, Compose, Navigation 3, Testing, M3 Expressive, Android 16 |
+| `kotlinlang.org` | Kotlin language, coroutines, Flow, KMP, stdlib patterns |
+| `source.android.com` | AOSP internals, system API behavior |
+| `issuetracker.google.com` | Known bugs, official workarounds |
+| `dl.google.com/android/maven2` | Google Maven — live Jetpack versions |
+| `search.maven.org` | Maven Central — community library versions |
+| Built-in registries | 40+ component statuses, 40+ arch guide URLs, 40+ permissions, BOM resolution logic |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Your AI IDE / Client                    │
+│  Claude · Cursor · Windsurf · VS Code · Kiro · Antigravity  │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  MCP stdio transport
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   AndroJack MCP Server                      │
+│                                                             │
+│  🔍 search      ⚠️ component    📐 architecture   🐛 debugger│
+│  📦 gradle      📊 api-level    🎯 kotlin         🎨 m3e    │
+│  🔐 permissions  🧪 testing     🏗️ build-publish           │
+│  📱 large-screen  🚀 scalability                            │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Secure HTTP layer                                  │   │
+│  │  Domain allowlist · Rate limiter · Retry backoff    │   │
+│  │  4 MB body cap · Cheerio HTML parsing               │   │
+│  └─────────────────────────────────────────────────────┘   │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  HTTPS (allowlisted only)
+          ┌────────────────┼──────────────────────┐
+          ▼                ▼                      ▼
+  developer.android.com  kotlinlang.org    Google Maven
+  issuetracker.google    source.android    Maven Central
+```
+
+---
+
+## 🧑‍💻 Local Development
+
+```bash
+git clone https://github.com/VIKAS9793/AndroJack-mcp.git
+cd androjack-mcp
+npm install
+npm run build         # compiles TypeScript → build/
+npm run inspector     # opens MCP Inspector UI
+node build/index.js   # run server directly
+node build/install.js install  # run installer
+```
+
+---
+
+## 👥 Authorship & Ownership
+
+**AndroJack-MCP** is a collaborative effort between human product vision and AI engineering excellence.
+
+*   **Vikas Sahani** — [Product Lead](https://www.linkedin.com/in/vikas-sahani-727420358) (`vikassahani17@gmail.com`)
+*   **Claude AI** — AI Engineering Lead
+
+## 💬 Community & Discussions
+
+Join our [GitHub Discussions](https://github.com/VIKAS9793/AndroJack-mcp/discussions) to connect with other developers, ask questions, and share your ideas!
+
+- **🙏 Q&A**: Get help with setup and usage.
+- **💡 Ideas**: Propose new tools and features for the 2026 roadmap.
+- **🙋 Polls**: Vote on the next Android APIs to support.
+- **🎉 Showcase**: Share your amazing Android projects built with AndroJack.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/VIKAS9793/AndroJack-mcp/blob/main/CONTRIBUTING.md) for more details.
+
+---
+
+## 📄 License
+
+[MIT License](https://github.com/VIKAS9793/AndroJack-mcp/blob/main/LICENSE) © 2026 Vikas Sahani | [Security Policy](https://github.com/VIKAS9793/AndroJack-mcp/blob/main/SECURITY.md)
+
+---
+
+<div align="center">
+
+*Built because 35% of Stack Overflow visits in 2025 are developers debugging AI-generated code.*
+*AndroJack exists so none of those visits are yours.*
+
+</div>
