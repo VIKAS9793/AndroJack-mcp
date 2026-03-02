@@ -6,7 +6,7 @@
 
 # 🤖 AndroJack — The Jack of All Android Trades
 
-![AndroJack Banner](assets/AndroJack%20banner.png)
+![AndroJack Banner](https://raw.githubusercontent.com/VIKAS9793/AndroJack-mcp/main/assets/AndroJack%20banner.png)
 
 ### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
 
@@ -129,7 +129,7 @@ This is the most important thing to understand before you install AndroJack:
 
 ## 🎯 The Killer Argument
 
-<img src="assets/killer_argument.png" alt="The Killer Argument — AndroJack MCP" width="100%" />
+<img src="https://raw.githubusercontent.com/VIKAS9793/AndroJack-mcp/main/assets/killer_argument.png" alt="The Killer Argument — AndroJack MCP" width="100%" />
 
 <br/>
 
