@@ -3,7 +3,6 @@
   "_not_firebase": "This is NOT Firebase Studio or Project IDX — those are separate Google products.",
   "_download": "https://antigravity.google/download",
   "_mcp_docs": "https://antigravity.google/docs/mcp",
-
   "_instructions": [
     "OPTION A – Via Antigravity UI (recommended, zero file editing):",
     "  1. Open Antigravity",
@@ -19,14 +18,15 @@
     "  Windows:        C:\\Users\\<USER>\\.gemini\\antigravity\\mcp_config.json",
     "  (Create directories and file if they don't exist yet.)",
     "",
-    "After saving, restart the Antigravity agent session or refresh MCP Servers.",
-    "Antigravity supports Claude Sonnet 4.5/4.6, Gemini 3 Pro, and GPT-OSS 120B."
+    "After saving, restart the Antigravity agent session or refresh MCP Servers."
   ],
-
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp"]
+      "args": [
+        "-y",
+        "androjack-mcp"
+      ]
     }
   }
 }

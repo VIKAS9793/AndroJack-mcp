@@ -1,7 +1,7 @@
 {
   "name": "androjack-mcp",
-  "version": "1.0.0",
-  "description": "AndroJack \u2013 Documentation-grounded Android engineering MCP server. Forces AI tools to verify official docs before generating Android/Kotlin code.",
+  "version": "1.3.0",
+  "description": "AndroJack – An MCP server that equips AI coding assistants with live, verified Android knowledge. 20 tools grounded in official developer.android.com, kotlinlang.org, and Google Maven sources.",
   "keywords": [
     "ai",
     "android",
@@ -18,7 +18,7 @@
     "scalability",
     "tablet"
   ],
-  "author": "AndroJack",
+  "author": "Vikas Sahani <vikassahani17@gmail.com> (https://github.com/VIKAS9793)",
   "license": "MIT",
   "type": "module",
   "bin": {

@@ -8,7 +8,7 @@
 
 ![AndroJack Banner](assets/AndroJack%20banner.png)
 
-### *The Grounding Gate for Android AI. Stop hallucinations. Start building with verified Android documentation.*
+### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
 
 <br/>
 
@@ -90,26 +90,31 @@ Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries publ
 
 ## 🧩 What AndroJack Does
 
-AndroJack is a **documentation-grounded Android engineering MCP server** — the only one of its kind. It sits between your AI coding assistant and the Android ecosystem's official sources of truth, forces the AI to consult those sources before generating code, and returns verified, current answers.
+AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant 20 specialized tools that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
 
-It does not make the AI smarter. It makes the AI **accountable to evidence.**
+> **It does not make the AI smarter. It makes the AI accountable to evidence.**
 
 ```
-Without AndroJack:   User asks → LLM predicts from stale weights → Code (possibly wrong)
+Without AndroJack:   You ask → AI predicts from stale weights → Code (possibly wrong)
 
-With AndroJack:      User asks → LLM MUST call tool → Tool fetches official source live
-                                → LLM reads verified evidence → Code (grounded)
+With AndroJack:      You ask → AI calls tool → Tool fetches official source live
+                              → AI reads verified answer → Code (grounded)
 ```
 
-Every query that flows through an AndroJack-connected IDE goes through this chain:
+### ⚠️ Honest Activation Model — Two Levels
 
-1. **Check component status** before using any API — stable, deprecated, or removed?
-2. **Fetch live dependency versions** from Google Maven — never stale coordinates
-3. **Pull official architecture guides** from `developer.android.com` — the actual current recommendation
-4. **Verify API level compatibility** — does this API exist at the project's minSdk?
-5. **Check permissions policy** — is this permission restricted by Play Store?
+This is the most important thing to understand before you install AndroJack:
 
-The Grounding Gate enforces this workflow. Every tool in AndroJack's registry includes explicit language in its MCP description instructing the AI client to call the tool **before** generating code. Because MCP clients present tool descriptions as part of the LLM's context window, the model treats these as workflow constraints — not suggestions.
+| Level | What's Active | What the AI Does |
+|---|---|---|
+| **Level 1** — Tools only installed | 20 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
+| **Level 2** — Tools + Grounding Gate prompt loaded | 20 tools + mandatory rulebook | AI *must* call the correct tool for every decision. No discretion. |
+
+**Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
+
+**Level 2 is active and guaranteed.** The `androjack_grounding_gate` system prompt (registered on the server — instructions below) maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
+
+→ **For full grounding, always activate Level 2.** See [Getting the Full Guarantee](#-getting-the-full-guarantee) below.
 
 ---
 
@@ -376,8 +381,8 @@ You: Build a login screen with ViewModel and Jetpack Compose
 → architecture_reference("mvvm")
 → material3_expressive("theme setup")
 → kotlin_best_practices("stateflow-ui")
-→ gradle_dependency_checker("compose")           → BOM 2025.12.00 / ui:1.7.8
-→ gradle_dependency_checker("lifecycle")         → lifecycle-viewmodel-ktx:2.8.7
+→ gradle_dependency_checker("compose")           → BOM 2025.05.01 / ui:1.11.0-alpha06
+→ gradle_dependency_checker("lifecycle")         → lifecycle-viewmodel-ktx:2.11.0-alpha01
 → android_api_level_check("26")                  ✅ covers ~90% devices
 → android_permission_advisor("INTERNET")         🟢 normal — no runtime request
 
@@ -483,7 +488,39 @@ node build/install.js install  # run installer
 *   **Vikas Sahani** — [Product Lead](https://www.linkedin.com/in/vikas-sahani-727420358) (`vikassahani17@gmail.com`)
 *   **Claude AI** — AI Engineering Lead
 
-## 💬 Community & Discussions
+## � Getting the Full Guarantee
+
+Installing the tools alone gives you **Level 1** grounding — the AI *can* use them but decides when. For **Level 2** mandatory, automatic grounding on every Android task, load the `androjack_grounding_gate` system prompt.
+
+### What is the Grounding Gate system prompt?
+
+It is a set of rules registered on the MCP server itself (accessible via the MCP `prompts` API). It maps every task type to the correct tool:
+
+| When the AI does this... | It is mandated to call this first |
+|---|---|
+| Write any Compose UI | `material3_expressive` |
+| Add/update any dependency | `gradle_dependency_checker` |
+| Use any Android/Jetpack class | `android_component_status` |
+| Write navigation code | `android_navigation3_guide` |
+| Write tests | `android_testing_guide` |
+| Target tablets/foldables | `android_large_screen_guide` |
+
+### How to activate Level 2
+
+**Claude Desktop / Cursor / Windsurf:**
+In your system prompt settings, add:
+```
+Use the androjack_grounding_gate MCP prompt before every Android coding task.
+```
+
+**IDEs that support MCP prompt injection** (Kiro, Antigravity, JetBrains AI):
+Select the `androjack_grounding_gate` prompt from the MCP prompts list at session start.
+
+> Without this step, tool invocation depends on the AI's judgment. With it, the AI is mandated to consult the correct tool for every decision — architecture, UI, dependencies, and testing.
+
+---
+
+## �💬 Community &amp; Discussions
 
 Join our [GitHub Discussions](https://github.com/VIKAS9793/AndroJack-mcp/discussions) to connect with other developers, ask questions, and share your ideas!
 
