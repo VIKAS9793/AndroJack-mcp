@@ -53,7 +53,7 @@ export async function startHttpServer(server: McpServer): Promise<void> {
       res.end(
         JSON.stringify({
           name: "androjack-mcp",
-          version: "1.0.0",
+          version: "1.3.1",
           description:
             "Documentation-grounded Android engineering MCP server. " +
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
@@ -168,7 +168,7 @@ export async function startHttpServer(server: McpServer): Promise<void> {
   for (const sig of ["SIGINT", "SIGTERM"] as const) {
     process.once(sig, async () => {
       process.stderr.write(`\nAndroJack HTTP: shutting down (${sig})…\n`);
-      for (const t of sessions.values()) await t.close().catch(() => {});
+      for (const t of sessions.values()) await t.close().catch(() => { });
       httpServer.close(() => process.exit(0));
     });
   }

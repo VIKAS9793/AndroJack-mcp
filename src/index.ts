@@ -41,7 +41,7 @@ import { androidWearOsGuide } from "./tools/wear.js";
 // ── Server Instantiation ────────────────────────────────────────────────────
 const server = new McpServer({
   name: "androjack-mcp",
-  version: "1.3.0",
+  version: "1.3.1",
 });
 
 // ── Tool 1: Official Android Documentation Search ──────────────────────────
