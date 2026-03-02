@@ -118,6 +118,47 @@ This is the most important thing to understand before you install AndroJack:
 
 ---
 
+<div align="center">
+
+## 🎯 The Killer Argument
+
+<img src="assets/killer_argument.png" alt="The Killer Argument — AndroJack MCP" width="100%" />
+
+<br/>
+
+### *"Can your `agents.md` file tell me the Gradle version that shipped last Tuesday?"*
+
+<br/>
+
+> **No markdown file can.**
+> **No rules in `.cursorrules` can.**
+> **No `SKILL.md` can.**
+
+<br/>
+
+### ✅ Only a live tool call can.
+
+**That's the job AndroJack exists to do — and nothing else in the current ecosystem does it for Android specifically.**
+
+<br/>
+
+| What you need | `agents.md` / SKILL.md | **AndroJack MCP** |
+|---|:---:|:---:|
+| Format output a specific way | ✅ Perfect | Works too |
+| Follow team conventions | ✅ Perfect | Works too |
+| **Latest Gradle version right now** | ❌ Guesses from memory | **✅ Fetches live** |
+| **Is `AsyncTask` removed?** | ❌ May be wrong | **✅ Verified against SDK** |
+| **Android 16 Play Store rules** | ❌ Post-training — unknown | **✅ Official source** |
+
+<br/>
+
+> Prompt engineering controls *how* the AI responds.
+> **MCP controls *what* the AI knows.**
+
+</div>
+
+---
+
 ## 🧠 Why MCP — Not Prompt Engineering, agents.md, or RAG
 
 > *This is the most important section if you are evaluating whether to use this.*
