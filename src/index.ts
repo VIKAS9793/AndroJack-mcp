@@ -296,7 +296,6 @@ server.registerPrompt(
     description:
       "System-level prompt enforcing the documentation-first policy. " +
       "Add this to your AI client system prompt to activate the grounding gate.",
-    argsSchema: {},
   },
   () => ({
     messages: [
