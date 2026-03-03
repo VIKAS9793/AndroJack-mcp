@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AndroJack MCP – Smart Installer
+ * AndroJack MCP – Interactive Installer
  *
  * Detects OS, installed IDEs, and config file locations automatically.
  * Supports both automated (--auto) and guided interactive installation.
@@ -15,7 +15,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import * as readline from "readline";
+import figlet from "figlet";
+import chalk from "chalk";
+import ora from "ora";
+import * as clack from "@clack/prompts";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -60,6 +63,7 @@ const PLATFORM = process.platform; // darwin | linux | win32
 function getConfigPaths(platform: string): IdeTarget[] {
   const appdata = process.env.APPDATA ?? path.join(HOME, "AppData", "Roaming");
   const localappdata = process.env.LOCALAPPDATA ?? path.join(HOME, "AppData", "Local");
+  void localappdata; // reserved for future use
 
   return [
     // ── Claude Desktop ──────────────────────────────────────────────────────
@@ -70,8 +74,8 @@ function getConfigPaths(platform: string): IdeTarget[] {
         platform === "darwin"
           ? [path.join(HOME, "Library", "Application Support", "Claude", "claude_desktop_config.json")]
           : platform === "win32"
-          ? [path.join(appdata, "Claude", "claude_desktop_config.json")]
-          : [path.join(HOME, ".config", "Claude", "claude_desktop_config.json")],
+            ? [path.join(appdata, "Claude", "claude_desktop_config.json")]
+            : [path.join(HOME, ".config", "Claude", "claude_desktop_config.json")],
       configKey: "mcpServers",
       format: "standard",
       notes: "Restart Claude Desktop after install. Look for 🔨 in chat input.",
@@ -112,8 +116,8 @@ function getConfigPaths(platform: string): IdeTarget[] {
         ...(platform === "darwin"
           ? [path.join(HOME, "Library", "Application Support", "Code", "User", "settings.json")]
           : platform === "win32"
-          ? [path.join(appdata, "Code", "User", "settings.json")]
-          : [path.join(HOME, ".config", "Code", "User", "settings.json")]),
+            ? [path.join(appdata, "Code", "User", "settings.json")]
+            : [path.join(HOME, ".config", "Code", "User", "settings.json")]),
       ],
       configKey: "servers",
       format: "vscode",
@@ -140,9 +144,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
       notes: "Or use the one-click Kiro install link in the README.",
     },
 
-    // ── Google Antigravity IDE (standalone, launched Nov 18 2025 with Gemini 3) ────
-    // NOT Firebase Studio / Project IDX — those are separate Google products.
-    // Confirmed config path from real usage: ~/.gemini/antigravity/mcp_config.json
+    // ── Google Antigravity IDE ────────────────────────────────────────────
     {
       id: "antigravity",
       name: "Google Antigravity IDE",
@@ -158,20 +160,19 @@ function getConfigPaths(platform: string): IdeTarget[] {
     // ── JetBrains (Android Studio / IntelliJ) ────────────────────────────────
     {
       id: "jetbrains",
-      name: "JetBrains AI Assistant (Android Studio / IntelliJ)",
+      name: "JetBrains AI (Android Studio / IntelliJ)",
       configPaths: [
-        // JetBrains stores MCP config inside IDE-version-specific dirs
         ...(platform === "darwin"
           ? [
-              path.join(HOME, "Library", "Application Support", "JetBrains", "AndroidStudio2024.3", "mcp.json"),
-              path.join(HOME, "Library", "Application Support", "JetBrains", "IdeaIC2024.3", "mcp.json"),
-            ]
+            path.join(HOME, "Library", "Application Support", "JetBrains", "AndroidStudio2024.3", "mcp.json"),
+            path.join(HOME, "Library", "Application Support", "JetBrains", "IdeaIC2024.3", "mcp.json"),
+          ]
           : platform === "win32"
-          ? [
+            ? [
               path.join(appdata, "JetBrains", "AndroidStudio2024.3", "mcp.json"),
               path.join(appdata, "JetBrains", "IdeaIC2024.3", "mcp.json"),
             ]
-          : [
+            : [
               path.join(HOME, ".config", "JetBrains", "AndroidStudio2024.3", "mcp.json"),
               path.join(HOME, ".config", "JetBrains", "IdeaIC2024.3", "mcp.json"),
             ]),
@@ -209,7 +210,6 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
   try {
     const dir = path.dirname(configPath);
 
-    // Create directory if needed
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -222,7 +222,6 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
       try {
         existing = JSON.parse(raw) as Record<string, unknown>;
       } catch {
-        // Corrupted JSON — back it up and overwrite
         fs.writeFileSync(configPath + ".backup", raw);
       }
       finalConfig = mergeConfig(existing, target);
@@ -236,13 +235,13 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
       ide: target.name,
       success: true,
       path: configPath,
-      message: `✅ Installed to ${configPath}`,
+      message: `Installed to ${configPath}`,
     };
   } catch (err) {
     return {
       ide: target.name,
       success: false,
-      message: `❌ Failed: ${err instanceof Error ? err.message : String(err)}`,
+      message: err instanceof Error ? err.message : String(err),
     };
   }
 }
@@ -251,7 +250,6 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
 
 function detectInstalledIdes(targets: IdeTarget[]): IdeTarget[] {
   return targets.filter((target) => {
-    // Check if any of the config's parent dirs exist (suggests IDE is installed)
     return target.configPaths.some((p) => fs.existsSync(path.dirname(path.dirname(p))));
   });
 }
@@ -271,59 +269,113 @@ function alreadyInstalled(target: IdeTarget): string | null {
   return null;
 }
 
-// ── Output helpers ────────────────────────────────────────────────────────────
-
-const RESET = "\x1b[0m";
-const BOLD = "\x1b[1m";
-const GREEN = "\x1b[32m";
-const YELLOW = "\x1b[33m";
-const CYAN = "\x1b[36m";
-const DIM = "\x1b[2m";
-
-function banner(): void {
-  console.log(`
-${BOLD}${CYAN}╔══════════════════════════════════════════════════╗
-║  🤖 AndroJack MCP — Smart Installer              ║
-║  The Jack of All Android Trades                  ║
-╚══════════════════════════════════════════════════╝${RESET}
-`);
-}
-
-function printStatus(targets: IdeTarget[]): void {
-  console.log(`${BOLD}IDE Installation Status:${RESET}\n`);
-  for (const t of targets) {
-    const installed = alreadyInstalled(t);
-    const icon = installed ? `${GREEN}✓${RESET}` : `${DIM}○${RESET}`;
-    const status = installed ? `${GREEN}installed${RESET} → ${DIM}${installed}${RESET}` : `${DIM}not installed${RESET}`;
-    console.log(`  ${icon}  ${BOLD}${t.name}${RESET}  —  ${status}`);
-  }
-  console.log();
-}
-
-// ── Prompt helper ────────────────────────────────────────────────────────────
-
-async function prompt(question: string): Promise<string> {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => rl.question(question, (ans) => { rl.close(); resolve(ans.trim()); }));
-}
-
 // ── Install to best path for a target ───────────────────────────────────────
 
 function installTarget(target: IdeTarget): InstallResult {
-  // For project-level configs, use first path. For global, prefer existing or first.
   const existingPath = target.configPaths.find((p) => fs.existsSync(p));
   const chosenPath = existingPath ?? target.configPaths[0];
   return installToPath(chosenPath, target);
 }
 
-// ── Main entry point ─────────────────────────────────────────────────────────
+// ── TTY Detection ───────────────────────────────────────────────────────────
+
+/**
+ * Returns true when running inside a real terminal (VS Code integrated terminal,
+ * Cursor, Android Studio, IntelliJ, macOS Terminal, Windows Terminal, etc.).
+ * Returns false in CI, piped output, or IDE task runners that don't allocate a
+ * PTY (e.g. IntelliJ "Run" tool window without 'Emulate terminal').
+ */
+function hasTty(): boolean {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+}
+
+// ── Banner ───────────────────────────────────────────────────────────────────
+
+function printBanner(): void {
+  const art = figlet.textSync("AndroJack", {
+    font: "ANSI Shadow",
+    horizontalLayout: "default",
+  });
+
+  // Gradient: cyan → blue → purple line by line
+  const lines = art.split("\n");
+  const gradientColors = [
+    "#00D4FF", "#00C4F0", "#00B0E0",
+    "#4090D0", "#6070C8", "#7B2FBE",
+  ];
+  const colored = lines
+    .map((line, i) => {
+      const hex = gradientColors[Math.min(i, gradientColors.length - 1)];
+      return chalk.bold.hex(hex)(line);
+    })
+    .join("\n");
+
+  console.log(colored);
+
+  // Android-flavored tagline
+  const fixes = [
+    chalk.hex("#00D4FF")("Gradle"),
+    chalk.hex("#4090D0")("ViewModel"),
+    chalk.hex("#7B2FBE")("Room"),
+    chalk.hex("#E040FB")("Compose"),
+    chalk.hex("#FF6D00")("Navigation"),
+    chalk.hex("#00C853")("Hilt"),
+    chalk.hex("#FFD600")("WorkManager"),
+  ];
+  console.log(
+    chalk.bold("  MCP Installer") +
+    chalk.dim("  ·  Fixes: ") +
+    fixes.join(chalk.dim(" · "))
+  );
+  console.log(
+    chalk.dim("  The Jack of All Android Trades\n")
+  );
+}
+
+// ── Status table ──────────────────────────────────────────────────────────────
+
+function printStatusTable(targets: IdeTarget[]): void {
+  console.log(chalk.bold.underline("  IDE Detection Results\n"));
+  for (const t of targets) {
+    const installed = alreadyInstalled(t);
+    const detected = detectInstalledIdes([t]).length > 0;
+
+    let icon: string;
+    let label: string;
+
+    if (installed) {
+      icon = chalk.green("  ✓");
+      label = chalk.green("already installed") + chalk.dim(` → ${installed}`);
+    } else if (detected) {
+      icon = chalk.cyan("  ◉");
+      label = chalk.cyan("detected, not configured");
+    } else {
+      icon = chalk.dim("  ○");
+      label = chalk.dim("not found");
+    }
+
+    console.log(`${icon}  ${chalk.bold(t.name)}  ${label}`);
+  }
+  console.log();
+}
+
+// ── Non-interactive (legacy) output helpers ───────────────────────────────────
+
+function legacyOk(msg: string): void {
+  process.stdout.write(chalk.green("  ✅ ") + msg + "\n");
+}
+
+function legacyFail(msg: string): void {
+  process.stdout.write(chalk.red("  ❌ ") + msg + "\n");
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const subcommand = args[0];
 
   if (!subcommand || subcommand === "install") {
-    banner();
     const targets = getConfigPaths(PLATFORM);
     const autoFlag = args.includes("--auto");
     const listFlag = args.includes("--list");
@@ -331,111 +383,328 @@ async function main(): Promise<void> {
 
     // ── --list ──────────────────────────────────────────────────────────────
     if (listFlag) {
-      printStatus(targets);
+      printBanner();
+      printStatusTable(targets);
       return;
     }
 
     // ── --ide=<id> ──────────────────────────────────────────────────────────
     if (ideFlag) {
+      printBanner();
       const target = targets.find((t) => t.id === ideFlag);
       if (!target) {
-        console.error(`❌ Unknown IDE: "${ideFlag}". Supported: ${targets.map((t) => t.id).join(", ")}`);
+        console.error(chalk.red(`  ❌ Unknown IDE: "${ideFlag}". Supported: ${targets.map((t) => t.id).join(", ")}`));
         process.exit(1);
       }
       const result = installTarget(target);
-      console.log(result.message);
-      if (result.success && target.notes) console.log(`   ${DIM}→ ${target.notes}${RESET}`);
-      if (target.oneClickUrl) console.log(`   ${YELLOW}One-click install: ${target.oneClickUrl}${RESET}`);
+      if (result.success) {
+        legacyOk(result.message);
+        if (target.notes) console.log(chalk.dim(`     → ${target.notes}`));
+      } else {
+        legacyFail(result.message);
+      }
+      if (target.oneClickUrl) console.log(chalk.yellow(`     One-click install: ${target.oneClickUrl}`));
       return;
     }
 
     // ── --auto ──────────────────────────────────────────────────────────────
     if (autoFlag) {
-      console.log(`${BOLD}Auto-detecting installed IDEs on ${PLATFORM}...${RESET}\n`);
+      printBanner();
+      const spinner = ora({
+        text: chalk.dim("Scanning system for installed IDEs…"),
+        color: "cyan",
+      }).start();
+
+      await new Promise((r) => setTimeout(r, 600));
       const detected = detectInstalledIdes(targets);
+      spinner.stop();
 
       if (detected.length === 0) {
-        console.log(`${YELLOW}No IDEs auto-detected. Run without --auto for guided install.${RESET}`);
+        console.log(chalk.yellow("  No IDEs auto-detected. Run without --auto for guided install."));
         return;
       }
 
-      console.log(`Found: ${detected.map((t) => t.name).join(", ")}\n`);
-      const results: InstallResult[] = [];
+      console.log(chalk.bold(`  Found: ${detected.map((t) => t.name).join(", ")}\n`));
 
       for (const target of detected) {
         const existing = alreadyInstalled(target);
         if (existing) {
-          console.log(`${GREEN}⏭  ${target.name}${RESET} — already installed at ${DIM}${existing}${RESET}`);
+          console.log(chalk.green(`  ⏭  ${target.name}`) + chalk.dim(` — already installed at ${existing}`));
           continue;
         }
+
+        const s = ora({ text: chalk.dim(`Installing for ${target.name}…`), color: "cyan" }).start();
+        await new Promise((r) => setTimeout(r, 400));
         const result = installTarget(target);
-        results.push(result);
-        console.log(result.message);
-        if (result.success && target.notes) console.log(`   ${DIM}→ ${target.notes}${RESET}`);
+        if (result.success) {
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) console.log(chalk.dim(`       → ${target.notes}`));
+        } else {
+          s.fail(chalk.red(`${target.name}: ${result.message}`));
+        }
       }
 
-      const successes = results.filter((r) => r.success).length;
-      console.log(`\n${BOLD}${GREEN}Done. ${successes} new installation(s) completed.${RESET}`);
+      const successes = detected.filter((t) => installTarget(t).success).length;
+      console.log(chalk.bold.green(`\n  Done. ${successes} installation(s) completed.`));
       return;
     }
 
     // ── Interactive guided mode ─────────────────────────────────────────────
-    console.log(`${BOLD}Platform detected:${RESET} ${PLATFORM}\n`);
-    printStatus(targets);
 
-    console.log(`${BOLD}Select installation mode:${RESET}`);
-    console.log(`  ${CYAN}1${RESET}  Auto-install to all detected IDEs`);
-    console.log(`  ${CYAN}2${RESET}  Choose specific IDEs`);
-    console.log(`  ${CYAN}3${RESET}  Show manual config snippets`);
-    console.log(`  ${CYAN}q${RESET}  Quit\n`);
+    printBanner();
 
-    const choice = await prompt("Your choice: ");
+    // ── TTY guard ────────────────────────────────────────────────────────────
+    // If stdin/stdout are not a real TTY (CI, IDE task runner without PTY,
+    // piped output), fall back to --auto instead of crashing.
+    if (!hasTty()) {
+      console.log(
+        chalk.yellow("  ⚠  No interactive terminal detected.") +
+        chalk.dim(" Falling back to --auto mode.\n")
+      );
+      console.log(
+        chalk.dim(
+          "  Tip: to get the full arrow-key UI, run this in an integrated terminal\n" +
+          "  (VS Code · Cursor · Android Studio · IntelliJ · Windows Terminal).\n" +
+          "  Or run:  " + chalk.white("npx androjack-mcp install --auto") + chalk.dim("  to skip the menu.\n")
+        )
+      );
 
-    if (choice === "1") {
       const detected = detectInstalledIdes(targets);
+      if (detected.length === 0) {
+        console.log(chalk.yellow("  No IDEs detected. Exiting."));
+        return;
+      }
+      console.log(chalk.bold(`  Auto-installing to: ${detected.map((t) => t.name).join(", ")}\n`));
       for (const target of detected) {
+        const alreadyAt = alreadyInstalled(target);
+        if (alreadyAt) {
+          console.log(chalk.green(`  ⏭  ${target.name}`) + chalk.dim(` — already installed`));
+          continue;
+        }
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
+        await new Promise((r) => setTimeout(r, 350));
         const result = installTarget(target);
-        console.log(result.message);
-        if (result.success && target.notes) console.log(`   ${DIM}→ ${target.notes}${RESET}`);
+        if (result.success) {
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) console.log(chalk.dim(`       → ${target.notes}`));
+        } else {
+          s.fail(chalk.red(`${target.name}: ${result.message}`));
+        }
       }
-    } else if (choice === "2") {
-      for (let i = 0; i < targets.length; i++) {
-        const t = targets[i];
-        const installed = alreadyInstalled(t);
-        const status = installed ? `${GREEN}(already installed)${RESET}` : "";
-        console.log(`  ${CYAN}${i + 1}${RESET}  ${t.name} ${status}`);
+      console.log(chalk.bold.green("\n  Done."));
+      return;
+    }
+
+    // Scan spinner
+    const scanSpinner = ora({
+      text: chalk.dim("Scanning system for installed IDEs…"),
+      color: "cyan",
+    }).start();
+    await new Promise((r) => setTimeout(r, 700));
+    scanSpinner.succeed(chalk.dim("System scan complete."));
+    console.log();
+
+    // Status table
+    printStatusTable(targets);
+
+    clack.intro(chalk.bold.hex("#00D4FF")("  AndroJack MCP  ") + chalk.dim("Installer"));
+
+    // ── Mode select ──────────────────────────────────────────────────────────
+    const mode = await clack.select<string>({
+      message: "Select installation mode:",
+      options: [
+        {
+          value: "auto",
+          label: "Auto-install to all detected IDEs",
+          hint: "Recommended",
+        },
+        {
+          value: "pick",
+          label: "Pick specific IDEs",
+          hint: "Choose from a list",
+        },
+        {
+          value: "snippet",
+          label: "Show manual config snippet",
+          hint: "Copy & paste JSON",
+        },
+        {
+          value: "quit",
+          label: "Quit",
+        },
+      ],
+    });
+
+    if (clack.isCancel(mode) || mode === "quit") {
+      clack.outro(chalk.dim("Installer exited. Run again anytime."));
+      return;
+    }
+
+    // ── Auto mode ────────────────────────────────────────────────────────────
+    if (mode === "auto") {
+      const detected = detectInstalledIdes(targets);
+
+      if (detected.length === 0) {
+        clack.log.warn("No IDEs detected on this system. Use 'Pick specific IDEs' to install manually.");
+        clack.outro(chalk.dim("No changes made."));
+        return;
       }
-      const input = await prompt("\nEnter numbers (e.g. 1 3 5) or 'all': ");
-      const selected =
-        input.trim() === "all"
-          ? targets
-          : input
-              .split(/\s+/)
-              .map((n) => targets[parseInt(n, 10) - 1])
-              .filter(Boolean);
+
+      clack.log.info(
+        `Detected: ${detected.map((t) => chalk.cyan(t.name)).join(", ")}`
+      );
+
+      // Y/N confirm
+      const confirmed = await clack.confirm({
+        message: `Install AndroJack MCP to ${chalk.bold(String(detected.length))} IDE(s)?`,
+        initialValue: true,
+      });
+
+      if (clack.isCancel(confirmed) || !confirmed) {
+        clack.outro(chalk.dim("Installation cancelled."));
+        return;
+      }
+
+      const results: InstallResult[] = [];
+
+      for (const target of detected) {
+        const alreadyAt = alreadyInstalled(target);
+        if (alreadyAt) {
+          // Y/N: overwrite already-installed?
+          const overwrite = await clack.confirm({
+            message: `${chalk.yellow(target.name)} is already installed. Overwrite?`,
+            initialValue: false,
+          });
+          if (clack.isCancel(overwrite) || !overwrite) {
+            clack.log.info(`Skipped ${target.name}`);
+            continue;
+          }
+        }
+
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
+        await new Promise((r) => setTimeout(r, 350));
+        const result = installTarget(target);
+        results.push(result);
+
+        if (result.success) {
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) clack.log.info(chalk.dim(target.notes));
+        } else {
+          s.fail(chalk.red(`${target.name}: ${result.message}`));
+        }
+      }
+
+      const ok = results.filter((r) => r.success).length;
+      const fail = results.filter((r) => !r.success).length;
+      clack.outro(
+        chalk.bold.green(`✓ ${ok} installed`) +
+        (fail > 0 ? chalk.red(`  ✗ ${fail} failed`) : "") +
+        chalk.dim("  Run  npx androjack-mcp install --list  to verify.")
+      );
+      return;
+    }
+
+    // ── Pick specific IDEs ───────────────────────────────────────────────────
+    if (mode === "pick") {
+      const chosen = await clack.multiselect<string>({
+        message: "Select IDEs to install (Space to toggle, Enter to confirm):",
+        options: targets.map((t) => {
+          const installed = alreadyInstalled(t);
+          const detected = detectInstalledIdes([t]).length > 0;
+          return {
+            value: t.id,
+            label: t.name,
+            hint: installed
+              ? chalk.green("already installed")
+              : detected
+                ? chalk.cyan("detected")
+                : chalk.dim("not found"),
+          };
+        }),
+        required: true,
+      });
+
+      if (clack.isCancel(chosen)) {
+        clack.outro(chalk.dim("Installation cancelled."));
+        return;
+      }
+
+      const selected = targets.filter((t) => (chosen as string[]).includes(t.id));
+
+      // Y/N confirm
+      const confirmed = await clack.confirm({
+        message: `Install AndroJack MCP to ${chalk.bold(String(selected.length))} IDE(s)?`,
+        initialValue: true,
+      });
+
+      if (clack.isCancel(confirmed) || !confirmed) {
+        clack.outro(chalk.dim("Installation cancelled."));
+        return;
+      }
+
+      const results: InstallResult[] = [];
 
       for (const target of selected) {
+        const alreadyAt = alreadyInstalled(target);
+        if (alreadyAt) {
+          const overwrite = await clack.confirm({
+            message: `${chalk.yellow(target.name)} is already installed. Overwrite?`,
+            initialValue: false,
+          });
+          if (clack.isCancel(overwrite) || !overwrite) {
+            clack.log.info(`Skipped ${target.name}`);
+            continue;
+          }
+        }
+
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
+        await new Promise((r) => setTimeout(r, 350));
         const result = installTarget(target);
-        console.log(result.message);
-        if (result.success && target.notes) console.log(`   ${DIM}→ ${target.notes}${RESET}`);
-        if (target.oneClickUrl) console.log(`   ${YELLOW}One-click: ${target.oneClickUrl}${RESET}`);
+        results.push(result);
+
+        if (result.success) {
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) clack.log.info(chalk.dim(target.notes));
+          if (target.oneClickUrl) clack.log.info(chalk.yellow(`One-click: ${target.oneClickUrl}`));
+        } else {
+          s.fail(chalk.red(`${target.name}: ${result.message}`));
+        }
       }
-    } else if (choice === "3") {
+
+      const ok = results.filter((r) => r.success).length;
+      const fail = results.filter((r) => !r.success).length;
+      clack.outro(
+        chalk.bold.green(`✓ ${ok} installed`) +
+        (fail > 0 ? chalk.red(`  ✗ ${fail} failed`) : "") +
+        chalk.dim("  Run  npx androjack-mcp install --list  to verify.")
+      );
+      return;
+    }
+
+    // ── Manual snippet ────────────────────────────────────────────────────────
+    if (mode === "snippet") {
       const snippet = {
-        mcpServers: {
-          androjack: SERVER_CONFIG_STANDARD,
-        },
+        mcpServers: { androjack: SERVER_CONFIG_STANDARD },
       };
-      console.log(`\n${BOLD}Paste this into your IDE's MCP config file:${RESET}\n`);
-      console.log(JSON.stringify(snippet, null, 2));
-      console.log(`\n${DIM}For VS Code .vscode/mcp.json, use the "servers" key instead of "mcpServers".${RESET}`);
-    } else {
-      console.log("Exiting.");
+      const vsSnippet = {
+        servers: { androjack: SERVER_CONFIG_VSCODE },
+      };
+
+      clack.note(
+        chalk.bold("Standard MCP config (Claude, Cursor, Windsurf, Kiro, JetBrains, Antigravity):\n") +
+        chalk.cyan(JSON.stringify(snippet, null, 2)) +
+        chalk.bold("\n\nVS Code .vscode/mcp.json:\n") +
+        chalk.cyan(JSON.stringify(vsSnippet, null, 2)),
+        "Manual Config Snippets"
+      );
+
+      clack.outro(chalk.dim("Paste the snippet into your IDE's MCP config file and restart the IDE."));
+      return;
     }
   }
 }
 
 main().catch((err) => {
-  console.error("Installer error:", err);
+  console.error(chalk.red.bold("  Installer error:"), err);
   process.exit(1);
 });

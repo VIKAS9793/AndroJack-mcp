@@ -290,26 +290,62 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 
 ## 🚀 Quick Start — Zero Install Required
 
-```bash
-# Option 1: Smart installer — detects your IDEs automatically
-npx androjack-mcp install
+### Option 1 — Interactive CLI (v1.4.0) ✨ Recommended
 
-# Option 2: Fully automated — installs to ALL detected IDEs at once
+```bash
+npx androjack-mcp install
+```
+
+Launches a full animated terminal wizard:
+- 🎨 Figlet ASCII-art banner with Android fixes tagline (`Gradle · ViewModel · Room · Compose · Hilt…`)
+- ⏳ Auto-scans your system for installed IDEs
+- ⬆️⬇️ Arrow-key menu: Auto / Pick specific IDEs / Show config snippet
+- ☑️ Checkbox multiselect for precise IDE targeting
+- **Y/N confirm** before writing — and again if overwriting an existing config
+- ✅ Per-IDE spinner with success/fail summary
+
+> Works in all integrated terminals (VS Code, Cursor, Android Studio, IntelliJ, Windows Terminal).  
+> Falls back to `--auto` mode gracefully in CI or non-TTY environments.
+
+### Option 2 — Targeted installs (non-interactive, safe in any environment)
+
+```bash
+# Auto-detect and install to all found IDEs
 npx androjack-mcp install --auto
 
-# Option 3: Target one specific IDE
-npx androjack-mcp install --ide cursor
-npx androjack-mcp install --ide claude
-npx androjack-mcp install --ide kiro
-npx androjack-mcp install --ide vscode
-npx androjack-mcp install --ide windsurf
-npx androjack-mcp install --ide jetbrains
-npx androjack-mcp install --ide antigravity
+# Install to one specific IDE
+npx androjack-mcp install --ide=cursor
+npx androjack-mcp install --ide=claude
+npx androjack-mcp install --ide=vscode
+npx androjack-mcp install --ide=windsurf
+npx androjack-mcp install --ide=jetbrains
+npx androjack-mcp install --ide=antigravity
+npx androjack-mcp install --ide=kiro
 
-# Option 4: Check what's installed where
+# Check what's installed where
 npx androjack-mcp install --list
+```
 
-# Option 5: Test all tools interactively (no IDE needed)
+### Option 3 — From your IDE's NPM Scripts panel (one click)
+
+If you have the repo cloned, open the npm scripts panel in VS Code, Cursor, or IntelliJ and click any of:
+
+```
+install-mcp            ← interactive (needs integrated terminal)
+install-mcp:auto       ← auto-detect all IDEs
+install-mcp:cursor     ← Cursor only
+install-mcp:vscode     ← VS Code only
+install-mcp:claude     ← Claude Desktop only
+install-mcp:windsurf   ← Windsurf only
+install-mcp:jetbrains  ← Android Studio / IntelliJ
+install-mcp:antigravity← Google Antigravity IDE
+install-mcp:kiro       ← AWS Kiro
+install-mcp:list       ← see detection status
+```
+
+### Option 4 — Test all tools (no IDE needed)
+
+```bash
 npx @modelcontextprotocol/inspector npx androjack-mcp
 ```
 
@@ -467,8 +503,8 @@ Android Studio added MCP support on January 15, 2026. The window between "first 
 | **Rate limiting** | 30 requests / domain / minute with exponential backoff on 429/5xx |
 | **No credentials** | Zero API keys, zero auth tokens required |
 | **No data stored** | Nothing persisted beyond process lifetime |
-| **Transparent agent** | User-Agent: `AndroJack-MCP/1.0 (documentation-grounding bot; not-a-scraper)` |
-| **Read-only** | All 13 tools are annotated `readOnlyHint: true` — no writes, no side effects |
+| **Transparent agent** | User-Agent: `AndroJack-MCP/1.4 (documentation-grounding bot; not-a-scraper)` |
+| **Read-only** | All 20 tools are annotated `readOnlyHint: true` — no writes, no side effects |
 | **Input bounds** | All inputs length-capped and sanitized before use |
 | **Body size cap** | HTTP responses capped at 4 MB — no OOM risk on large documentation pages |
 
@@ -526,11 +562,32 @@ Android Studio added MCP support on January 15, 2026. The window between "first 
 git clone https://github.com/VIKAS9793/AndroJack-mcp.git
 cd androjack-mcp
 npm install
-npm run build         # compiles TypeScript → build/
-npm run inspector     # opens MCP Inspector UI
-node build/index.js   # run server directly
-node build/install.js install  # run installer
+npm run build              # compiles TypeScript → build/
+npm run inspector          # opens MCP Inspector UI
+node build/index.js        # run MCP server directly
+npm run install-mcp        # interactive installer (needs real terminal)
+npm run install-mcp:auto   # non-interactive auto-install
+npm run install-mcp:list   # check IDE detection status
 ```
+
+---
+
+## 📋 Changelog
+
+### v1.4.0 — Interactive CLI Installer
+
+- **New:** Animated `figlet` ASCII-art banner with cyan→purple gradient and Android fixes tagline  
+  (`Gradle · ViewModel · Room · Compose · Navigation · Hilt · WorkManager`)
+- **New:** `@clack/prompts` arrow-key select + checkbox multiselect — no more typing numbers
+- **New:** `ora` per-IDE spinner with ✅/❌ result per IDE
+- **New:** Y/N `confirm` dialogs before writing configs and when overwriting existing installs
+- **New:** TTY guard — graceful `--auto` fallback in CI / non-TTY environments
+- **New:** Per-IDE `npm run install-mcp:*` scripts visible in VS Code / IntelliJ npm panels
+- **Fix:** `--ide` flag now uses `--ide=<name>` format consistently
+
+### v1.3.4 and earlier
+
+See [GitHub releases](https://github.com/VIKAS9793/AndroJack-mcp/releases) for prior history.
 
 ---
 
