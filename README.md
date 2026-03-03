@@ -8,6 +8,10 @@
 
 ![AndroJack Banner](https://raw.githubusercontent.com/VIKAS9793/AndroJack-mcp/main/assets/AndroJack%20banner.png)
 
+### 🎬 See AndroJack in Action
+
+[![Watch AndroJack in Action on YouTube](https://img.youtube.com/vi/O2aFyObV-B0/maxresdefault.jpg)](https://youtu.be/O2aFyObV-B0)
+
 ### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
 
 <br/>
