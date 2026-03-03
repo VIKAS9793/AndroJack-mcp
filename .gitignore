@@ -16,6 +16,9 @@ _test_playground/
 # TypeScript incremental build cache
 *.tsbuildinfo
 
+# npm pack tarballs
+*.tgz
+
 # Environment variables
 .env
 .env.local
