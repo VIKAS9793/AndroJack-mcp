@@ -106,6 +106,8 @@ AndroJack is a **documentation-grounded Android engineering MCP server**. It giv
 
 > **It does not make the AI smarter. It makes the AI accountable to evidence.**
 
+**Think of it as a pre-build linter for LLMs.** While other tools retrieve documentation, AndroJack acts as a strict architectural gatekeeper.
+
 ```
 Without AndroJack:   You ask → AI predicts from stale weights → Code (possibly wrong)
 
@@ -485,13 +487,31 @@ AI produces:
 
 ---
 
-## 📍 The Market Gap — Why Nothing Else Does This
+## 📍 The Ecosystem: AndroJack vs. Other MCPs
 
-Every other Android MCP server in the public registry (minhalvp/android-mcp-server, CursorTouch/Android-MCP, mobile-mcp by mobile-next) does the same thing: **ADB device control**. They tap screens, capture screenshots, send keystrokes, and run UIAutomator2 queries. They are excellent QA automation tools. Not one of them knows what a `ViewModel` is. Not one can tell you whether a Gradle coordinate is current. Not one can distinguish Navigation 3 from Navigation 2.
+### 1. vs. Device Automation MCPs
+Most Android MCP servers in the public registry (`minhalvp/android-mcp-server`, `CursorTouch/Android-MCP`) do the same thing: **ADB device control**. They tap screens and capture screenshots for QA testing. Not one of them knows what a `ViewModel` is or can distinguish Navigation 3 from Navigation 2. AndroJack owns the engineering and architecture category.
 
-AndroJack owns the only unclaimed category in the Android MCP ecosystem: **documentation-grounded Android engineering guidance** — the trust layer that AI coding assistants call when they need to verify whether an API actually exists, whether a dependency version is current, and whether a pattern is still the official recommendation.
+### 2. vs. Google's Official Developer Knowledge MCP (Public Preview, Feb 2026)
+In February 2026, Google launched the Developer Knowledge MCP in public preview — a generalist tool that retrieves Markdown from its documentation corpus covering Firebase, Android, Google Cloud, Maps, and more. You might ask: *Does this replace AndroJack?*
 
-Android Studio added MCP support on January 15, 2026. The window between "first Android doc-grounded MCP" and "Google ships one themselves" is the window AndroJack is built to fill.
+**No. They solve two different halves of the AI coding problem.**
+
+| Feature | Google Developer Knowledge MCP | AndroJack MCP |
+| :--- | :--- | :--- |
+| **Identity** | **The Librarian** (Information) | **The Gatekeeper** (Enforcement) |
+| **Core Job** | Feeds the AI the newest documentation so it knows what exists. | Acts as a strict pre-build linter to enforce modern architectural rules. |
+| **Mechanism** | Context Retrieval | Context Enforcement |
+| **Scope** | Generalist — Firebase, Cloud, Android, Maps, and more | Android specialist — 20 tools, one domain, zero drift |
+| **Tools** | 3 retrieval tools (`search_documents`, `get_document`, `batch_get_documents`) | 20 specialized tools — live version checks, deprecation registry, Gradle lookups, API level validation |
+| **Setup** | Google Cloud project + API key + `gcloud` CLI required | `npx androjack-mcp` — zero auth, zero cloud project |
+| **Enforcement** | Passive — AI decides when to retrieve | Active — tool descriptions mandate calls before every task type |
+| **Status** | Public preview (v1alpha / experimental) | Stable (v1.4.0) |
+
+**Why you need both in production:**
+Google's tool cures AI "ignorance" by providing official text. However, **AndroJack cures AI "bad habits."** If you ask an AI to refactor an app, Google's tool will provide the new docs. But **AndroJack** is the tool that actively blocks the AI from writing legacy XML, enforces Jetpack Compose, checks Gradle versions against Maven, and ensures your `minSdk` doesn't violate Android 16's Play Store mandate.
+
+Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 
 ---
 
