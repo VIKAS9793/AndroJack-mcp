@@ -21,7 +21,7 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
-[![Tools](https://img.shields.io/badge/tools-20-orange?style=flat-square)](#-the-20-tools)
+[![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
 
@@ -102,7 +102,7 @@ Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries publ
 
 ## 🧩 What AndroJack Does
 
-AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant 20 specialized tools that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
+AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant 21 specialized tools that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
 
 > **It does not make the AI smarter. It makes the AI accountable to evidence.**
 
@@ -121,14 +121,199 @@ This is the most important thing to understand before you install AndroJack:
 
 | Level | What's Active | What the AI Does |
 |---|---|---|
-| **Level 1** — Tools only installed | 20 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
-| **Level 2** — Tools + Grounding Gate prompt loaded | 20 tools + mandatory rulebook | AI *must* call the correct tool for every decision. No discretion. |
+| **Level 1** — Tools only installed | 21 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
+| **Level 2** — Tools + Grounding Gate prompt loaded | 21 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
+| **Level 3** — Level 2 + `android_code_validator` | Full loop: fetch → generate → validate → fix | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
-**Level 2 is active and guaranteed.** The `androjack_grounding_gate` system prompt (registered on the server — instructions below) maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
+**Level 2 is active.** The `androjack_grounding_gate` system prompt maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
 
-→ **For full grounding, always activate Level 2.** See [Getting the Full Guarantee](#-getting-the-full-guarantee) below.
+**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 24 rules covering removed APIs, deprecated patterns, and Android 16 compliance. Verdict FAIL means the AI must fix and re-validate — the user never sees the broken code.
+
+→ **For full grounding, always activate Level 2 + Level 3.** See [Getting the Full Guarantee](#-getting-the-full-guarantee) below.
+
+---
+
+### 🪲 What Can Still Break — Even at Level 3
+
+> [!IMPORTANT]
+> **AndroJack is a documentation-grounding and API-validation tool. It is not a Compose layout engine, a design system enforcer, or a runtime renderer.** Level 3 catches removed APIs and deprecated patterns. It cannot catch every class of Android bug. This is not a limitation of AndroJack — it is a fundamental property of static text analysis applied to a visual, runtime-rendered UI framework.
+
+The following bugs were encountered in a real Android app built with AndroJack at Level 2 (v1.4.0). They are documented here honestly so you know exactly what to watch for — and where to reach for different tools.
+
+#### ✅ What Level 3 Catches
+
+These are the bugs AndroJack was designed to prevent. The rule engine fires on these:
+
+```kotlin
+// ❌ REMOVED — android_code_validator fires: REMOVED_ASYNCTASK
+class MyTask : AsyncTask<Void, Void, String>()
+
+// ❌ REMOVED — fires: REMOVED_TEST_COROUTINE_DISPATCHER
+val dispatcher = TestCoroutineDispatcher()
+
+// ❌ DEPRECATED — fires: DEPRECATED_CONTEXTUAL_FLOW_ROW
+ContextualFlowRow { Text("hello") }
+
+// ❌ LEAK — fires: GLOBALSCOPE_LAUNCH
+GlobalScope.launch { fetchData() }
+
+// ❌ ANDROID 16 — fires: XML_SCREEN_ORIENTATION_LOCK
+// android:screenOrientation="portrait"
+```
+
+---
+
+#### ⚠️ What Level 3 Cannot Catch — And Why
+
+> [!WARNING]
+> The following bugs were found in a real project. They are **valid, API-current Compose code that violates design system constraints, accessibility minimums, or architectural boundaries**. Static text scanning cannot detect them. This is not a gap in AndroJack — it requires a different tool class at a different layer of your quality stack.
+
+---
+
+**Bug PH-UI-001 — Segmented button text truncation**
+
+```kotlin
+// Compiles and runs. Level 3 sees no violation.
+// The bug: Text inside MultiChoiceSegmentedButtonRow truncates
+// ("Ligh t", "Drai ned") because a fixed height modifier prevents
+// the Roboto Flex variable font from expanding the container.
+
+MultiChoiceSegmentedButtonRow {
+    SegmentedButton(/* fixed height modifier */) {
+        Text("Light")  // truncates at runtime on variable font sizes
+    }
+}
+
+// Fix: Replace fixed height with Modifier.wrapContentHeight() + heightIn(min = 48.dp)
+```
+
+> [!NOTE]
+> **This is an absence bug.** The correct modifier is missing — no wrong one is present. RegExp pattern matching detects patterns that exist in code. Absence is significantly harder for static analysis to detect and often requires structural rules or runtime validation rather than text-level pattern matching.
+
+---
+
+**Bug PH-UI-003 — Disabled button contrast failure**
+
+```kotlin
+// Correct Material 3 API. Level 3 sees no violation.
+// The bug: disabled state colours fail WCAG AA 4.5:1 contrast ratio
+// against the dark theme surface — but only visible when rendered.
+
+Button(enabled = false, onClick = {}) {
+    Text("INITIALIZE VAULT")  // illegible dark grey on dark grey surface
+}
+
+// Fix: Override ButtonDefaults.buttonColors(
+//     disabledContainerColor = ...,
+//     disabledContentColor = ...
+// ) to achieve minimum 4.5:1 against MaterialTheme.colorScheme.surface
+```
+
+> [!NOTE]
+> **This is a runtime visual property bug.** A 4.5:1 contrast ratio only exists when the theming engine renders against a surface colour. Contrast validation requires rendering or screenshot-based testing rather than source text analysis. Use `paparazzi` screenshot tests or Google's Accessibility Scanner.
+
+---
+
+**Bug PH-AR-004 — Raw stack trace rendered to end user**
+
+```kotlin
+// The AI generated a ViewModel without catching the domain exception.
+// Level 3 fires only if a flagged API (e.g. GlobalScope) caused the leak.
+// A plain missing try/catch produces no pattern match.
+
+class VaultViewModel : ViewModel() {
+    fun initializeVault() {
+        viewModelScope.launch {
+            val result = repository.initialize()
+            // Missing try/catch — LiteRT exception propagates to UI
+            _uiState.value = UiState.Success(result)
+        }
+    }
+}
+// What the user saw: "LiteRT initialization failed: ByteBuffer is not a
+// valid TensorFlow Lite model flatbuffer" — raw crash text in the UI.
+
+// Fix: Wrap in try/catch, emit UiState.Error with a user-friendly string resource.
+```
+
+> [!WARNING]
+> **UDF architecture boundary violations require architectural linting, not API pattern matching.** A missing `try/catch` has no detectable pattern. Use [Detekt](https://detekt.dev) with custom architecture rules, or write a ViewModel unit test that verifies exception mapping to `UiState.Error`.
+
+---
+
+**Bug PH-UX-008 — Consent checkbox tap target too small**
+
+```kotlin
+// Valid Compose code. Level 3 sees no violation.
+// The bug: Modifier.toggleable scoped to the Checkbox icon only —
+// tappable area is ~24dp instead of the required 48dp minimum.
+
+Row {
+    Checkbox(
+        checked = isChecked,
+        onCheckedChange = { isChecked = it }  // toggleable on icon only
+    )
+    Text("I agree to the terms")  // not tappable — users miss the target
+}
+
+// Fix: Hoist Modifier.toggleable to the parent Row.
+// The entire Row (icon + text) becomes the touch target.
+```
+
+> [!NOTE]
+> **Structural placement bugs require AST-level analysis.** The API is used correctly — in the wrong structural position. Detecting this requires understanding the composable tree, not the line in isolation. This is on the roadmap for a future `android_code_validator` AST extension.
+
+---
+
+**Bug PH-UI-009 — Scaffold inner padding ignored**
+
+```kotlin
+// Compiles and runs. Bottom content scrolls behind the navigation bar.
+// Level 3 sees no violation — all APIs are correct and current.
+
+Scaffold { innerPadding ->
+    LazyColumn(
+        // Missing: contentPadding = innerPadding
+    ) {
+        items(data) { ItemRow(it) }  // bottom items cut off by BottomAppBar
+    }
+}
+
+// Fix: LazyColumn(contentPadding = innerPadding)
+```
+
+> [!NOTE]
+> **Unused-variable class bugs require data-flow analysis.** `innerPadding` is captured but never consumed. Android Lint's `UnusedVariable` rule and Android Studio's own live inspector flag this. It is not in scope for MCP-layer validation.
+
+---
+
+### 🗂️ Defence-in-Depth: The Right Tool for Each Bug Class
+
+> [!IMPORTANT]
+> AndroJack is one layer in a quality stack. Each layer catches what only it can catch. No single tool covers all four.
+
+| Bug Class | Real Example | Right Tool |
+|---|---|---|
+| Removed / deprecated API | `AsyncTask`, `TestCoroutineDispatcher`, `ContextualFlowRow` | ✅ **AndroJack Level 3** |
+| Android 16 manifest violations | `screenOrientation`, `resizeableActivity=false` | ✅ **AndroJack Level 3** |
+| Architecture violation (flagged root cause) | `GlobalScope` leaking to UI | ✅ **AndroJack Level 3** |
+| Absent modifier / missing constraint | PH-UI-001 (wrapContentHeight), PH-UI-009 (innerPadding) | 🔧 Android Lint / IDE inspector |
+| Runtime contrast / colour failures | PH-UI-003 (disabled button WCAG) | 🔧 `paparazzi` + Accessibility Scanner |
+| Touch target violations | PH-UI-002, PH-UX-008 | 🔧 Accessibility Scanner |
+| Structural placement (wrong hierarchy) | PH-UX-008 (toggleable on wrong composable) | 🔧 Android Lint / future AST rule |
+| Architecture boundary (missing try/catch) | PH-AR-004 (stack trace to UI) | 🔧 Detekt + ViewModel unit tests |
+| M3 design system aesthetic | PH-UI-007 (corner radius), PH-UI-006 (casing) | 🔧 Design review / Figma handoff |
+
+---
+
+### Why MCP Is Not at Fault for Any of This
+
+> [!NOTE]
+> **MCP is a transport protocol.** It specifies how an AI client and a tool server exchange structured messages — nothing more. Blaming MCP for not catching a missing `contentPadding` in `DropdownMenuItem` is equivalent to blaming TCP/IP for a badly designed website. The protocol carried the message correctly.
+>
+> Anthropic donated MCP to the Linux Foundation in December 2025 — co-founded with OpenAI, Block, Google, Microsoft, and AWS — precisely because a neutral protocol does not encode domain-specific rules. HTTP does not enforce WCAG. gRPC does not enforce Material 3. MCP does not enforce Compose modifier semantics. That is what makes it universal. AndroJack exists as a specialised layer *on top of* MCP — it is not a replacement for runtime testing, accessibility auditing, or design system review.
 
 ---
 
@@ -284,15 +469,25 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 | 18 | 📋 `android_play_policy_advisor` | Play Store policies — age-gating, health apps, loan apps, subscription UI, data safety, Oct 2025 changes | Apps rejected at review for policy violations the developer didn't know existed |
 | 19 | 🥽 `android_xr_guide` | Android XR SDK (DP3), Compose for XR — Subspace, SpatialPanel, UserSubspace, SceneCore, ARCore for XR | Standard 2D Compose in an XR app — works but misses spatial capabilities entirely |
 | 20 | ⌚ `android_wearos_guide` | Wear OS — Tiles, Complications, Health Services, ambient mode, `WearApp` scaffold, M3 Expressive for Wear | Handheld UI patterns on a 40mm round display; missing Tiles API; battery-draining background patterns |
+| 21 | 🛡️ `android_code_validator` | **Level 3 loop-back gate.** Validates AI-generated Kotlin, XML, and Gradle against 24 Android rules. Returns PASS/WARN/FAIL verdict, line-level violations with replacements and doc URLs. Called automatically after code generation. | The AI generates code and returns it — no validation pass. Errors only discovered at runtime, in CI, or at Play Store review. |
 
-> **All 20 tools are read-only.** AndroJack fetches and returns information — it never modifies your project files.
+> **All 21 tools are read-only.** AndroJack fetches and returns information — it never modifies your project files.
 
+
+---
+
+## 🎯 Google's Own Recommendation (March 2026)
+
+> *"To prevent the model from hallucinating code for niche or brand-new libraries, leverage Android Studio's Agent tools to have access to documentation… install a MCP Server that lets you access documentation like Context7 (or something similar)."*
+> — **Android Studio Team, Official Android Developer Blog, March 2026**
+
+**That MCP server is AndroJack** — purpose-built for Android, with 21 tools and a mandatory validation loop that no generic doc-retrieval tool provides.
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.4.0) ✨ Recommended
+### Option 1 — Interactive CLI (v1.5.0) ✨ Recommended
 
 ```bash
 npx androjack-mcp install
@@ -472,7 +667,7 @@ You: Build a login screen with ViewModel and Jetpack Compose
 → architecture_reference("mvvm")
 → material3_expressive("theme setup")
 → kotlin_best_practices("stateflow-ui")
-→ gradle_dependency_checker("compose")           → BOM 2025.05.01 / ui:1.11.0-alpha06
+→ gradle_dependency_checker("compose")           → BOM 2026.02.01 / ui:1.8.0
 → gradle_dependency_checker("lifecycle")         → lifecycle-viewmodel-ktx:2.11.0-alpha01
 → android_api_level_check("26")                  ✅ covers ~90% devices
 → android_permission_advisor("INTERNET")         🟢 normal — no runtime request
@@ -483,6 +678,9 @@ AI produces:
   ✅ Official MVVM + M3 Expressive theming
   ✅ StateFlow instead of LiveData in new code
   ✅ Source URL cited on every code block
+
+→ android_code_validator(generatedCode, "kotlin", 24, 36)
+  ✅ PASS — 0 errors, 0 warnings (code is grounded and rule-compliant)
 ```
 
 ---
@@ -502,11 +700,11 @@ In February 2026, Google launched the Developer Knowledge MCP in public preview 
 | **Identity** | **The Librarian** (Information) | **The Gatekeeper** (Enforcement) |
 | **Core Job** | Feeds the AI the newest documentation so it knows what exists. | Acts as a strict pre-build linter to enforce modern architectural rules. |
 | **Mechanism** | Context Retrieval | Context Enforcement |
-| **Scope** | Generalist — Firebase, Cloud, Android, Maps, and more | Android specialist — 20 tools, one domain, zero drift |
-| **Tools** | 3 retrieval tools (`search_documents`, `get_document`, `batch_get_documents`) | 20 specialized tools — live version checks, deprecation registry, Gradle lookups, API level validation |
+| **Scope** | Generalist — Firebase, Cloud, Android, Maps, and more | Android specialist — 21 tools, one domain, zero drift |
+| **Tools** | 3 retrieval tools (`search_documents`, `get_document`, `batch_get_documents`) | 21 specialized tools — live version checks, deprecation registry, Gradle lookups, API level validation, loop-back code validator |
 | **Setup** | Google Cloud project + API key + `gcloud` CLI required | `npx androjack-mcp` — zero auth, zero cloud project |
 | **Enforcement** | Passive — AI decides when to retrieve | Active — tool descriptions mandate calls before every task type |
-| **Status** | Public preview (v1alpha / experimental) | Stable (v1.4.0) |
+| **Status** | Public preview (v1alpha / experimental) | Stable (v1.5.0) |
 
 **Why you need both in production:**
 Google's tool cures AI "ignorance" by providing official text. However, **AndroJack cures AI "bad habits."** If you ask an AI to refactor an app, Google's tool will provide the new docs. But **AndroJack** is the tool that actively blocks the AI from writing legacy XML, enforces Jetpack Compose, checks Gradle versions against Maven, and ensures your `minSdk` doesn't violate Android 16's Play Store mandate.
@@ -524,7 +722,7 @@ Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 | **No credentials** | Zero API keys, zero auth tokens required |
 | **No data stored** | Nothing persisted beyond process lifetime |
 | **Transparent agent** | User-Agent: `AndroJack-MCP/1.4 (documentation-grounding bot; not-a-scraper)` |
-| **Read-only** | All 20 tools are annotated `readOnlyHint: true` — no writes, no side effects |
+| **Read-only** | All 21 tools are annotated `readOnlyHint: true` — no writes, no side effects |
 | **Input bounds** | All inputs length-capped and sanitized before use |
 | **Body size cap** | HTTP responses capped at 4 MB — no OOM risk on large documentation pages |
 
@@ -594,8 +792,10 @@ npm run install-mcp:list   # check IDE detection status
 
 ## 📋 Changelog
 
-### v1.4.0 — Interactive CLI Installer
+### v1.5.0 — Level 3 Loop-Back Validator + Interactive CLI Installer
 
+- **New:** `android_code_validator` (Tool 21) — Level 3 loop-back validation gate. 24 rules across Kotlin, XML, and Gradle. Validates AI-generated code before it reaches the user. Returns PASS/WARN/FAIL verdict with line-level violations, replacements, and official doc URLs. Zero new dependencies — pure TypeScript.
+- **New:** Grounding Gate upgraded to Level 3: Step 8 mandates `android_code_validator` after every code generation. Negative constraints section lists explicit prohibitions by API level (Android 16 targets, new Compose projects, universal rules).
 - **New:** Animated `figlet` ASCII-art banner with cyan→purple gradient and Android fixes tagline  
   (`Gradle · ViewModel · Room · Compose · Navigation · Hilt · WorkManager`)
 - **New:** `@clack/prompts` arrow-key select + checkbox multiselect — no more typing numbers

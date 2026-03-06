@@ -38,10 +38,11 @@ import { androidOnDeviceAiGuide } from "./tools/ondevice-ai.js";
 import { androidPlayPolicyAdvisor } from "./tools/play-policy.js";
 import { androidXrGuide } from "./tools/xr.js";
 import { androidWearOsGuide } from "./tools/wear.js";
+import { androidCodeValidator } from "./tools/validator.js";
 // ── Server Instantiation ────────────────────────────────────────────────────
 const server = new McpServer({
   name: "androjack-mcp",
-  version: "1.4.0",
+  version: "1.5.0",
 });
 
 // ── Tool 1: Official Android Documentation Search ──────────────────────────
@@ -333,14 +334,41 @@ Before writing ANY Android or Kotlin code, you MUST follow this sequence:
 5. **API LEVEL** — Call \`android_api_level_check\` if you are unsure about minSdk compatibility.
 6. **PATTERNS** — Call \`kotlin_best_practices\` for idiomatic coroutine, Flow, or Compose patterns.
 7. **DEBUG** — Call \`android_debugger\` for any stacktrace before proposing a fix.
+8. **VALIDATE OUTPUT** — Call \`android_code_validator\` on EVERY code block you generate before returning it to the user. If verdict is FAIL, fix all errors and re-run until PASS or WARN.
 
 ## HARD RULES — NO EXCEPTIONS
 
 - You CANNOT generate Android code without first retrieving official documentation evidence.
+- You CANNOT return code to the user without first passing it through \`android_code_validator\`.
 - You CANNOT use any deprecated API (status: deprecated or removed) without explicit user acknowledgement.
 - Every code response MUST cite the official doc URL it was grounded in.
 - If a tool call fails, say so explicitly — do not fall back to training memory.
 - No hallucinated API names, method signatures, or Gradle coordinates.
+
+## NEGATIVE CONSTRAINTS BY API LEVEL
+
+These are hard prohibitions. Generate none of the following without explicit user override:
+
+**All targets (universal):**
+- NEVER generate \`AsyncTask\` — removed API 33, crashes on modern devices
+- NEVER generate \`TestCoroutineDispatcher\` — removed coroutines-test 1.8+, breaks CI
+- NEVER generate \`TestCoroutineScope\` — removed, use \`runTest { }\` block
+- NEVER generate \`GlobalScope.launch\` or \`GlobalScope.async\` — leaks coroutines
+- NEVER generate \`ContextualFlowRow\` or \`ContextualFlowColumn\` — deprecated Compose 1.8
+- NEVER generate \`Thread.sleep()\` in tests — causes flaky test failures
+- NEVER generate \`startActivityForResult()\` — use \`registerForActivityResult()\`
+- NEVER generate \`IntentService\` — deprecated API 30, use WorkManager or coroutines
+- NEVER generate \`runBlocking { }\` on a UI/main thread — causes ANR
+
+**targetSdk ≥ 36 (Android 16 mandate, Play Store August 2026):**
+- NEVER generate \`android:screenOrientation="portrait"\` or any orientation lock in manifests
+- NEVER generate \`android:resizeableActivity="false"\`
+- Always verify large-screen compliance with \`android_api36_compliance\` before finalising
+
+**New Compose projects (not migrating legacy):**
+- NEVER generate \`rememberNavController()\` or \`NavHost()\` — use Navigation 3 (\`rememberNavBackStack\`, \`NavDisplay\`)
+- NEVER generate \`MutableLiveData\` — use \`MutableStateFlow\`
+- NEVER generate \`kapt\` annotation processing — use \`ksp\`
 
 ## CRITICAL INVARIANTS FOR 2025-2026 CODE
 
@@ -677,7 +705,43 @@ server.registerTool(
   })
 );
 
-// ── Server Startup ──────────────────────────────────────────────────────────
+// ── Tool 21: Android Code Validator (Level 3 Loop-Back) ───────────────────
+server.registerTool(
+  "android_code_validator",
+  {
+    title: "Android Code Validator",
+    description:
+      "CALL THIS AFTER GENERATING EVERY ANDROID CODE BLOCK. " +
+      "This is the Level 3 loop-back gate: validates AI-generated Kotlin, XML, and Gradle code " +
+      "against 24 Android-specific rules before the user sees it. " +
+      "Detects removed APIs (AsyncTask, TestCoroutineDispatcher), deprecated patterns " +
+      "(ContextualFlowRow, NavController in new code, SharedPreferences), Android 16 violations " +
+      "(orientation locks, resizeableActivity=false), and structural issues (GlobalScope.launch, runBlocking in UI). " +
+      "Returns: verdict (PASS/WARN/FAIL), line-level violations with replacements and doc URLs, " +
+      "and explicit next-step instructions. " +
+      "If verdict is FAIL: fix all errors and re-run before returning code to the user. " +
+      "Inputs: code (required), language ('kotlin'|'xml'|'gradle', auto-detected if omitted), " +
+      "minSdk and targetSdk for context-aware API level checks.",
+    inputSchema: {
+      code:       z.string().min(1).max(50_000).describe("The code block to validate"),
+      language:   z.enum(["kotlin", "xml", "gradle"]).optional()
+                   .describe("File type — auto-detected from content if omitted"),
+      minSdk:     z.number().int().min(1).max(40).optional()
+                   .describe("App minSdk for API level context (e.g. 24)"),
+      targetSdk:  z.number().int().min(1).max(40).optional()
+                   .describe("App targetSdk for API 36 compliance checks (e.g. 36)"),
+    },
+    annotations: { readOnlyHint: true },
+  },
+  async ({ code, language, minSdk, targetSdk }) => ({
+    content: [{
+      type: "text",
+      text: await androidCodeValidator(code, language, minSdk, targetSdk),
+    }],
+  })
+);
+
+
 // All tools/prompts must be registered above this point.
 // Pass --http to start Streamable HTTP transport instead of stdio.
 async function main(): Promise<void> {
