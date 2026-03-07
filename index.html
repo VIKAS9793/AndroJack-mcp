@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AndroJack MCP - The Jack of All Android Trades</title>
+    <!-- Google Fonts (Material 3 Expressive) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Background Elements -->
+    <div class="glow glow-green"></div>
+    <div class="glow glow-purple"></div>
+
+    <nav>
+        <div class="logo" style="display: flex; align-items: center;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <rect x="4" y="9" width="16" height="11" rx="3" fill="url(#logo-grad)"/>
+                <path d="M8 9V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V9" stroke="url(#logo-grad)" stroke-width="2"/>
+                <circle cx="8.5" cy="14.5" r="1.5" fill="#1a1d24"/>
+                <circle cx="15.5" cy="14.5" r="1.5" fill="#1a1d24"/>
+                <path d="M10 17H14" stroke="#1a1d24" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M2.5 12H4" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 12H21.5" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="logo-grad" x1="4" y1="3" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#3ddc84"/>
+                        <stop offset="1" stop-color="#7f52ff"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            AndroJack
+        </div>
+        <div class="nav-links">
+            <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank">GitHub</a>
+            <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="nav-btn">NPM Registry</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="badges">
+                <span class="badge badge-android">Active Android 16 Rules</span>
+                <span class="badge badge-mcp">MCP Protocol Ready</span>
+            </div>
+            
+            <h1 class="hero-title animate-bounce-in">
+                The <span class="text-gradient">Jack</span> of All <br/> Android Trades
+            </h1>
+            
+            <p class="hero-subtitle fade-in-up">
+                Equip your AI assistant with live, verified Android knowledge. <br/> Stop hallucinating legacy XML and deprecated APIs.
+            </p>
+
+            <div class="cta-group fade-in-up delay-1">
+                <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="btn btn-primary bounce-hover">
+                    Install Now <span class="arrow">→</span>
+                </a>
+                <a href="#metrics" class="btn btn-secondary bounce-hover">
+                    View Live Metrics
+                </a>
+            </div>
+
+            <!-- Terminal Window Illusion -->
+            <div class="terminal-card fade-in-up delay-2">
+                <div class="terminal-header">
+                    <div class="dots"><span></span><span></span><span></span></div>
+                    <div class="terminal-title">Quick Start</div>
+                </div>
+                <div class="terminal-body">
+                    <code><span class="prompt">$</span> npx androjack-mcp install</code>
+                </div>
+            </div>
+
+            <!-- Product Visual Showoff -->
+            <div class="product-showcase fade-in-up delay-2">
+                <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img">
+            </div>
+        </section>
+
+        <!-- Live Metrics Section -->
+        <section id="metrics" class="metrics">
+            <div class="section-header">
+                <h2>Product <span class="text-gradient">Traction</span></h2>
+                <p>Live data pulled directly from the official NPM Registry.</p>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="glass-card stat-card bouncy-card">
+                    <h3>Downloads (Last 7 Days)</h3>
+                    <div class="stat-value" id="weekly-downloads">Loading...</div>
+                </div>
+                <!-- Chart Card -->
+                <div class="glass-card chart-card bouncy-card">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Value Props -->
+        <section class="features">
+            <div class="section-header">
+                <h2>Why <span class="text-gradient">AndroJack</span>?</h2>
+            </div>
+            <div class="feature-grid">
+                <div class="glass-card bouncy-card">
+                    <div class="icon-wrap android-burst">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--android-green);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <h3>Level 3 Validator</h3>
+                    <p>Blocks AI from generating discontinued APIs like AsyncTask or ContextualFlowRow before you even see the code.</p>
+                </div>
+                <div class="glass-card bouncy-card">
+                    <div class="icon-wrap mcp-burst">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--mcp-purple);"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    </div>
+                    <h3>Android 16 Ready</h3>
+                    <p>Enforces Play Store compliance for foldable architectures and large-screen WindowSizeClass rules automatically.</p>
+                </div>
+                <div class="glass-card bouncy-card">
+                    <div class="icon-wrap github-burst">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f1e05a;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <h3>Zero Configuration</h3>
+                    <p>Compatible with Claude Desktop, Cursor, and Windsurf instantly via a single automated installation command.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Philosophy Section -->
+        <section class="philosophy">
+            <div class="section-header">
+                <h2>The <span class="text-gradient">Philosophy</span></h2>
+                <p>Solving the AI Hallucination Crisis</p>
+            </div>
+            <div class="glass-card philosophy-card fade-in-up">
+                <h3>The Problem: Predictable Tokens ≠ Verified Code</h3>
+                <p>AI tools like Cursor and GitHub Copilot are incredible at predicting the next line of code, but they suffer from a measurable trust crisis. The Stack Overflow 2025 Developer Survey found that 35% of site visits are now triggered by developers debugging AI-generated code. AI models natively hallucinate deprecated APIs, legacy XML architectures, and outdated Gradle coordinates because they rely on stale training memory.</p>
+                
+                <h3>The Solution: Data Grounding Over Inference</h3>
+                <p>AndroJack MCP intercepts the AI's generation process. Before the AI writes a single line of Android code, AndroJack forces it to query the official Google ecosystem (developer.android.com, issue trackers, Maven Central). It ensures your AI assistant builds from verified, real-time evidence, acting as an elite staff engineer reviewing every technical decision.</p>
+            </div>
+        </section>
+
+        <!-- Use Cases Comparison -->
+        <section class="use-cases">
+            <div class="use-cases-grid">
+                <div class="glass-card bouncy-card use-case-pro">
+                    <div class="icon-wrap android-burst">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--android-green);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <h3>Where AndroJack Shines</h3>
+                    <ul class="use-case-list">
+                        <li><strong>Greenfield Projects:</strong> Architecting new apps strictly using Compose 1.8, Navigation 3, and modern MVI/M3 standards.</li>
+                        <li><strong>Legacy Modernization:</strong> Eradicating `AsyncTask`, `LiveData`, and XML layouts safely.</li>
+                        <li><strong>Play Store Compliance:</strong> Guaranteeing apps meet the Android 16 (API 36) large-screen constraints mandated for August 2026.</li>
+                        <li><strong>Debugging Complex Configurations:</strong> Fixing ProGuard obfuscation rules or deep Gradle dependency conflicts across KMP projects.</li>
+                    </ul>
+                </div>
+                <div class="glass-card bouncy-card use-case-con">
+                    <div class="icon-wrap error-burst">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ff5f56;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    </div>
+                    <h3>Where It Is Not Needed</h3>
+                    <ul class="use-case-list">
+                        <li><strong>Backend or Web Apps:</strong> Completely useless for your Express.js server, React website, or Python scripts.</li>
+                        <li><strong>Simple UI Tweaks:</strong> If you are just changing a text color in an isolated view, loading 21 AI tools is overkill.</li>
+                        <li><strong>Basic Syntax Help:</strong> LLMs are already great at basic Kotlin syntax. AndroJack is for system-level SDK architecture, not teaching "for loops."</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Block -->
+        <section class="contact-block glass-card bounce-hover">
+            <h2>
+                Let's Build Together
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px; color: var(--android-green);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </h2>
+            <p>Feedback, issues, or feature requests? Reach out directly to the developer.</p>
+            <div class="contact-links">
+                <a href="mailto:vikassahani17@gmail.com" class="btn btn-outline">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    vikassahani17@gmail.com
+                </a>
+                <a href="https://github.com/VIKAS9793/AndroJack-mcp/discussions" target="_blank" class="btn btn-outline">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    GitHub Discussions
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Built with ❤️ for the Android Community. Open Source on <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank">GitHub</a>.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
