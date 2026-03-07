@@ -1,6 +1,6 @@
 {
   "name": "androjack-mcp",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "files": [
     "build/",
     "src/",
@@ -59,8 +59,13 @@
   },
   "devDependencies": {
     "@types/figlet": "^1.7.0",
+    "@types/gradient-string": "^1.1.6",
     "@types/node": "^22.0.0",
     "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "hono": "^4.12.5",
+    "@hono/node-server": "^1.19.10"
   },
   "engines": {
     "node": ">=18.0.0"

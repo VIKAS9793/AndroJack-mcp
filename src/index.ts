@@ -42,7 +42,7 @@ import { androidCodeValidator } from "./tools/validator.js";
 // ── Server Instantiation ────────────────────────────────────────────────────
 const server = new McpServer({
   name: "androjack-mcp",
-  version: "1.5.0",
+  version: "1.5.1",
 });
 
 // ── Tool 1: Official Android Documentation Search ──────────────────────────

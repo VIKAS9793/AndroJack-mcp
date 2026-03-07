@@ -113,7 +113,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
 function buildServer(): McpServer {
   const server = new McpServer({
     name:    "androjack-mcp",
-    version: "1.5.0",
+    version: "1.5.1",
   });
 
   // Tool 1

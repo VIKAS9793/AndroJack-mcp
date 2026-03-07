@@ -487,7 +487,7 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.5.0) ✨ Recommended
+### Option 1 — Interactive CLI (v1.5.1) ✨ Recommended
 
 ```bash
 npx androjack-mcp install
@@ -704,7 +704,7 @@ In February 2026, Google launched the Developer Knowledge MCP in public preview 
 | **Tools** | 3 retrieval tools (`search_documents`, `get_document`, `batch_get_documents`) | 21 specialized tools — live version checks, deprecation registry, Gradle lookups, API level validation, loop-back code validator |
 | **Setup** | Google Cloud project + API key + `gcloud` CLI required | `npx androjack-mcp` — zero auth, zero cloud project |
 | **Enforcement** | Passive — AI decides when to retrieve | Active — tool descriptions mandate calls before every task type |
-| **Status** | Public preview (v1alpha / experimental) | Stable (v1.5.0) |
+| **Status** | Public preview (v1alpha / experimental) | Stable (v1.5.1) |
 
 **Why you need both in production:**
 Google's tool cures AI "ignorance" by providing official text. However, **AndroJack cures AI "bad habits."** If you ask an AI to refactor an app, Google's tool will provide the new docs. But **AndroJack** is the tool that actively blocks the AI from writing legacy XML, enforces Jetpack Compose, checks Gradle versions against Maven, and ensures your `minSdk` doesn't violate Android 16's Play Store mandate.
@@ -792,7 +792,7 @@ npm run install-mcp:list   # check IDE detection status
 
 ## 📋 Changelog
 
-### v1.5.0 — Level 3 Loop-Back Validator + Interactive CLI Installer
+### v1.5.1 — Level 3 Loop-Back Validator + Interactive CLI Installer
 
 - **New:** `android_code_validator` (Tool 21) — Level 3 loop-back validation gate. 24 rules across Kotlin, XML, and Gradle. Validates AI-generated code before it reaches the user. Returns PASS/WARN/FAIL verdict with line-level violations, replacements, and official doc URLs. Zero new dependencies — pure TypeScript.
 - **New:** Grounding Gate upgraded to Level 3: Step 8 mandates `android_code_validator` after every code generation. Negative constraints section lists explicit prohibitions by API level (Android 16 targets, new Compose projects, universal rules).
