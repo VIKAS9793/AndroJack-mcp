@@ -4,14 +4,355 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AndroJack MCP - The Jack of All Android Trades</title>
-    <!-- Google Fonts (Material 3 Expressive) -->
+    
+    <!-- Google Fonts (Material 3 Expressive: Outfit for headings, Roboto Flex for body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- INLINED & M3E OVERHAULED style.css -->
+    <style>
+        /* CSS Variables - Upgraded to Material 3 Expressive Dark Theme */
+        :root {
+            --bg-dark: #0F141A; /* M3 Background */
+            --glass-bg: #1A212A; /* M3 Surface Container */
+            --glass-border: rgba(194, 199, 207, 0.12); /* M3 Outline Variant */
+            --surface-highest: #2E3541; /* M3 Surface Container Highest */
+            
+            --text-main: #E2E2E9; /* M3 On-Surface */
+            --text-muted: #C2C7CF; /* M3 On-Surface Variant */
+            
+            --android-green: #3DDC84; /* Kept brand identity */
+            --mcp-purple: #A8C7FA; /* Upgraded to M3 Primary Blue/Purple tint */
+            --error-red: #FFB4AB; /* M3 Error */
+            --error-bg: #93000A; /* M3 Error Container */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Roboto Flex', sans-serif;
+            font-variation-settings: 'wght' 400, 'wdth' 100;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* M3E Typography */
+        h1, h2, h3 { 
+            font-family: 'Outfit', sans-serif; 
+            font-weight: 700; 
+            letter-spacing: -0.5px;
+        }
+
+        .logo { 
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+        }
+
+        /* Background Glows (Softer M3 diffusion) */
+        .glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            opacity: 0.12;
+            animation: drift 12s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glow-green { background: var(--android-green); top: -200px; left: -100px; }
+        .glow-purple { background: var(--mcp-purple); bottom: -100px; right: -100px; animation-delay: -6s; }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            margin-left: 2rem; 
+            font-weight: 500; 
+            transition: color 0.3s cubic-bezier(0.2, 0, 0, 1); 
+        }
+        .nav-links a:hover { color: var(--text-main); }
+        .nav-btn {
+            background: var(--surface-highest);
+            border: 1px solid var(--glass-border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px; /* M3 Pill Shape */
+            color: var(--text-main) !important;
+        }
+
+        /* Typography */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--android-green), var(--mcp-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Base Layouts */
+        main { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-header h2 { font-size: 2.75rem; margin-bottom: 0.75rem; }
+        .section-header p { color: var(--text-muted); font-size: 1.15rem; }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 5rem 0 6rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .badges { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 9999px; /* M3 Pill */
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-android { background: rgba(61, 220, 132, 0.1); color: var(--android-green); border: 1px solid rgba(61, 220, 132, 0.3); }
+        .badge-mcp { background: rgba(168, 199, 250, 0.1); color: var(--mcp-purple); border: 1px solid rgba(168, 199, 250, 0.3); }
+
+        .hero-title { font-size: 5rem; line-height: 1.05; margin-bottom: 1.5rem; letter-spacing: -2px; }
+        .hero-subtitle { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem; }
+
+        /* Buttons (M3E Standard) */
+        .cta-group { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 4rem; }
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 9999px; /* M3E Fully Rounded/Pill */
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--mcp-purple);
+            color: #062E6F; /* M3 On-Primary */
+            box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.3);
+        }
+        .btn-primary:hover { 
+            background: #D3E3FD; 
+            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover { background: var(--surface-highest); transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--surface-highest);
+            color: var(--text-main);
+        }
+        .btn-outline:hover { border-color: var(--text-main); background: var(--glass-bg); }
+
+        /* Bouncy Hovers */
+        .bounce-hover:hover { transform: translateY(-4px) scale(1.02); }
+
+        /* Terminal Illusion (M3 Spec) */
+        .terminal-card {
+            background: var(--surface-highest);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px; /* M3 Large Shape */
+            width: 100%;
+            max-width: 500px;
+            text-align: left;
+            overflow: hidden;
+            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3); /* M3 Elevation 2 */
+            margin: 0 auto 3rem;
+        }
+        .terminal-header {
+            background: var(--glass-bg);
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .dots span {
+            display: inline-block;
+            width: 12px; height: 12px;
+            border-radius: 50%; margin-right: 8px;
+        }
+        .dots span:nth-child(1) { background: var(--error-red); }
+        .dots span:nth-child(2) { background: #FBBF24; }
+        .dots span:nth-child(3) { background: var(--android-green); }
+        .terminal-title { margin-left: auto; margin-right: auto; color: var(--text-muted); font-size: 0.85rem; font-family: 'Fira Code', monospace;}
+        .terminal-body { padding: 1.5rem; font-family: 'Fira Code', monospace; font-size: 1.1rem; color: var(--mcp-purple);}
+        .prompt { color: var(--text-muted); margin-right: 8px;}
+
+        /* Animated Worker Metaphor Container */
+        .metaphor-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 4rem auto;
+            background: var(--glass-bg);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .metaphor-svg { width: 100%; height: auto; display: block; }
+        
+        /* Metaphor Animations */
+        .svg-float { animation: float 4s ease-in-out infinite; }
+        .svg-wrench { animation: fix 1.2s ease-in-out infinite alternate; transform-origin: 65% 55%; }
+        .svg-gear { animation: spin 8s linear infinite; transform-origin: center; }
+        .svg-gear-reverse { animation: spin-reverse 6s linear infinite; transform-origin: center; }
+        .svg-pulse-code { animation: pulseOpacity 2s ease-in-out infinite alternate; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes fix { 0% { transform: rotate(-25deg); } 100% { transform: rotate(15deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulseOpacity { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Product Look */
+        .product-showcase {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        .showcase-img {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0px 8px 12px 6px rgba(0,0,0,0.15), 0px 4px 4px 0px rgba(0,0,0,0.3); /* M3 Elevation 4 */
+        }
+
+        /* Glassmorphism Cards: M3E Extra Large Shapes */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 32px; /* M3E Extra Large Size */
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.2, 0, 0, 1); 
+            box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15); /* M3 Elevation 1 */
+        }
+        .bouncy-card:hover { 
+            transform: translateY(-8px); 
+            border-color: rgba(255, 255, 255, 0.15); 
+            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3); /* M3 Elevation 2 */
+        }
+
+        /* Metrics Section */
+        .metrics { padding: 4.5rem 0; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        .stat-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .stat-card h3 { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1rem; font-weight: 500;}
+        .stat-value { font-size: 4.5rem; font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--mcp-purple); }
+
+        /* Features */
+        .features { padding: 4.5rem 0; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .icon-wrap { 
+            width: 64px; height: 64px;
+            border-radius: 24px; /* M3 Medium Shape */
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem; 
+        }
+        .android-burst { background: rgba(61, 220, 132, 0.15); }
+        .mcp-burst { background: rgba(168, 199, 250, 0.15); }
+        .github-burst { background: rgba(241, 224, 90, 0.15); }
+        .error-burst { background: rgba(255, 180, 171, 0.15); }
+        
+        .feature-grid h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .feature-grid p { color: var(--text-muted); line-height: 1.7;}
+
+        /* Philosophy Section */
+        .philosophy { padding: 4.5rem 0; }
+        .philosophy-card { margin-top: 2rem; }
+        .philosophy-card h3 { font-size: 1.7rem; color: var(--android-green); margin-bottom: 1rem; margin-top: 2.5rem; }
+        .philosophy-card h3:first-of-type { margin-top: 0; color: var(--error-red);}
+        .philosophy-card p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; }
+
+        /* Use Cases Section */
+        .use-cases { padding: 4.5rem 0; }
+        .use-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        
+        .use-case-pro { border-top: 4px solid var(--android-green); }
+        .use-case-pro h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
+        
+        .use-case-con { border-top: 4px solid var(--error-red); }
+        .use-case-con h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
+        
+        .use-case-list { list-style: none; color: var(--text-muted); padding-left: 0; }
+        .use-case-list li { margin-bottom: 1.2rem; position: relative; padding-left: 1.5rem; line-height: 1.6; }
+        .use-case-list li::before { content: "•"; position: absolute; left: 0; font-weight: bold; font-size: 1.2rem; line-height: 1;}
+        .use-case-pro .use-case-list li::before { color: var(--android-green); }
+        .use-case-con .use-case-list li::before { color: var(--error-red); }
+        .use-case-list strong { color: var(--text-main); font-weight: 600; }
+
+        /* Contact Block */
+        .contact-block {
+            text-align: center;
+            margin: 4.5rem 0;
+            background: linear-gradient(180deg, rgba(168,199,250,0.05) 0%, rgba(255,255,255,0.01) 100%);
+        }
+        .contact-block h2 { display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+        .contact-block p { margin: 1rem 0 2.5rem; color: var(--text-muted); font-size: 1.1rem;}
+        .contact-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;}
+
+        /* Footer */
+        footer { text-align: center; padding: 3rem 5%; color: var(--text-muted); border-top: 1px solid var(--glass-border); }
+        footer a { color: var(--mcp-purple); text-decoration: none; font-weight: 500; transition: color 0.3s;}
+        footer a:hover { color: var(--text-main); }
+
+        /* Animations */
+        @keyframes drift {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(30px) scale(1.1); }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-bounce-in { animation: bounceIn 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
+        
+        .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
+        .delay-1 { animation-delay: 0.15s; }
+        .delay-2 { animation-delay: 0.3s; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive Breakpoints (Preserved from original) */
+        @media (max-width: 900px) {
+            .metrics-grid, .feature-grid, .use-cases-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 3.2rem; }
+            .contact-links { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
     
@@ -32,7 +373,7 @@
                 <defs>
                     <linearGradient id="logo-grad" x1="4" y1="3" x2="20" y2="20" gradientUnits="userSpaceOnUse">
                         <stop stop-color="#3ddc84"/>
-                        <stop offset="1" stop-color="#7f52ff"/>
+                        <stop offset="1" stop-color="#A8C7FA"/>
                     </linearGradient>
                 </defs>
             </svg>
@@ -80,9 +421,75 @@
                 </div>
             </div>
 
+            <!-- Animated Metaphor: Worker Android Fixing Code -->
+            <div class="metaphor-container fade-in-up delay-2">
+                <svg viewBox="0 0 800 300" class="metaphor-svg" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Abstract Background UI -->
+                    <rect x="50" y="50" width="200" height="200" rx="24" fill="#161C24" stroke="#42474E" stroke-width="2" />
+                    <rect x="70" y="80" width="120" height="12" rx="6" fill="#42474E" class="svg-pulse-code" />
+                    <rect x="70" y="110" width="160" height="12" rx="6" fill="#42474E" class="svg-pulse-code" style="animation-delay: 0.5s;" />
+                    <rect x="70" y="140" width="90" height="12" rx="6" fill="#FFB4AB" class="svg-pulse-code" style="animation-delay: 1s;" />
+                    <path d="M70 180 L140 180 M80 200 L120 200" stroke="#FFB4AB" stroke-width="4" stroke-linecap="round" />
+
+                    <!-- Floating Gear System -->
+                    <g class="svg-gear" style="transform-origin: 650px 100px;">
+                        <circle cx="650" cy="100" r="30" fill="none" stroke="#A8C7FA" stroke-width="8" stroke-dasharray="10 10"/>
+                        <circle cx="650" cy="100" r="15" fill="#A8C7FA" />
+                    </g>
+                    <g class="svg-gear-reverse" style="transform-origin: 700px 160px;">
+                        <circle cx="700" cy="160" r="40" fill="none" stroke="#42474E" stroke-width="8" stroke-dasharray="15 10"/>
+                        <circle cx="700" cy="160" r="20" fill="#42474E" />
+                    </g>
+
+                    <!-- The Worker Robot Container -->
+                    <g class="svg-float">
+                        <!-- Code block being fixed -->
+                        <rect x="350" y="130" width="180" height="120" rx="16" fill="#1A212A" stroke="#3DDC84" stroke-width="3" stroke-dasharray="8 4" />
+                        <rect x="370" y="160" width="140" height="8" rx="4" fill="#3DDC84" />
+                        <rect x="370" y="180" width="100" height="8" rx="4" fill="#3DDC84" />
+                        <rect x="370" y="200" width="120" height="8" rx="4" fill="#3DDC84" />
+
+                        <!-- Robot Base/Body (Overalls) -->
+                        <rect x="250" y="180" width="100" height="120" rx="20" fill="#A8C7FA" />
+                        <!-- Denim Overalls -->
+                        <path d="M 250 220 L 350 220 L 350 300 L 250 300 Z" fill="#062E6F" />
+                        <rect x="265" y="180" width="15" height="40" fill="#062E6F" />
+                        <rect x="320" y="180" width="15" height="40" fill="#062E6F" />
+                        <circle cx="272.5" cy="215" r="4" fill="#FBBF24" />
+                        <circle cx="327.5" cy="215" r="4" fill="#FBBF24" />
+
+                        <!-- Robot Head (Android silhouette) -->
+                        <path d="M 250 160 A 50 50 0 0 1 350 160 Z" fill="#3DDC84" />
+                        <!-- Eyes -->
+                        <g style="transform-origin: 300px 145px;">
+                            <circle cx="280" cy="145" r="6" fill="#0F141A" />
+                            <circle cx="320" cy="145" r="6" fill="#0F141A" />
+                        </g>
+                        <!-- Antennas -->
+                        <line x1="265" y1="120" x2="255" y2="95" stroke="#3DDC84" stroke-width="4" stroke-linecap="round" />
+                        <circle cx="255" cy="95" r="4" fill="#3DDC84" />
+                        <line x1="335" y1="120" x2="345" y2="95" stroke="#3DDC84" stroke-width="4" stroke-linecap="round" />
+                        <circle cx="345" cy="95" r="4" fill="#3DDC84" />
+
+                        <!-- Hard Hat -->
+                        <path d="M 240 125 C 250 90, 350 90, 360 125 L 370 125 L 370 135 L 230 135 Z" fill="#FBBF24" />
+
+                        <!-- Arm holding wrench -->
+                        <path d="M 330 200 Q 380 200 400 170" stroke="#3DDC84" stroke-width="16" fill="none" stroke-linecap="round" />
+                        
+                        <!-- Wrench (Animated) -->
+                        <g class="svg-wrench" style="transform-origin: 400px 165px;">
+                            <rect x="390" y="100" width="16" height="80" rx="4" fill="#C2C7CF" />
+                            <path d="M 380 90 C 380 60, 416 60, 416 90 C 416 100, 380 100, 380 90" fill="none" stroke="#C2C7CF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="398" cy="165" r="6" fill="#0F141A" opacity="0.3" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
+
             <!-- Product Visual Showoff -->
             <div class="product-showcase fade-in-up delay-2">
-                <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img">
+                <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img" onerror="this.style.display='none'">
             </div>
         </section>
 
@@ -167,7 +574,7 @@
                 </div>
                 <div class="glass-card bouncy-card use-case-con">
                     <div class="icon-wrap error-burst">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ff5f56;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--error-red);"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                     </div>
                     <h3>Where It Is Not Needed</h3>
                     <ul class="use-case-list">
@@ -204,6 +611,123 @@
         <p>Built with ❤️ for the Android Community. Open Source on <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank">GitHub</a>.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- INLINED script.js (Exact preservation of your fetch logic and Chart.js animations) -->
+    <script>
+        // Fetch NPM Data for AndroJack-mcp
+        const PACKAGE_NAME = 'androjack-mcp';
+        const API_URL = `https://api.npmjs.org/downloads/range/last-month/${PACKAGE_NAME}`;
+
+        async function fetchMetrics() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // Extract the last 7 days of data for the big counter
+                const downloadsArray = data.downloads;
+                const last7Days = downloadsArray.slice(-7);
+                const weeklyTotal = last7Days.reduce((sum, dayData) => sum + dayData.downloads, 0);
+
+                // Update the DOM counter with an animation
+                const counterElement = document.getElementById('weekly-downloads');
+                animateValue(counterElement, 0, weeklyTotal, 2000); // 2 second animation
+
+                // Prepare data for the Chart (last 30 days)
+                const labels = downloadsArray.map(d => {
+                    const date = new Date(d.day);
+                    return `${date.getMonth() + 1}/${date.getDate()}`; // Format MM/DD
+                });
+                const downloadCounts = downloadsArray.map(d => d.downloads);
+
+                renderChart(labels, downloadCounts);
+
+            } catch (error) {
+                console.error("Failed to fetch NPM metrics:", error);
+                document.getElementById('weekly-downloads').innerText = "Unavailable";
+            }
+        }
+
+        // Animation function for YouTube subscriber-style countdown
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // easeOutQuart for a smooth, slowing down effect
+                const easeOut = 1 - Math.pow(1 - progress, 4);
+                obj.innerHTML = Math.floor(easeOut * (end - start) + start).toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end.toLocaleString();
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            // Create a gradient for the chart line fill
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(168, 199, 250, 0.5)'); // M3 Primary
+            gradient.addColorStop(1, 'rgba(168, 199, 250, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Daily NPM Downloads',
+                        data: data,
+                        borderColor: '#A8C7FA', // M3 Primary
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3DDC84', // Android Green dots
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3DDC84',
+                        fill: true,
+                        tension: 0.4 // Bouncy, smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 33, 42, 0.9)', // M3 Surface Container
+                            titleColor: '#E2E2E9',
+                            bodyColor: '#3DDC84',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: '#C2C7CF', maxTicksLimit: 7 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                            ticks: { color: '#C2C7CF', stepSize: 50 },
+                            beginAtZero: true
+                        }
+                    },
+                    animation: {
+                        y: {
+                            duration: 2000,
+                            easing: 'easeOutElastic' // Bouncy chart render!
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', fetchMetrics);
+    </script>
 </body>
 </html>
