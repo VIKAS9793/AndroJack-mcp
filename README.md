@@ -7,7 +7,7 @@ It is completely isolated from the main Model Context Protocol server codebase (
 ## Stack
 - **HTML5:** Semantic structure and Material 3 Expressive shapes.
 - **CSS3:** Custom properties, CSS grid/flexbox, bouncy micro-animations, and glassmorphism.
-- **JavaScript (Vanilla):** Fetches real-time NPM download metrics (`fetch()`), handles intersection observers array animations, and renders charts via `Chart.js`.
+- **JavaScript (Vanilla):** Fetches raw live npm package and VS Code Marketplace traction data (`fetch()`) and renders compact source-labeled metric cards.
 
 To run this site locally, simply serve the root directory:
 ```bash

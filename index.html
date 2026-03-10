@@ -11,9 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <!-- INLINED & M3E OVERHAULED style.css -->
     <style>
         /* CSS Variables - Upgraded to Material 3 Expressive Dark Theme */
@@ -204,6 +201,105 @@
         .terminal-title { margin-left: auto; margin-right: auto; color: var(--text-muted); font-size: 0.85rem; font-family: 'Fira Code', monospace;}
         .terminal-body { padding: 1.5rem; font-family: 'Fira Code', monospace; font-size: 1.1rem; color: var(--mcp-purple);}
         .prompt { color: var(--text-muted); margin-right: 8px;}
+        .command-list {
+            display: grid;
+            gap: 0.85rem;
+        }
+        .quick-command {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .quick-command .command-label {
+            min-width: 110px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Distribution Paths */
+        .distribution-paths {
+            width: 100%;
+            max-width: 1040px;
+            margin: 0 auto 4rem;
+        }
+        .distribution-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+        .distribution-card {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding: 1.2rem;
+        }
+        .distribution-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+        }
+        .distribution-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .distribution-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        .distribution-icon-npm {
+            background: rgba(203, 56, 55, 0.16);
+            color: #f88379;
+        }
+        .distribution-icon-vscode {
+            background: rgba(0, 122, 204, 0.16);
+            color: #4fc3ff;
+        }
+        .distribution-kicker {
+            display: inline-block;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+        }
+        .distribution-card h3 {
+            font-size: 1.12rem;
+            margin-bottom: 0.15rem;
+        }
+        .distribution-card p {
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+        .distribution-command {
+            font-family: 'Fira Code', monospace;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 0.75rem 0.85rem;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        .distribution-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .distribution-note {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.28;
+        }
 
         /* Animated Worker Metaphor Container */
         .metaphor-container {
@@ -265,14 +361,106 @@
 
         /* Metrics Section */
         .metrics { padding: 4.5rem 0; }
-        .metrics-grid {
+        .traction-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.25rem;
         }
-        .stat-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .stat-card h3 { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1rem; font-weight: 500;}
-        .stat-value { font-size: 4.5rem; font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--mcp-purple); }
+        .traction-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            padding: 1.4rem;
+        }
+        .traction-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .traction-platform {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+        .traction-platform .distribution-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+        }
+        .traction-platform h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.1rem;
+        }
+        .traction-platform p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+        .traction-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.84rem;
+            white-space: nowrap;
+        }
+        .traction-link:hover {
+            color: var(--text-main);
+        }
+        .mini-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+        .mini-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 0.85rem 0.95rem;
+        }
+        .mini-label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.45rem;
+        }
+        .mini-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--mcp-purple);
+            line-height: 1;
+        }
+        .mini-value-small {
+            font-size: 1.2rem;
+        }
+        .traction-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .metrics-source {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .metrics-note {
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .metrics-note strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .distribution-actions .btn,
+        .traction-actions .btn {
+            padding: 0.72rem 1rem;
+            font-size: 0.95rem;
+        }
 
         /* Features */
         .features { padding: 4.5rem 0; }
@@ -348,9 +536,65 @@
 
         /* Responsive Breakpoints (Preserved from original) */
         @media (max-width: 900px) {
-            .metrics-grid, .feature-grid, .use-cases-grid { grid-template-columns: 1fr; }
+            .distribution-grid, .traction-grid, .feature-grid, .use-cases-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 3.2rem; }
             .contact-links { flex-direction: column; }
+        }
+
+        @media (max-width: 640px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+            .nav-links a {
+                margin-left: 0;
+            }
+            .mini-stat-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.6rem;
+            }
+            .mini-value {
+                font-size: 1.45rem;
+            }
+            .mini-value-small {
+                font-size: 1rem;
+            }
+            .quick-command .command-label {
+                min-width: 100%;
+            }
+            .distribution-card,
+            .traction-card {
+                padding: 1.1rem;
+            }
+            .traction-card {
+                gap: 0.7rem;
+                padding: 1rem;
+            }
+            .distribution-head,
+            .traction-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .distribution-command,
+            .mini-stat {
+                width: 100%;
+            }
+            .mini-label {
+                font-size: 0.68rem;
+            }
+            .metrics-source,
+            .metrics-note {
+                font-size: 0.76rem;
+            }
+            .traction-actions .btn {
+                padding: 0.64rem 0.9rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -381,6 +625,7 @@
         </div>
         <div class="nav-links">
             <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank">GitHub</a>
+            <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank">VS Code</a>
             <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="nav-btn">NPM Registry</a>
         </div>
     </nav>
@@ -398,14 +643,17 @@
             </h1>
             
             <p class="hero-subtitle fade-in-up">
-                Equip your AI assistant with live, verified Android knowledge. <br/> Stop hallucinating legacy XML and deprecated APIs.
+                Equip your AI assistant with live, verified Android knowledge. <br/> Install the MCP server from npm or use the VS Code Marketplace wrapper for IDE-native onboarding.
             </p>
 
             <div class="cta-group fade-in-up delay-1">
                 <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="btn btn-primary bounce-hover">
-                    Install Now <span class="arrow">→</span>
+                    Install from npm <span class="arrow">→</span>
                 </a>
-                <a href="#metrics" class="btn btn-secondary bounce-hover">
+                <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="btn btn-secondary bounce-hover">
+                    Install in VS Code
+                </a>
+                <a href="#metrics" class="btn btn-outline bounce-hover">
                     View Live Metrics
                 </a>
             </div>
@@ -414,10 +662,63 @@
             <div class="terminal-card fade-in-up delay-2">
                 <div class="terminal-header">
                     <div class="dots"><span></span><span></span><span></span></div>
-                    <div class="terminal-title">Quick Start</div>
+                    <div class="terminal-title">Install Paths</div>
                 </div>
                 <div class="terminal-body">
-                    <code><span class="prompt">$</span> npx androjack-mcp install</code>
+                    <div class="command-list">
+                        <div class="quick-command">
+                            <span class="command-label">npm install</span>
+                            <code><span class="prompt">$</span> npx androjack-mcp install</code>
+                        </div>
+                        <div class="quick-command">
+                            <span class="command-label">VS Code</span>
+                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="distribution-paths fade-in-up delay-2">
+                <div class="distribution-grid">
+                    <article class="glass-card distribution-card bouncy-card">
+                        <div class="distribution-head">
+                            <div class="distribution-icon distribution-icon-npm" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 7.2v9.6h9.2v-7H16v7h5V7.2H3Z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="distribution-kicker">Core MCP Server</span>
+                                <h3>Install from npm</h3>
+                                <p>Best for Claude Desktop, Cursor, Windsurf, Kiro, and direct MCP installs.</p>
+                            </div>
+                        </div>
+                        <div class="distribution-command">npx androjack-mcp install</div>
+                        <div class="distribution-actions">
+                            <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="btn btn-primary">Open npm Package</a>
+                        </div>
+                        <div class="distribution-note">Use the raw MCP server and installer flow.</div>
+                    </article>
+
+                    <article class="glass-card distribution-card bouncy-card">
+                        <div class="distribution-head">
+                            <div class="distribution-icon distribution-icon-vscode" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.08 2.5 7.07 11.09 4.24 8.93 2 10.61l3.53 3.23L2 17.08l2.23 1.67 2.82-2.16 9.03 8.61 5.92-2.27V4.77L16.08 2.5Zm.92 4.27v12.46l-6.1-5.39 6.1-7.07Z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="distribution-kicker">IDE Wrapper</span>
+                                <h3>Install in VS Code</h3>
+                                <p>Best for developers who want Marketplace install, updates, and IDE-native discovery.</p>
+                            </div>
+                        </div>
+                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode</div>
+                        <div class="distribution-actions">
+                            <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="btn btn-secondary">Open VS Code Marketplace</a>
+                        </div>
+                        <div class="distribution-note">The same AndroJack MCP server, packaged for VS Code.</div>
+                    </article>
                 </div>
             </div>
 
@@ -497,19 +798,77 @@
         <section id="metrics" class="metrics">
             <div class="section-header">
                 <h2>Product <span class="text-gradient">Traction</span></h2>
-                <p>Live data pulled directly from the official NPM Registry.</p>
+                <p>Raw values fetched live from the official npm Registry and VS Code Marketplace APIs.</p>
             </div>
-            
-            <div class="metrics-grid">
-                <div class="glass-card stat-card bouncy-card">
-                    <h3>Downloads (Last 7 Days)</h3>
-                    <div class="stat-value" id="weekly-downloads">Loading...</div>
-                </div>
-                <!-- Chart Card -->
-                <div class="glass-card chart-card bouncy-card">
-                    <canvas id="growthChart"></canvas>
-                </div>
+
+            <div class="traction-grid">
+                <article class="glass-card traction-card bouncy-card">
+                    <div class="traction-header">
+                        <div class="traction-platform">
+                            <div class="distribution-icon distribution-icon-npm" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 7.2v9.6h9.2v-7H16v7h5V7.2H3Z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>npm Registry</h3>
+                                <p>Core MCP package traction</p>
+                            </div>
+                        </div>
+                        <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="traction-link">Open package</a>
+                    </div>
+                    <div class="mini-stat-grid">
+                        <div class="mini-stat">
+                            <span class="mini-label">Official 7-day total</span>
+                            <div class="mini-value" id="weekly-downloads">Loading...</div>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="mini-label">Published version</span>
+                            <div class="mini-value mini-value-small" id="npm-version">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="traction-actions">
+                        <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="btn btn-primary">Install from npm</a>
+                    </div>
+                    <div class="metrics-source">Source: npm downloads API plus npm latest package metadata.</div>
+                </article>
+
+                <article class="glass-card traction-card bouncy-card">
+                    <div class="traction-header">
+                        <div class="traction-platform">
+                            <div class="distribution-icon distribution-icon-vscode" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.08 2.5 7.07 11.09 4.24 8.93 2 10.61l3.53 3.23L2 17.08l2.23 1.67 2.82-2.16 9.03 8.61 5.92-2.27V4.77L16.08 2.5Zm.92 4.27v12.46l-6.1-5.39 6.1-7.07Z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>VS Code Marketplace</h3>
+                                <p>Wrapper extension traction</p>
+                            </div>
+                        </div>
+                        <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="traction-link">Open listing</a>
+                    </div>
+                    <div class="mini-stat-grid">
+                        <div class="mini-stat">
+                            <span class="mini-label">Official total installs</span>
+                            <div class="mini-value" id="vscode-downloads">Loading...</div>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="mini-label">Published version</span>
+                            <div class="mini-value mini-value-small" id="vscode-version">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="traction-actions">
+                        <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="btn btn-secondary">Install in VS Code</a>
+                    </div>
+                    <div class="metrics-source">Source: official VS Code Marketplace extension query API.</div>
+                </article>
             </div>
+            <div class="metrics-note">
+                <strong>No projections or smoothing.</strong> npm shows the official last-7-days total, VS Code shows the official Marketplace <code>downloadCount</code>, and both values refresh directly from their source APIs.
+                <span id="metrics-refreshed">Refreshing now.</span>
+            </div>
+
         </section>
 
         <!-- Value Props -->
@@ -613,121 +972,114 @@
 
     <!-- INLINED script.js (Exact preservation of your fetch logic and Chart.js animations) -->
     <script>
-        // Fetch NPM Data for AndroJack-mcp
-        const PACKAGE_NAME = 'androjack-mcp';
-        const API_URL = `https://api.npmjs.org/downloads/range/last-month/${PACKAGE_NAME}`;
+        const NPM_PACKAGE_NAME = 'androjack-mcp';
+        const NPM_DOWNLOADS_URL = `https://api.npmjs.org/downloads/range/last-month/${NPM_PACKAGE_NAME}`;
+        const NPM_LATEST_URL = `https://registry.npmjs.org/${NPM_PACKAGE_NAME}/latest`;
+        const VSCODE_EXTENSION_ID = 'VIKAS9793.androjack-vscode';
+        const VSCODE_QUERY_URL = 'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery';
 
-        async function fetchMetrics() {
+        function setMetricNumber(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            if (!Number.isFinite(value) || value < 0) {
+                element.textContent = 'Unavailable';
+                return;
+            }
+            element.textContent = Math.round(value).toLocaleString();
+        }
+
+        function setMetricText(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.textContent = value || 'Unavailable';
+        }
+
+        function updateMetricsRefreshed() {
+            const refreshed = document.getElementById('metrics-refreshed');
+            if (!refreshed) return;
+            const now = new Date();
+            refreshed.textContent = `Last refreshed: ${now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`;
+        }
+
+        async function fetchNpmMetrics() {
             try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                // Extract the last 7 days of data for the big counter
-                const downloadsArray = data.downloads;
+                const [downloadsResponse, latestResponse] = await Promise.all([
+                    fetch(NPM_DOWNLOADS_URL, { cache: 'no-store' }),
+                    fetch(NPM_LATEST_URL, { cache: 'no-store' })
+                ]);
+
+                if (!downloadsResponse.ok || !latestResponse.ok) {
+                    throw new Error('Failed to fetch npm metrics');
+                }
+
+                const [downloadsData, latestData] = await Promise.all([
+                    downloadsResponse.json(),
+                    latestResponse.json()
+                ]);
+                const downloadsArray = downloadsData.downloads || [];
                 const last7Days = downloadsArray.slice(-7);
                 const weeklyTotal = last7Days.reduce((sum, dayData) => sum + dayData.downloads, 0);
 
-                // Update the DOM counter with an animation
-                const counterElement = document.getElementById('weekly-downloads');
-                animateValue(counterElement, 0, weeklyTotal, 2000); // 2 second animation
-
-                // Prepare data for the Chart (last 30 days)
-                const labels = downloadsArray.map(d => {
-                    const date = new Date(d.day);
-                    return `${date.getMonth() + 1}/${date.getDate()}`; // Format MM/DD
-                });
-                const downloadCounts = downloadsArray.map(d => d.downloads);
-
-                renderChart(labels, downloadCounts);
-
+                setMetricNumber('weekly-downloads', weeklyTotal);
+                setMetricText('npm-version', latestData.version ? `v${latestData.version}` : null);
             } catch (error) {
-                console.error("Failed to fetch NPM metrics:", error);
-                document.getElementById('weekly-downloads').innerText = "Unavailable";
+                console.error('Failed to fetch npm metrics:', error);
+                setMetricText('weekly-downloads', 'Unavailable');
+                setMetricText('npm-version', 'Unavailable');
             }
         }
 
-        // Animation function for YouTube subscriber-style countdown
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                // easeOutQuart for a smooth, slowing down effect
-                const easeOut = 1 - Math.pow(1 - progress, 4);
-                obj.innerHTML = Math.floor(easeOut * (end - start) + start).toLocaleString();
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
-                    obj.innerHTML = end.toLocaleString();
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        function renderChart(labels, data) {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            
-            // Create a gradient for the chart line fill
-            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(168, 199, 250, 0.5)'); // M3 Primary
-            gradient.addColorStop(1, 'rgba(168, 199, 250, 0.0)');
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Daily NPM Downloads',
-                        data: data,
-                        borderColor: '#A8C7FA', // M3 Primary
-                        backgroundColor: gradient,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#3DDC84', // Android Green dots
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#3DDC84',
-                        fill: true,
-                        tension: 0.4 // Bouncy, smooth curves
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(26, 33, 42, 0.9)', // M3 Surface Container
-                            titleColor: '#E2E2E9',
-                            bodyColor: '#3DDC84',
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false
-                        }
+        async function fetchVsCodeMetrics() {
+            try {
+                const response = await fetch(VSCODE_QUERY_URL, {
+                    method: 'POST',
+                    cache: 'no-store',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json;api-version=7.2-preview.1;excludeUrls=true',
+                        'X-Market-Client-Id': 'VSCode 1.0'
                     },
-                    scales: {
-                        x: {
-                            grid: { display: false, drawBorder: false },
-                            ticks: { color: '#C2C7CF', maxTicksLimit: 7 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                            ticks: { color: '#C2C7CF', stepSize: 50 },
-                            beginAtZero: true
-                        }
-                    },
-                    animation: {
-                        y: {
-                            duration: 2000,
-                            easing: 'easeOutElastic' // Bouncy chart render!
-                        }
-                    }
+                    body: JSON.stringify({
+                        filters: [{
+                            criteria: [{ filterType: 7, value: VSCODE_EXTENSION_ID }],
+                            pageNumber: 1,
+                            pageSize: 1,
+                            sortBy: 0,
+                            sortOrder: 0
+                        }],
+                        assetTypes: [],
+                        flags: 914
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Marketplace request failed with ${response.status}`);
                 }
-            });
+
+                const data = await response.json();
+                const extension = data.results?.[0]?.extensions?.[0];
+                const installCount = extension?.statistics?.find(
+                    statistic => statistic.statisticName === 'downloadCount'
+                )?.value;
+                const version = extension?.versions?.[0]?.version;
+
+                setMetricNumber('vscode-downloads', installCount);
+                setMetricText('vscode-version', version ? `v${version}` : null);
+            } catch (error) {
+                console.error('Failed to fetch VS Code Marketplace metrics:', error);
+                setMetricText('vscode-downloads', 'Unavailable');
+                setMetricText('vscode-version', 'Unavailable');
+            }
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', fetchMetrics);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await Promise.allSettled([
+                fetchNpmMetrics(),
+                fetchVsCodeMetrics()
+            ]);
+            updateMetricsRefreshed();
+        });
     </script>
 </body>
 </html>
