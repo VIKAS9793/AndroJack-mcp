@@ -35,6 +35,10 @@
 [![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%22%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
+**VS Code distribution:** AndroJack MCP is also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode). The `VS Code` badge above always reflects the currently published Marketplace version.
+
+**PM / APM docs:** Product strategy, JTBD, personas, roadmap, user stories, competitive analysis, and GTM materials now live under [product-management/README.md](product-management/README.md).
+
 <br/>
 
 **Also works with:** Windsurf · VS Code Copilot · Google Antigravity · JetBrains AI — see [Manual Config](#-manual-config--copy--paste) below ↓
