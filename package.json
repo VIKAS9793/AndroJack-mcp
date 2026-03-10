@@ -1,8 +1,8 @@
 {
   "name": "androjack-vscode",
-  "displayName": "AndroJack MCP: AI Android Verify",
-  "description": "The Jack of All Android Trades. Live verification and documentation grounding for Android development.",
-  "version": "1.5.3",
+  "displayName": "AndroJack MCP for VS Code",
+  "description": "VS Code Marketplace wrapper for the AndroJack MCP server with verified Android documentation grounding.",
+  "version": "1.5.4",
   "publisher": "VIKAS9793",
   "repository": {
     "type": "git",

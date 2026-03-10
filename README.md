@@ -1,11 +1,15 @@
-# AndroJack AI: VS Code Extension 🤖🛡️
+# AndroJack MCP for VS Code 🤖🛡️
 
-**The Elite Android Staff Engineer for your IDE.**
+[![Version 1.5.4](https://img.shields.io/badge/version-1.5.4-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 
-AndroJack MCP is a high-fidelity Model Context Protocol (MCP) server that brings 2026 Android development standards, API 36 (Android 16) compliance, and deep architectural insights directly to your VS Code AI tools (Copilot, Claude, etc.).
+**The VS Code Marketplace wrapper for the AndroJack MCP server.**
+
+AndroJack MCP is a documentation-grounded Android engineering MCP server. This extension is the VS Code distribution layer for that same server, so AndroJack can be installed through both the npm registry and the VS Code Marketplace without splitting the product identity.
+
+Install the extension in VS Code, or use the npm package directly in other MCP clients. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
 
 ## 🚀 Why AndroJack?
-Stop relying on AI models trained on outdated data. AndroJack grounds your AI in real-time, verified Android documentation and "Elite Staff Engineer" best practices.
+Stop relying on AI models trained on outdated data. AndroJack grounds your AI assistant in real-time, verified Android documentation and modern Android engineering practices.
 
 - **Zero Config**: No manual `mcp.json` editing. Just install the extension and the tools are available.
 - **API 16 (Android 16) Ready**: Validates orientation locks, resizability, and predictive back requirements.
@@ -43,7 +47,7 @@ Have a question, found a bug, or have a feature request?
 
 ## 👥 Authorship & Ownership
 
-**AndroJack AI: VS Code Extension** is a collaborative effort between human product vision and AI engineering excellence.
+**AndroJack MCP for VS Code** is the VS Code extension wrapper for the broader AndroJack MCP product.
 
 *   **Vikas Sahani** — [Product Lead](https://www.linkedin.com/in/vikas-sahani-727420358) (`vikassahani17@gmail.com`)
 *   **Antigravity AI** — AI Engineering Lead
