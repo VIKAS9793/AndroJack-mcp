@@ -18,6 +18,7 @@
 <br/>
 
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
+[![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
@@ -28,6 +29,7 @@
 
 ### 🚀 One-Click Install
 
+[![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwIl19)
 [![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3AiXX0=)
 [![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%22%5D%7D)
