@@ -13,6 +13,8 @@
 [![Official Product Page](https://img.shields.io/badge/Product-Landing%20Page-00C7B7?style=for-the-badge)](https://androjack-web.netlify.app/)
 [![Watch AndroJack in Action on YouTube](https://img.shields.io/badge/YouTube-Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/O2aFyObV-B0)
 
+> **🚀 PROSPECTIVE APMS & PMs: For full product management frameworks docs refer:** [`/docs/product-management/`](/docs/product-management/)
+
 ### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
 
 <br/>

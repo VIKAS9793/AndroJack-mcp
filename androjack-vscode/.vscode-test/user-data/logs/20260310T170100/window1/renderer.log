@@ -1,0 +1,11 @@
+2026-03-10 17:01:01.860 [info] Started local extension host with pid 11072.
+2026-03-10 17:01:01.871 [info] Loading development extension at c:\Users\vikas\Downloads\AndroJack-mcp\androjack-vscode
+2026-03-10 17:01:02.296 [info] MCP Registry configured: https://api.mcp.github.com
+2026-03-10 17:01:02.334 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-03-10 17:01:02.843 [info] [0m%s%s[0m  
+2026-03-10 17:01:02.844 [info] [0m%s%s[0m    Extension Test Suite
+2026-03-10 17:01:02.857 [info]   [32m  ✔[0m[90m %s[0m Extension should be present
+2026-03-10 17:01:02.862 [info] AndroJack MCP extension is now active!
+2026-03-10 17:01:02.866 [info]   [32m  ✔[0m[90m %s[0m Extension should activate
+2026-03-10 17:01:02.871 [info]   [32m  ✔[0m[90m %s[0m MCP Provider should be registered
+2026-03-10 17:01:02.872 [info] [92m [0m[32m %d passing[0m[90m (%s)[0m 3 25ms

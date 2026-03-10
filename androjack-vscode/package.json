@@ -1,0 +1,62 @@
+{
+  "name": "androjack-vscode",
+  "displayName": "AndroJack MCP: AI Android Verify",
+  "description": "The Jack of All Android Trades. Live verification and documentation grounding for Android development.",
+  "version": "1.5.1",
+  "publisher": "VIKAS9793",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "android",
+    "mcp",
+    "ai",
+    "kotlin",
+    "compose"
+  ],
+  "activationEvents": [
+    "onLanguageModel"
+  ],
+  "ai": {
+    "tools": true
+  },
+  "main": "./dist/extension.js",
+  "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "androjack",
+        "label": "AndroJack MCP: Verified Android Docs"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.3",
+    "glob": "^13.0.6",
+    "mocha": "^11.3.0",
+    "serialize-javascript": "^7.0.4",
+    "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "diff": "^5.2.0",
+    "serialize-javascript": "^7.0.4"
+  }
+}

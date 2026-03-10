@@ -1,0 +1,5 @@
+2026-03-10 16:58:21.385 [error] Error: Error mutex already exists
+    at ls.installMutex (file:///C:/Users/vikas/AppData/Local/Programs/Microsoft%20VS%20Code/ce099c1ed2/resources/app/out/main.js:550:23404)
+2026-03-10 16:58:21.402 [info] update#setState disabled
+2026-03-10 16:58:21.402 [info] update#ctor - updates are disabled by the environment
+2026-03-10 16:58:23.397 [info] Extension host with pid 12036 exited with code: 0, signal: unknown.
