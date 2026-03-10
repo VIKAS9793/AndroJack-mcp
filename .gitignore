@@ -1,0 +1,25 @@
+# VS Code Extension Build
+out/
+dist/
+node_modules/
+.vscode-test/
+*.vsix
+**/*.map
+
+# Build Artifacts
+build/
+*.tsbuildinfo
+*.tgz
+
+# MCP / Genkit
+.genkit/
+_mcp_test/
+_mcp_comparison/
+_test_playground/
+
+# Environment / OS
+.env
+.env.local
+.DS_Store
+Thumbs.db
+.history/
