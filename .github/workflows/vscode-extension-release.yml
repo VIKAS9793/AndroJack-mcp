@@ -1,0 +1,93 @@
+name: VS Code Extension Release
+
+on:
+  pull_request:
+    branches:
+      - feature/vscode-extension
+  push:
+    branches:
+      - feature/vscode-extension
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile test output
+        run: npm run compile
+
+      - name: Run extension tests
+        run: npm test
+
+      - name: Package VSIX
+        run: npm run package:vsix
+
+      - name: Validate packaged README asset
+        run: npm run verify:vsix
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag version v$TAG_VERSION does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      - name: Compile test output
+        run: npm run compile
+
+      - name: Run extension tests
+        run: npm test
+
+      - name: Package VSIX
+        run: npm run package:vsix
+
+      - name: Validate packaged README asset
+        run: npm run verify:vsix
+
+      - name: Resolve package path
+        shell: bash
+        run: |
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "PACKAGE_PATH=./${NAME}-${VERSION}.vsix" >> "$GITHUB_ENV"
+
+      - name: Publish to Visual Studio Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --packagePath "$PACKAGE_PATH"

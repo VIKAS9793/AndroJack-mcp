@@ -1,6 +1,9 @@
 .vscode/**
 .vscode-test/**
+.github/**
+docs/**
 out/**
+scripts/**
 src/**
 .gitignore
 tsconfig.json
