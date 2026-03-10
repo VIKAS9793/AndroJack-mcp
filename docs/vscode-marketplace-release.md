@@ -15,13 +15,21 @@ Use `feature/vscode-extension` as the source branch for the VS Code extension re
    - `code --install-extension ./androjack-vscode-<version>.vsix --force`
 6. Open the extension details page in VS Code and confirm the README renders.
 
-## Marketplace publish steps
+## Marketplace upload steps
+
+1. Bump `package.json` to the next patch version before packaging.
+2. Build and validate the release archive.
+   - `npm run release:manual`
+3. Upload the generated `androjack-vscode-<version>.vsix` to the Marketplace using your manual publisher flow.
+4. Confirm the Marketplace version matches the local package version.
+5. Reinstall or update from the Marketplace if VS Code is still pinned to an older local install.
+
+## Optional token-based publish
+
+If you later switch back to CLI publishing:
 
 1. Export a Visual Studio Marketplace personal access token as `VSCE_PAT`.
-2. Publish from the extension branch after the VSIX passes validation.
-   - `npm run publish:marketplace`
-3. Confirm the Marketplace version matches the local package version.
-4. Reinstall or update from the Marketplace if VS Code is still pinned to an older local install.
+2. Run `npm run publish:marketplace`.
 
 ## Expected release artifacts
 

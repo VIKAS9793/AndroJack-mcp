@@ -2,7 +2,7 @@
   "name": "androjack-vscode",
   "displayName": "AndroJack MCP: AI Android Verify",
   "description": "The Jack of All Android Trades. Live verification and documentation grounding for Android development.",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "publisher": "VIKAS9793",
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
     "package:vsix": "npx @vscode/vsce package --githubBranch feature/vscode-extension",
     "verify:vsix": "node ./scripts/validate-vsix.mjs",
     "release:check": "npm run package:vsix && npm run verify:vsix",
+    "release:manual": "npm run release:check",
     "publish:marketplace": "npm run release:check && node ./scripts/publish-marketplace.mjs",
     "test": "node ./out/test/runTest.js"
   },

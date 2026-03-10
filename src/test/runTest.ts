@@ -11,14 +11,16 @@ async function main() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
-		// Download VS Code, unzip it and run the integration test
-        const vscodeExecutablePath = 'C:\\Users\\vkas\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe'.replace('vkas', process.env.USERNAME || 'vikas');
-		await runTests({ 
-            extensionDevelopmentPath, 
-            extensionTestsPath,
-            vscodeExecutablePath
-        });
+		// Let @vscode/test-electron download a platform-appropriate VS Code build
+		// unless the environment explicitly provides one.
+		const vscodeExecutablePath = process.env.VSCODE_EXECUTABLE_PATH;
+		await runTests({
+			extensionDevelopmentPath,
+			extensionTestsPath,
+			...(vscodeExecutablePath ? { vscodeExecutablePath } : {})
+		});
 	} catch (err) {
+		console.error('Test error:', err);
 		console.error('Failed to run tests');
 		process.exit(1);
 	}
