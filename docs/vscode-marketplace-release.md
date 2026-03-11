@@ -4,24 +4,26 @@ Use `feature/vscode-extension` as the source branch for the VS Code extension re
 
 ## Local release steps
 
-1. Switch to the extension branch.
+1. Publish the MCP server to npm first.
+   - Confirm `androjack-mcp@<version>` is live before touching the wrapper pin.
+2. Switch to the extension branch or its dedicated worktree.
    - `git switch feature/vscode-extension`
-2. Update `package.json` version and any README changes for the release.
-3. Package the VSIX.
+3. Update `package.json`, `src/extension.ts`, and `README.md` for the exact pinned MCP version.
+4. Package the VSIX.
    - `npm run package:vsix`
-4. Validate that the packaged VSIX exposes the README to Marketplace and VS Code.
+5. Validate that the packaged VSIX exposes the README to Marketplace and VS Code.
    - `npm run verify:vsix`
-5. Replace the local install with the packaged VSIX.
+6. Replace the local install with the packaged VSIX.
    - `code --install-extension ./androjack-vscode-<version>.vsix --force`
-6. Open the extension details page in VS Code and confirm the README renders.
+7. Open the extension details page in VS Code and confirm the README renders and the icon is visible.
 
 ## Marketplace upload steps
 
-1. Bump `package.json` to the next patch version before packaging.
+1. Keep the wrapper version aligned with the pinned MCP version for the release.
 2. Build and validate the release archive.
    - `npm run release:manual`
 3. Upload the generated `androjack-vscode-<version>.vsix` to the Marketplace using your manual publisher flow.
-4. Confirm the Marketplace version matches the local package version.
+4. Confirm the Marketplace version matches the local package version and the listing no longer shows the default puzzle-piece icon.
 5. Reinstall or update from the Marketplace if VS Code is still pinned to an older local install.
 
 ## Optional token-based publish
@@ -35,6 +37,7 @@ If you later switch back to CLI publishing:
 
 - `androjack-vscode-<version>.vsix` exists at the repo root.
 - The VSIX contains the packaged README asset at `extension/readme.md`.
+- The VSIX contains `extension/assets/marketplace-icon.png`.
 - `.vsixmanifest` contains `Microsoft.VisualStudio.Services.Content.Details` pointing to the packaged README asset.
 
 ## Post-publish verification
@@ -43,3 +46,4 @@ If you later switch back to CLI publishing:
 2. Install the published extension into a clean VS Code profile.
 3. Confirm the installed extension directory includes the packaged README file.
 4. Confirm the extension details view does not show `No README available.`
+5. Confirm the extension list/details view shows the packaged icon instead of the default puzzle-piece glyph.

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('AndroJack MCP extension is now active!');
@@ -11,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Provide a static definition referencing our single configured server
             return [{
                 command: 'npx',
-                args: ['-y', 'androjack-mcp'],
+                args: ['-y', 'androjack-mcp@1.6.0'],
                 env: { ...process.env } as Record<string, string>,
                 stderr: 'inherit',
                 label: 'AndroJack MCP: Verified Android Docs'
@@ -31,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             return {
                 command: 'npx',
-                args: ['-y', 'androjack-mcp'],
+                args: ['-y', 'androjack-mcp@1.6.0'],
                 env: safeEnv,
                 // Allow standard error tracking
                 stderr: 'inherit',

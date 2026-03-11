@@ -2,8 +2,9 @@
   "name": "androjack-vscode",
   "displayName": "AndroJack MCP for VS Code",
   "description": "VS Code Marketplace wrapper for the AndroJack MCP server with verified Android documentation grounding.",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "publisher": "VIKAS9793",
+  "icon": "assets/marketplace-icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
