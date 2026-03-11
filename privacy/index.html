@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AndroJack MCP Privacy Policy</title>
+    <meta name="description" content="Privacy policy for the AndroJack MCP website, npm package, and local MCP server workflow.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f141a;
+            --surface: #1a212a;
+            --outline: rgba(194, 199, 207, 0.14);
+            --text-main: #e2e2e9;
+            --text-muted: #c2c7cf;
+            --android-green: #3ddc84;
+            --primary: #a8c7fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(61, 220, 132, 0.12), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(168, 199, 250, 0.14), transparent 35%),
+                var(--bg-dark);
+            color: var(--text-main);
+            font-family: "Roboto Flex", sans-serif;
+            line-height: 1.7;
+            padding: 0 24px 48px;
+        }
+
+        a {
+            color: var(--primary);
+        }
+
+        .page {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 24px 0 18px;
+        }
+
+        .brand {
+            font-family: "Outfit", sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .toplinks {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .toplinks a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .hero {
+            padding: 28px 0 22px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(61, 220, 132, 0.10);
+            border: 1px solid rgba(61, 220, 132, 0.25);
+            color: var(--android-green);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3 {
+            font-family: "Outfit", sans-serif;
+            letter-spacing: -0.03em;
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 5vw, 4.4rem);
+            line-height: 1.03;
+            margin-bottom: 14px;
+        }
+
+        .lead {
+            max-width: 760px;
+            color: var(--text-muted);
+            font-size: 1.08rem;
+        }
+
+        .meta {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .meta-card,
+        .section-card {
+            background: rgba(26, 33, 42, 0.92);
+            border: 1px solid var(--outline);
+            border-radius: 24px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+
+        .meta-card {
+            padding: 18px 20px;
+        }
+
+        .meta-card .label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .meta-card .value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .content {
+            display: grid;
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        .section-card {
+            padding: 24px;
+        }
+
+        .section-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+        }
+
+        .section-card h3 {
+            font-size: 1.02rem;
+            margin: 18px 0 8px;
+        }
+
+        .section-card p + p {
+            margin-top: 12px;
+        }
+
+        .section-card ul {
+            margin: 12px 0 0 20px;
+        }
+
+        .section-card li + li {
+            margin-top: 8px;
+        }
+
+        .callout {
+            margin-top: 16px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(168, 199, 250, 0.08);
+            border: 1px solid rgba(168, 199, 250, 0.18);
+            color: var(--text-muted);
+        }
+
+        .foot {
+            margin-top: 28px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 0 16px 32px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-card,
+            .meta-card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <a class="brand" href="/">AndroJack MCP</a>
+            <nav class="toplinks" aria-label="Privacy page links">
+                <a href="/">Home</a>
+                <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank" rel="noreferrer">GitHub</a>
+                <a href="mailto:vikassahani17@gmail.com">Contact</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div class="eyebrow">Privacy Policy</div>
+                <h1>How AndroJack handles data</h1>
+                <p class="lead">
+                    AndroJack is designed to run as a local MCP server. This page explains what the static website does,
+                    what the MCP server does, what data is not collected by AndroJack-owned services, and which third-party
+                    services may still receive standard network requests when you use the product.
+                </p>
+
+                <div class="meta">
+                    <div class="meta-card">
+                        <span class="label">Effective date</span>
+                        <span class="value">March 11, 2026</span>
+                    </div>
+                    <div class="meta-card">
+                        <span class="label">Applies to</span>
+                        <span class="value">Website, npm package, MCP server, and VS Code wrapper</span>
+                    </div>
+                    <div class="meta-card">
+                        <span class="label">Contact</span>
+                        <span class="value">vikassahani17@gmail.com</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content" aria-label="Privacy policy sections">
+                <article class="section-card">
+                    <h2>1. Core principle</h2>
+                    <p>
+                        AndroJack does not run a proprietary cloud backend for MCP tool execution. The MCP server runs on
+                        the user's machine and makes direct requests only to allowlisted documentation and artifact sources
+                        needed to answer the current query.
+                    </p>
+                    <p>
+                        AndroJack does not require users to create an account, sign in, provide an API key, or connect a
+                        paid cloud service to use the local MCP server.
+                    </p>
+                    <div class="callout">
+                        No AndroJack-owned service receives your project files, prompts, or generated code as part of normal
+                        MCP server usage.
+                    </div>
+                </article>
+
+                <article class="section-card">
+                    <h2>2. What this website collects</h2>
+                    <p>
+                        This website is a static marketing and documentation site. It does not embed custom analytics,
+                        session replay scripts, advertising trackers, or first-party login systems.
+                    </p>
+                    <p>
+                        The landing page fetches public package metrics directly from npm and the Visual Studio Marketplace
+                        to display current install traction. Those requests are made from the visitor's browser to public APIs.
+                    </p>
+                    <h3>What may still be processed</h3>
+                    <ul>
+                        <li>Standard HTTP request data handled by the hosting provider, such as IP address, user agent, and request timestamps.</li>
+                        <li>Browser requests to third-party services you choose to open, such as GitHub, npm, or the VS Code Marketplace.</li>
+                        <li>Public metrics API requests made client-side to render live install and version cards.</li>
+                    </ul>
+                </article>
+
+                <article class="section-card">
+                    <h2>3. What the MCP server does</h2>
+                    <p>
+                        When you use AndroJack as an MCP server, it performs documentation grounding and validation locally.
+                        It may fetch allowlisted pages or artifact metadata from sources such as Android Developers, Kotlin
+                        documentation, Google issue trackers, Google Maven, and Maven Central.
+                    </p>
+                    <p>
+                        The server uses in-memory caching, per-process rate limiting, and cached <code>robots.txt</code>
+                        handling with <code>Crawl-delay</code> support to reduce repeated traffic and respect documented host pacing.
+                    </p>
+                    <p>
+                        Because the server uses public documentation and artifact sources, no separate AndroJack test account
+                        or credential set is required for product review.
+                    </p>
+                    <h3>What AndroJack does not do</h3>
+                    <ul>
+                        <li>It does not upload your repository to an AndroJack-operated API.</li>
+                        <li>It does not require an AndroJack account, auth token, or API key.</li>
+                        <li>It does not persist prompts, tool output, or project code beyond the lifetime of the running process.</li>
+                        <li>It does not access arbitrary domains; network access is restricted to allowlisted sources.</li>
+                    </ul>
+                </article>
+
+                <article class="section-card">
+                    <h2>4. Third-party services you may interact with</h2>
+                    <p>
+                        Using AndroJack can still involve third-party services outside of AndroJack's control. Their privacy
+                        practices apply to your interactions with them.
+                    </p>
+                    <ul>
+                        <li><strong>Netlify</strong> hosts this website.</li>
+                        <li><strong>npm</strong> distributes the MCP package and provides public package metadata.</li>
+                        <li><strong>Visual Studio Marketplace</strong> distributes the VS Code wrapper and public listing data.</li>
+                        <li><strong>GitHub</strong> hosts the source repository, issues, and discussions.</li>
+                        <li><strong>Official Android and Kotlin documentation and artifact hosts</strong> receive the direct documentation fetches needed for MCP tool results.</li>
+                    </ul>
+                </article>
+
+                <article class="section-card">
+                    <h2>5. Cookies, tracking, and retention</h2>
+                    <p>
+                        This site does not intentionally set custom tracking cookies or operate a user profile database.
+                        If you interact with third-party services linked from the site, those services may set their own cookies
+                        according to their policies.
+                    </p>
+                    <p>
+                        MCP server responses are cached in memory only for short-lived operational purposes and are discarded
+                        when the running process exits.
+                    </p>
+                </article>
+
+                <article class="section-card">
+                    <h2>6. Security and contact</h2>
+                    <p>
+                        If you have privacy questions, want to report a security concern, or believe this page is inaccurate,
+                        contact the project owner at <a href="mailto:vikassahani17@gmail.com">vikassahani17@gmail.com</a>.
+                    </p>
+                    <p>
+                        Product and source updates are tracked publicly at
+                        <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank" rel="noreferrer">github.com/VIKAS9793/AndroJack-mcp</a>.
+                    </p>
+                </article>
+            </section>
+        </main>
+
+        <footer class="foot">
+            <p>AndroJack MCP Privacy Policy</p>
+        </footer>
+    </div>
+</body>
+</html>
