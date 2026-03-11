@@ -3,6 +3,7 @@
   "version": "1.6.0",
   "mcpName": "io.github.vikas9793/androjack-mcp",
   "files": [
+    "assets/icon.png",
     "build/",
     "src/",
     "config/",
@@ -46,6 +47,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node build/index.js",
+    "connector:validate": "npm run build && node ./scripts/check-connector-readiness.mjs && node ./scripts/build-connector-bundle.mjs validate",
+    "connector:pack": "npm run build && node ./scripts/check-connector-readiness.mjs && node ./scripts/build-connector-bundle.mjs pack",
+    "connector:info": "node ./scripts/build-connector-bundle.mjs info",
     "install-mcp": "node build/install.js install",
     "install-mcp:auto": "node build/install.js install --auto",
     "install-mcp:list": "node build/install.js install --list",

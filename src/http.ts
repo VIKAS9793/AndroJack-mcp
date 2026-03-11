@@ -73,9 +73,186 @@ const MAX_BODY_BYTES = 4 * 1024 * 1024;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 const MAX_RETRIES = 2;
 const RETRY_BASE_MS = 800;
+const ROBOTS_CACHE_TTL_MS = 60 * 60 * 1000;
+const ROBOTS_AGENT_NAME = USER_AGENT.split("/")[0]!.trim().toLowerCase();
+
+type RobotsPolicy = {
+  allowPrefixes: string[];
+  disallowPrefixes: string[];
+  crawlDelayMs?: number;
+};
+
+type CachedRobotsPolicy = {
+  policy: RobotsPolicy;
+  expiresAt: number;
+};
+
+const robotsPolicyCache = new Map<string, CachedRobotsPolicy>();
+const robotsNextAllowedAt = new Map<string, number>();
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function parseRobotsTxt(content: string): RobotsPolicy {
+  type RobotsGroup = RobotsPolicy & {
+    agents: string[];
+    hasRules: boolean;
+  };
+
+  const groups: RobotsGroup[] = [];
+  let current: RobotsGroup = {
+    agents: [],
+    allowPrefixes: [],
+    disallowPrefixes: [],
+    crawlDelayMs: undefined,
+    hasRules: false,
+  };
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.replace(/#.*$/, "").trim();
+    if (!line) continue;
+
+    const colonIndex = line.indexOf(":");
+    if (colonIndex === -1) continue;
+
+    const directive = line.slice(0, colonIndex).trim().toLowerCase();
+    const value = line.slice(colonIndex + 1).trim();
+
+    if (directive === "user-agent") {
+      if (current.agents.length > 0 && current.hasRules) {
+        groups.push(current);
+        current = {
+          agents: [],
+          allowPrefixes: [],
+          disallowPrefixes: [],
+          crawlDelayMs: undefined,
+          hasRules: false,
+        };
+      }
+      current.agents.push(value.toLowerCase());
+      continue;
+    }
+
+    if (current.agents.length === 0) continue;
+
+    if (directive === "allow") {
+      current.allowPrefixes.push(value);
+      current.hasRules = true;
+      continue;
+    }
+
+    if (directive === "disallow") {
+      current.disallowPrefixes.push(value);
+      current.hasRules = true;
+      continue;
+    }
+
+    if (directive === "crawl-delay") {
+      const delaySeconds = Number(value);
+      if (Number.isFinite(delaySeconds) && delaySeconds >= 0) {
+        current.crawlDelayMs = delaySeconds * 1000;
+      }
+      current.hasRules = true;
+    }
+  }
+
+  if (current.agents.length > 0) {
+    groups.push(current);
+  }
+
+  const matchingGroups = groups.filter((group) => group.agents.includes(ROBOTS_AGENT_NAME));
+  const fallbackGroups = groups.filter((group) => group.agents.includes("*"));
+  const selectedGroups = matchingGroups.length > 0 ? matchingGroups : fallbackGroups;
+
+  if (selectedGroups.length === 0) {
+    return { allowPrefixes: [], disallowPrefixes: [] };
+  }
+
+  const crawlDelayCandidates = selectedGroups
+    .map((group) => group.crawlDelayMs)
+    .filter((delay): delay is number => typeof delay === "number");
+
+  return {
+    allowPrefixes: selectedGroups.flatMap((group) => group.allowPrefixes).filter(Boolean),
+    disallowPrefixes: selectedGroups.flatMap((group) => group.disallowPrefixes).filter(Boolean),
+    crawlDelayMs: crawlDelayCandidates.length > 0 ? Math.max(...crawlDelayCandidates) : undefined,
+  };
+}
+
+function longestMatchingPrefix(pathname: string, prefixes: string[]): number {
+  let longest = -1;
+  for (const prefix of prefixes) {
+    if (!prefix) continue;
+    if (pathname.startsWith(prefix) && prefix.length > longest) {
+      longest = prefix.length;
+    }
+  }
+  return longest;
+}
+
+function isPathBlockedByRobots(pathname: string, policy: RobotsPolicy): boolean {
+  const normalizedPath = pathname || "/";
+  const longestDisallow = longestMatchingPrefix(normalizedPath, policy.disallowPrefixes);
+  const longestAllow = longestMatchingPrefix(normalizedPath, policy.allowPrefixes);
+  return longestDisallow > longestAllow && longestDisallow >= 0;
+}
+
+async function getRobotsPolicy(parsed: URL): Promise<RobotsPolicy> {
+  const cacheKey = parsed.hostname.toLowerCase();
+  const cached = robotsPolicyCache.get(cacheKey);
+  const now = Date.now();
+
+  if (cached && cached.expiresAt > now) {
+    return cached.policy;
+  }
+
+  const robotsUrl = new URL("/robots.txt", parsed.origin).toString();
+
+  try {
+    const response = await fetchWithRetry(robotsUrl, {
+      headers: {
+        "User-Agent": USER_AGENT,
+        Accept: "text/plain,*/*;q=0.8",
+      },
+    });
+
+    if (!response.ok) {
+      const emptyPolicy: RobotsPolicy = { allowPrefixes: [], disallowPrefixes: [] };
+      robotsPolicyCache.set(cacheKey, { policy: emptyPolicy, expiresAt: now + ROBOTS_CACHE_TTL_MS });
+      return emptyPolicy;
+    }
+
+    const content = await response.text();
+    const policy = parseRobotsTxt(content);
+    robotsPolicyCache.set(cacheKey, { policy, expiresAt: now + ROBOTS_CACHE_TTL_MS });
+    return policy;
+  } catch {
+    const emptyPolicy: RobotsPolicy = { allowPrefixes: [], disallowPrefixes: [] };
+    robotsPolicyCache.set(cacheKey, { policy: emptyPolicy, expiresAt: now + ROBOTS_CACHE_TTL_MS });
+    return emptyPolicy;
+  }
+}
+
+async function enforceRobotsPolicy(parsed: URL): Promise<void> {
+  const policy = await getRobotsPolicy(parsed);
+
+  if (isPathBlockedByRobots(parsed.pathname, policy)) {
+    throw new Error(`robots.txt disallows ${parsed.pathname || "/"} for ${parsed.hostname}`);
+  }
+
+  if (!policy.crawlDelayMs || policy.crawlDelayMs <= 0) {
+    return;
+  }
+
+  const nextAllowedAt = robotsNextAllowedAt.get(parsed.hostname) ?? 0;
+  const waitMs = nextAllowedAt - Date.now();
+
+  if (waitMs > 0) {
+    await sleep(waitMs);
+  }
+
+  robotsNextAllowedAt.set(parsed.hostname, Date.now() + policy.crawlDelayMs);
 }
 
 async function fetchWithRetry(
@@ -127,6 +304,7 @@ export async function secureFetch(url: string): Promise<string> {
     return cached;
   }
 
+  await enforceRobotsPolicy(parsed);
   checkRateLimit(parsed.hostname);
 
   const response = await fetchWithRetry(url, {
@@ -156,6 +334,7 @@ export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
     return structuredClone(cached as T);
   }
 
+  await enforceRobotsPolicy(parsed);
   checkRateLimit(parsed.hostname);
 
   const response = await fetchWithRetry(url, {

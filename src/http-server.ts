@@ -55,8 +55,8 @@ export async function startHttpServer(server: McpServer): Promise<void> {
           name: "androjack-mcp",
           version: "1.6.0",
           description:
-            "Documentation-grounded Android engineering MCP server. " +
-            "Forces AI tools to verify official docs before generating Android/Kotlin code.",
+            "Documentation-grounded Android engineering MCP server with 21 read-only verification tools " +
+            "for official-source Android and Kotlin guidance.",
           mcp_endpoint: `http://${host}:${port}${MCP_PATH}`,
           spec_version: "2025-11-25",
           tools: 21,
@@ -70,7 +70,7 @@ export async function startHttpServer(server: McpServer): Promise<void> {
     // ── /mcp — Streamable HTTP transport endpoint ─────────────────────────
     if (url.pathname !== MCP_PATH) {
       res.writeHead(404, { "Content-Type": "text/plain" });
-      res.end(`AndroJack MCP: endpoint is ${MCP_PATH}`);
+      res.end(`AndroJack MCP endpoint is ${MCP_PATH}. Use ${WELL_KNOWN_PATH} for discovery.`);
       return;
     }
 
@@ -149,7 +149,10 @@ export async function startHttpServer(server: McpServer): Promise<void> {
       process.stderr.write(`AndroJack HTTP error: ${err}\n`);
       if (!res.headersSent) {
         res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Internal server error");
+        res.end(
+          "AndroJack MCP could not complete this request. Retry the MCP session. " +
+          "If the problem continues, restart the local server and review stderr logs."
+        );
       }
     }
   });

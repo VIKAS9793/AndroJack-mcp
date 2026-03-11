@@ -18,6 +18,10 @@ _test_playground/
 
 # npm pack tarballs
 *.tgz
+*.mcpb
+
+# Connector build staging
+.connector-build/
 
 # Environment variables
 .env

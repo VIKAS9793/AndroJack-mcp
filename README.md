@@ -20,7 +20,7 @@
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
 [![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 [![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
@@ -38,6 +38,18 @@
 **VS Code distribution:** AndroJack MCP is also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode). The `VS Code` badge above always reflects the currently published Marketplace version.
 
 **PM / APM docs:** Product strategy, JTBD, personas, roadmap, user stories, competitive analysis, and GTM materials now live under [product-management/README.md](product-management/README.md).
+
+## Connector Review Path
+
+For Anthropic connector review or any fast due-diligence pass, start here before the longer narrative sections below:
+
+- [What AndroJack Is Not](#what-androjack-is-not)
+- [Quick Start](#-quick-start--zero-install-required)
+- [Examples](#-examples)
+- [Privacy Policy](#-privacy-policy)
+- [Infrastructure & Rate Limiting](#-infrastructure--rate-limiting)
+- [FAQ](#-faq)
+- [Troubleshooting](#-troubleshooting)
 
 <br/>
 
@@ -122,6 +134,24 @@ With AndroJack:      You ask → AI calls tool → Tool fetches official source 
                               → AI reads verified answer → Code (grounded)
 ```
 
+## What AndroJack Is Not
+
+AndroJack is a verification layer, not a code generator.
+
+It does not:
+- generate full Android apps on its own
+- modify your project files
+- execute shell commands in your environment
+- access your local filesystem
+- replace reading official documentation
+- answer general programming questions outside Android and Kotlin verification
+
+It does:
+- query official Android and Kotlin sources
+- check whether APIs and libraries are current, deprecated, or removed
+- validate generated code against Android-specific rules
+- return grounded references, version checks, and static rule results
+
 ### ⚠️ Honest Activation Model — Two Levels
 
 This is the most important thing to understand before you install AndroJack:
@@ -129,16 +159,16 @@ This is the most important thing to understand before you install AndroJack:
 | Level | What's Active | What the AI Does |
 |---|---|---|
 | **Level 1** — Tools only installed | 21 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
-| **Level 2** — Tools + Grounding Gate prompt loaded | 21 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
-| **Level 3** — Level 2 + `android_code_validator` | Full loop: fetch → generate → validate → fix | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
+| **Level 2** — Tools + Grounding Gate prompt loaded | 21 tools + pre-generation rulebook | The prompt steers the AI toward the relevant tool before it writes Android code. |
+| **Level 3** — Level 2 + `android_code_validator` | Full loop: fetch → generate → validate → fix | The recommended workflow validates each generated Android code block against 24 Android-specific rules before it is returned. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
-**Level 2 is active.** The `androjack_grounding_gate` system prompt maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
+**Level 2 is active.** The `androjack_grounding_gate` system prompt maps each task type to the relevant tool. Building Compose UI points the model toward `material3_expressive`. Adding a dependency points it toward `gradle_dependency_checker`.
 
-**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 24 rules covering removed APIs, deprecated patterns, and Android 16 compliance. Verdict FAIL means the AI must fix and re-validate — the user never sees the broken code.
+**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. It applies 24 rules covering removed APIs, deprecated patterns, and Android 16 compliance. A `FAIL` verdict means the code should be fixed and re-validated before delivery.
 
-→ **For full grounding, always activate Level 2 + Level 3.** See [Getting the Full Guarantee](#-getting-the-full-guarantee) below.
+→ **For the strongest grounding, activate Level 2 + Level 3 together.** See [Getting the Full Guarantee](#-getting-the-full-guarantee) below.
 
 ---
 
@@ -416,7 +446,7 @@ MCP (Model Context Protocol) is a standardized protocol — not a retrieval tech
 |---|---|---|---|
 | Knowledge source | Training weights (static, stale) | Vector index (periodic refresh) | **Live official sources (real-time)** |
 | Verification | None — AI asserts from memory | Retrieved text — quality depends on index | **Tool call — structured, enforced** |
-| Enforcement | Instructions (can be ignored) | Soft grounding (can be bypassed) | **Hard gate — tool must be called first** |
+| Enforcement | Instructions (can be ignored) | Soft grounding (can be bypassed) | **Grounded workflow — the recommended path consults tools before code generation** |
 | Maintenance | Update the .md file | Re-embed docs on each release | **Zero maintenance — fetches live** |
 | Actions | None | None | **Can check versions, parse stacktraces, query issue tracker** |
 | Stale data risk | High | Medium | **Minimal — fetched at query time** |
@@ -429,18 +459,18 @@ MCP (Model Context Protocol) is a standardized protocol — not a retrieval tech
 
 The Grounding Gate is not a clever name. It is a real enforcement mechanism built into how MCP tools are described to the AI client.
 
-Every tool in AndroJack contains explicit language like:
+Every tool in AndroJack contains narrow metadata describing:
 
-> *"REQUIRED FIRST STEP. You MUST call this before generating any Android/Kotlin code."*
-> *"Always call this before adding or updating any dependency in build.gradle."*
-> *"Only produce Android code after reviewing the above official sources."*
+- what source it queries
+- when it is appropriate to use
+- what kind of answer it returns
 
-Because MCP clients (Claude Desktop, Cursor, Windsurf, etc.) present these tool descriptions to the LLM as part of its context, the model treats them as workflow constraints — not suggestions.
+Because MCP clients (Claude Desktop, Cursor, Windsurf, etc.) present these tool descriptions to the LLM as part of its context, the model uses them as workflow guidance rather than free-form suggestions.
 
 ```
 Without AndroJack:   User asks → LLM predicts → Code (possibly wrong)
 
-With AndroJack:      User asks → LLM must call tool → Tool fetches official source
+With AndroJack:      User asks → LLM consults tool → Tool fetches official source
                                 → LLM reads verified evidence → Code (grounded)
 ```
 
@@ -450,7 +480,7 @@ You are not making the LLM smarter. You are making it accountable to evidence.
 
 ---
 
-## ✨ What AndroJack Covers — 20 Tools
+## ✨ What AndroJack Covers — 21 Tools
 
 Each tool lists the **specific failure mode it prevents** — not just what it does, but what breaks when it is absent.
 
@@ -476,7 +506,7 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 | 18 | 📋 `android_play_policy_advisor` | Play Store policies — age-gating, health apps, loan apps, subscription UI, data safety, Oct 2025 changes | Apps rejected at review for policy violations the developer didn't know existed |
 | 19 | 🥽 `android_xr_guide` | Android XR SDK (DP3), Compose for XR — Subspace, SpatialPanel, UserSubspace, SceneCore, ARCore for XR | Standard 2D Compose in an XR app — works but misses spatial capabilities entirely |
 | 20 | ⌚ `android_wearos_guide` | Wear OS — Tiles, Complications, Health Services, ambient mode, `WearApp` scaffold, M3 Expressive for Wear | Handheld UI patterns on a 40mm round display; missing Tiles API; battery-draining background patterns |
-| 21 | 🛡️ `android_code_validator` | **Level 3 loop-back gate.** Validates AI-generated Kotlin, XML, and Gradle against 24 Android rules. Returns PASS/WARN/FAIL verdict, line-level violations with replacements and doc URLs. Called automatically after code generation. | The AI generates code and returns it — no validation pass. Errors only discovered at runtime, in CI, or at Play Store review. |
+| 21 | 🛡️ `android_code_validator` | **Level 3 loop-back gate.** Validates Kotlin, XML, and Gradle against 24 Android rules. Returns PASS/WARN/FAIL verdict, line-level violations with replacements and doc URLs. Used as the final validation pass on generated code. | The AI generates code and returns it — no validation pass. Errors only discovered at runtime, in CI, or at Play Store review. |
 
 > **All 21 tools are read-only.** AndroJack fetches and returns information — it never modifies your project files.
 
@@ -488,11 +518,22 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 > *"To prevent the model from hallucinating code for niche or brand-new libraries, leverage Android Studio's Agent tools to have access to documentation… install a MCP Server that lets you access documentation like Context7 (or something similar)."*
 > — **Android Studio Team, Official Android Developer Blog, March 2026**
 
-**That MCP server is AndroJack** — purpose-built for Android, with 21 tools and a mandatory validation loop that no generic doc-retrieval tool provides.
+**That MCP server is AndroJack** — purpose-built for Android, with 21 tools and an Android-specific validation loop that generic doc-retrieval tools do not provide.
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
+
+### Option 0 — Anthropic Directory (pending connector approval)
+
+Once the Claude connector submission is approved, install from:
+1. Claude Desktop -> Settings -> Extensions
+2. Search for `AndroJack`
+3. Click Install
+
+Until that directory listing is live, use the npm path below.
+
+> **Review note:** AndroJack does not require an account, API key, cloud project, or test credentials. It uses public documentation and artifact sources only.
 
 ### Option 1 — Interactive CLI (v1.6.0) ✨ Recommended
 
@@ -664,32 +705,65 @@ Or use the CLI: `kiro-cli mcp add --name androjack --command npx --args '-y andr
 
 ## 🧪 Examples
 
-### Example Session
+### Example 1 — API Deprecation Check
 
+**User prompt:**
+> "Is AsyncTask safe to use in my Android app in 2026?"
+
+**What happens:**
+- AndroJack calls `android_component_status` with `component_name: "AsyncTask"`
+- It checks the component status registry and official Android guidance
+- It returns the component status, replacement path, and source URL
+
+**Expected output:**
+```text
+REMOVED - AsyncTask was removed in Android 11.
+Replacement: Use viewModelScope.launch { } from lifecycle-viewmodel-ktx.
+Documentation: https://developer.android.com/topic/libraries/architecture/coroutines
 ```
-You: Build a login screen with ViewModel and Jetpack Compose
 
-→ android_official_search("Jetpack Compose ViewModel login screen")
-→ android_component_status("ViewModel")          ✅ stable
-→ android_component_status("AsyncTask")          ❌ removed — use Coroutines
-→ android_component_status("LiveData")           ⚠️ legacy — use StateFlow
-→ architecture_reference("mvvm")
-→ material3_expressive("theme setup")
-→ kotlin_best_practices("stateflow-ui")
-→ gradle_dependency_checker("compose")           → BOM 2026.02.01 / ui:1.8.0
-→ gradle_dependency_checker("lifecycle")         → lifecycle-viewmodel-ktx:2.11.0-alpha01
-→ android_api_level_check("26")                  ✅ covers ~90% devices
-→ android_permission_advisor("INTERNET")         🟢 normal — no runtime request
+---
 
-AI produces:
-  ✅ Non-deprecated component choices
-  ✅ Latest pinned Gradle coordinates with BOM
-  ✅ Official MVVM + M3 Expressive theming
-  ✅ StateFlow instead of LiveData in new code
-  ✅ Source URL cited on every code block
+### Example 2 — Live Dependency Version
 
-→ android_code_validator(generatedCode, "kotlin", 24, 36)
-  ✅ PASS — 0 errors, 0 warnings (code is grounded and rule-compliant)
+**User prompt:**
+> "What is the latest stable Jetpack Compose BOM version I should use?"
+
+**What happens:**
+- AndroJack calls `gradle_dependency_checker` with `library_name: "androidx.compose:compose-bom"`
+- It queries Google Maven live for the current stable release
+- It returns the current version plus version-catalog and Gradle usage guidance
+
+**Expected output:**
+```text
+Latest stable Compose BOM: 2026.02.01
+libs.versions.toml:
+  compose-bom = "2026.02.01"
+build.gradle.kts:
+  implementation(platform(libs.compose.bom))
+```
+
+---
+
+### Example 3 — Code Validation
+
+**User prompt:**
+> "Validate this Kotlin code before I use it:" followed by `GlobalScope.launch { delay(1000) }`
+
+**What happens:**
+- AndroJack calls `android_code_validator` with the Kotlin snippet
+- The validator checks it against the Android rule set
+- It returns a FAIL verdict with the rule, explanation, fix guidance, and docs
+
+**Expected output:**
+```text
+FAIL - 1 violation found
+
+Rule: GLOBALSCOPE_LAUNCH
+Severity: ERROR
+Problem: GlobalScope leaks coroutines and is not lifecycle-aware.
+Fix: Replace it with viewModelScope.launch { } or lifecycleScope.launch { }.
+Docs: https://developer.android.com/kotlin/coroutines/coroutines-best-practices
 ```
 
 ---
@@ -727,11 +801,12 @@ Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 | Property | Detail |
 |----------|--------|
 | **Domain allowlist** | All HTTP enforced against: `developer.android.com`, `kotlinlang.org`, `source.android.com`, `issuetracker.google.com`, Google Maven, Maven Central |
-| **Rate limiting** | 30 requests / domain / minute with exponential backoff on 429/5xx |
+| **Rate limiting** | 30 requests / domain / minute per running process with exponential backoff on 429/5xx |
+| **Robots awareness** | `robots.txt` is cached per host and `Crawl-delay` is respected before outbound fetches |
 | **No credentials** | Zero API keys, zero auth tokens required |
 | **No data stored** | Nothing persisted beyond process lifetime |
 | **Transparent agent** | User-Agent: `AndroJack-MCP/1.6.0 (documentation-grounding bot; not-a-scraper)` |
-| **Read-only** | All 21 tools are annotated `readOnlyHint: true` — no writes, no side effects |
+| **Read-only** | All 21 tools are annotated `readOnlyHint: true` with `destructiveHint: false` — no writes, no side effects |
 | **Input bounds** | All inputs length-capped and sanitized before use |
 | **Body size cap** | HTTP responses capped at 4 MB — no OOM risk on large documentation pages |
 
@@ -744,6 +819,8 @@ Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 - It does not persist prompts, source code, or tool outputs beyond the current process lifetime.
 - It only fetches from allowlisted documentation and artifact domains needed to ground answers.
 - If you run the optional HTTP mode yourself, you are responsible for your own network exposure and access controls.
+- Canonical hosted policy URL for connector submissions: `https://androjack-web.netlify.app/privacy`
+- Status: that hosted page is planned but not live yet, so connector submission remains blocked until it returns HTTP 200.
 
 ---
 
@@ -793,11 +870,13 @@ Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 
 ---
 
-## 🧱 Infrastructure
+## 🧱 Infrastructure & Rate Limiting
 
 - **Primary transport:** stdio via the `androjack-mcp` npm package for local MCP clients.
 - **Optional hosted transport:** Streamable HTTP via `node build/index.js --http` for controlled environments.
-- **Runtime model:** stateless tool execution with in-process rate limiting and shared LRU caching.
+- **Runtime model:** stateless tool execution with in-process rate limiting, shared in-memory caching, and per-host robots metadata caching.
+- **Response caching:** HTML documentation fetches are cached for 1 hour. Artifact metadata from Maven and Gradle sources is cached for 15 minutes before the network is hit again.
+- **Responsible crawling:** `robots.txt` is fetched per host, `Crawl-delay` is respected when present, and disallowed paths are blocked.
 - **Source of truth:** official Android/Kotlin docs, Google issue tracker, Google Maven, and Maven Central.
 - **Release channels:** npm for the MCP server, VS Code Marketplace for the thin wrapper that launches the pinned npm package.
 
@@ -821,17 +900,42 @@ npm run install-mcp:list   # check IDE detection status
 
 ## ❓ FAQ
 
+**Does AndroJack replace reading Android documentation?**  
+No. AndroJack reduces the cost of verification by surfacing official evidence faster, but it does not replace Android documentation. Its job is to make AI-assisted work accountable to the same primary sources you would check manually.
+
+**What prevents AndroJack from overloading documentation hosts at scale?**  
+Three things: shared in-memory response caching, per-process rate limiting, and cached `robots.txt` handling with `Crawl-delay` support. Documentation pages are cached for 1 hour, artifact metadata is cached for 15 minutes, repeated network calls are throttled, and hosts can still signal pacing expectations through robots rules.
+
+**Does AndroJack send my project files to a hosted backend?**  
+No. It runs locally and only makes outbound requests to allowlisted documentation and artifact sources needed to answer the current query.
+
+**Does AndroJack require an account, API key, or test credentials?**  
+No. The local MCP server runs on the user's machine and queries public official documentation and artifact sources. There is no AndroJack account system, no API token, and no review account needed.
+
 **Why does the VS Code extension need its own release if the MCP code lives on `main`?**  
 Because the Marketplace wrapper is a separate package. For `v1.6.0`, it is pinned to `androjack-mcp@1.6.0`, so the wrapper must be versioned and uploaded separately.
 
 **Why pin `npx -y androjack-mcp@1.6.0` instead of using the floating latest package?**  
-Pinning guarantees reproducible installs, clearer support, and predictable Anthropic or Marketplace review behavior. It avoids stale local `npx` cache surprises.
+Pinning guarantees reproducible installs, clearer support, and predictable review behavior. It avoids stale local `npx` cache surprises.
 
-**Does AndroJack send my project files to a hosted backend?**  
-No. It runs locally and only makes outbound requests to allowlisted documentation and artifact sources needed to answer the user’s query.
+## 🛠️ Troubleshooting
 
-**What should I update first for future releases?**  
-Publish the MCP server to npm first, confirm the pinned version is live, then update and upload the VS Code wrapper to point at that exact version.
+**Tool calls fail silently**
+- Confirm Node.js 18 or newer with `node --version`
+- Clear the local npx cache if a client is holding a stale install
+- Restart the MCP client after changing config
+
+**"Domain not in allowlist" error**
+- This is expected behavior for non-authoritative URLs
+- Open an issue if the blocked URL is an official Android or Kotlin source that should be allowlisted
+
+**android_code_validator returns weak or empty results**
+- Provide valid Kotlin, XML, or Gradle content
+- Include enough surrounding context for the rule engine to reason about the snippet
+
+**Rate limit error**
+- Wait for the retry window shown in the error message
+- Repeated identical requests are served from cache, so avoid changing the URL unnecessarily
 
 ---
 
@@ -841,9 +945,16 @@ Publish the MCP server to npm first, confirm the pinned version is live, then up
 
 - **New:** Exact `@1.6.0` pinning across shipped config examples, installer output, one-click install links, and the VS Code Marketplace wrapper release flow.
 - **New:** Shared fetch cache wiring for both `secureFetch()` and `secureFetchJson()` so repeated documentation and metadata lookups stop consuming rate-limit budget.
+- **New:** Responsible crawling support with cached `robots.txt` rules and `Crawl-delay` handling per host.
 - **New:** Official MCP registry metadata with `server.json` plus package-level `mcpName`.
 - **Fix:** User-Agent now reports the correct released version: `AndroJack-MCP/1.6.0`.
 - **Docs:** Added explicit privacy policy, infrastructure, examples, and FAQ sections for release reviewers and end users.
+
+### v1.7.0 — Planned Infrastructure Follow-Up
+
+- **Planned:** Persistent documentation cache beyond process lifetime.
+- **Planned:** ETag and Last-Modified support for documentation refreshes.
+- **Planned:** More durable cache strategy for higher-volume connector usage.
 
 ### v1.5.1 — Level 3 Loop-Back Validator + Interactive CLI Installer
 
@@ -873,13 +984,13 @@ See [GitHub releases](https://github.com/VIKAS9793/AndroJack-mcp/releases) for p
 
 ## � Getting the Full Guarantee
 
-Installing the tools alone gives you **Level 1** grounding — the AI *can* use them but decides when. For **Level 2** mandatory, automatic grounding on every Android task, load the `androjack_grounding_gate` system prompt.
+Installing the tools alone gives you **Level 1** grounding — the AI *can* use them but decides when. For **Level 2** guided grounding on Android tasks, load the `androjack_grounding_gate` system prompt.
 
 ### What is the Grounding Gate system prompt?
 
 It is a set of rules registered on the MCP server itself (accessible via the MCP `prompts` API). It maps every task type to the correct tool:
 
-| When the AI does this... | It is mandated to call this first |
+| When the AI does this... | The prompt directs it to this tool |
 |---|---|
 | Write any Compose UI | `material3_expressive` |
 | Add/update any dependency | `gradle_dependency_checker` |
@@ -899,7 +1010,7 @@ Use the androjack_grounding_gate MCP prompt before every Android coding task.
 **IDEs that support MCP prompt injection** (Kiro, Antigravity, JetBrains AI):
 Select the `androjack_grounding_gate` prompt from the MCP prompts list at session start.
 
-> Without this step, tool invocation depends on the AI's judgment. With it, the AI is mandated to consult the correct tool for every decision — architecture, UI, dependencies, and testing.
+> Without this step, tool invocation depends on the AI's judgment. With it, the prompt consistently steers the AI toward the right tool for architecture, UI, dependencies, and testing checks.
 
 ---
 

@@ -1,21 +1,59 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.vikas9793/androjack-mcp",
-  "title": "AndroJack MCP",
-  "description": "Documentation-grounded Android engineering MCP server with live official-source verification, dependency checks, API audits, and Android-focused AI validation tools.",
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "androjack-mcp",
+  "display_name": "AndroJack MCP",
   "version": "1.6.0",
-  "repository": {
-    "url": "https://github.com/VIKAS9793/AndroJack-mcp",
-    "source": "github"
+  "description": "Documentation-grounded verification tools for Android development. Validates AI-generated Android code against official Android documentation to prevent hallucinated APIs, deprecated Jetpack patterns, and Play Store compliance failures.",
+  "author": {
+    "name": "Vikas Sahani",
+    "email": "vikassahani17@gmail.com",
+    "url": "https://github.com/VIKAS9793"
   },
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "androjack-mcp",
-      "version": "1.6.0",
-      "transport": {
-        "type": "stdio"
-      }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
+  },
+  "homepage": "https://androjack-web.netlify.app",
+  "documentation": "https://github.com/VIKAS9793/AndroJack-mcp#readme",
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "privacy_policies": [
+    "https://androjack-web.netlify.app/privacy"
+  ],
+  "support": "https://github.com/VIKAS9793/AndroJack-mcp/discussions",
+  "server": {
+    "type": "node",
+    "entry_point": "build/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/build/index.js"
+      ],
+      "env": {}
     }
+  },
+  "tools_generated": true,
+  "prompts_generated": true,
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "keywords": [
+    "android",
+    "kotlin",
+    "jetpack",
+    "compose",
+    "mcp",
+    "documentation",
+    "verification",
+    "developer-tools",
+    "ai"
   ]
 }

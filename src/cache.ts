@@ -92,9 +92,9 @@ export class LRUCache<T = unknown> {
   }
 }
 
-const DOC_SOURCE_TTL_MS = 6 * 60 * 60 * 1000;
+const DOC_SOURCE_TTL_MS = 60 * 60 * 1000;
 const ISSUE_TRACKER_TTL_MS = 60 * 60 * 1000;
-const ARTIFACT_METADATA_TTL_MS = 30 * 60 * 1000;
+const ARTIFACT_METADATA_TTL_MS = 15 * 60 * 1000;
 
 const ARTIFACT_HOSTS = new Set([
   "dl.google.com",
