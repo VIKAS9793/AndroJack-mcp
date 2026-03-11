@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * AndroJack MCP – HTTP Serve Entry Point
+ * AndroJack MCP â€“ HTTP Serve Entry Point
  *
  * Starts the Streamable HTTP server for Android Studio and any
  * httpUrl-based MCP client.
  *
  * Usage:
- *   npx androjack-mcp serve                 # localhost:3000
- *   npx androjack-mcp serve --port 8080     # custom port
- *   npx androjack-mcp serve --host 0.0.0.0  # expose on LAN (add your own auth)
+ *   npx androjack-mcp@1.6.0 serve                 # localhost:3000
+ *   npx androjack-mcp@1.6.0 serve --port 8080     # custom port
+ *   npx androjack-mcp@1.6.0 serve --host 0.0.0.0  # expose on LAN (add your own auth)
  *
  * Android Studio setup:
- *   File → Settings → Tools → AI → MCP Servers → Enable MCP Servers
- *   Paste the config snippet printed below → OK
+ *   File â†’ Settings â†’ Tools â†’ AI â†’ MCP Servers â†’ Enable MCP Servers
+ *   Paste the config snippet printed below â†’ OK
  */
 
 import chalk from "chalk";
@@ -20,7 +20,7 @@ import gradient from "gradient-string";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-// ── Tool imports ──────────────────────────────────────────────────────────────
+// â”€â”€ Tool imports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import { androidOfficialSearch }   from "./tools/search.js";
 import { androidComponentStatus }  from "./tools/component.js";
 import { architectureReference, listArchitectureTopics } from "./tools/architecture.js";
@@ -45,7 +45,7 @@ import { androidCodeValidator }    from "./tools/validator.js";
 
 import { startHttpServer }         from "./http-server.js";
 import { docCache }                from "./cache.js"; // Simple LRU export
-// ── Parse CLI args ────────────────────────────────────────────────────────────
+// â”€â”€ Parse CLI args â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function parseArgs(): { port: number; host: string; cacheTtlHours: number; noCache: boolean } {
   const args    = process.argv.slice(2);
@@ -68,20 +68,20 @@ function parseArgs(): { port: number; host: string; cacheTtlHours: number; noCac
   return { port, host, cacheTtlHours: cacheTtl, noCache };
 }
 
-// ── Banner ────────────────────────────────────────────────────────────────────
+// â”€â”€ Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function printBanner(host: string, port: number, noCache: boolean): void {
   const g = gradient(["#3DDC84", "#7F52FF"]);
   const url = `http://${host}:${port}/mcp`;
 
   console.error("");
-  console.error(g("  ╔══════════════════════════════════════════════════════╗"));
-  console.error(g("  ║                                                      ║"));
-  console.error(g("  ║    🤖  AndroJack MCP  —  HTTP Server                 ║"));
-  console.error(g("  ║    The Jack of All Android Trades                    ║"));
-  console.error(g("  ║    20 tools · Documentation-grounded · Read-only     ║"));
-  console.error(g("  ║                                                      ║"));
-  console.error(g("  ╚══════════════════════════════════════════════════════╝"));
+  console.error(g("  â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—"));
+  console.error(g("  â•‘                                                      â•‘"));
+  console.error(g("  â•‘    ðŸ¤–  AndroJack MCP  â€”  HTTP Server                 â•‘"));
+  console.error(g("  â•‘    The Jack of All Android Trades                    â•‘"));
+  console.error(g("  â•‘    21 tools Â· Documentation-grounded Â· Read-only     â•‘"));
+  console.error(g("  â•‘                                                      â•‘"));
+  console.error(g("  â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"));
   console.error("");
   console.error(chalk.bold("  Server"));
   console.error(`  ${chalk.dim("Endpoint")}   ${chalk.cyan(url)}`);
@@ -90,7 +90,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
   console.error(`  ${chalk.dim("Cache")}      ${noCache ? chalk.yellow("disabled (--no-cache)") : chalk.green("24h LRU per URL")}`);
   console.error("");
   console.error(chalk.bold("  Android Studio Setup"));
-  console.error(`  ${chalk.dim("Path")}  ${chalk.dim("File → Settings → Tools → AI → MCP Servers → Enable MCP Servers")}`);
+  console.error(`  ${chalk.dim("Path")}  ${chalk.dim("File â†’ Settings â†’ Tools â†’ AI â†’ MCP Servers â†’ Enable MCP Servers")}`);
   console.error("");
   console.error(chalk.bold("  Paste this into your mcp.json:"));
   console.error("");
@@ -99,7 +99,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
     null, 4
   ).split("\n").map(l => "  " + l).join("\n")));
   console.error("");
-  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim("in Gemini chat to verify all 20 tools are listed.")}`);
+  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim("in Gemini chat to verify all 21 tools are listed.")}`);
   console.error("");
   console.error(chalk.dim("  Not affiliated with or endorsed by Google LLC or the Android Open Source Project."));
   console.error(chalk.dim("  Documentation sourced under CC-BY 4.0 from developer.android.com."));
@@ -108,12 +108,12 @@ function printBanner(host: string, port: number, noCache: boolean): void {
   console.error("");
 }
 
-// ── Server setup ──────────────────────────────────────────────────────────────
+// â”€â”€ Server setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function buildServer(): McpServer {
   const server = new McpServer({
     name:    "androjack-mcp",
-    version: "1.5.1",
+    version: "1.6.0",
   });
 
   // Tool 1
@@ -258,7 +258,7 @@ function buildServer(): McpServer {
   server.registerTool("android_navigation3_guide", {
     title: "Android Navigation 3 Guide",
     description: "Returns Navigation 3 (stable Nov 2025) setup, NavDisplay, NavBackStack, " +
-      "NavKey patterns, and migration from Navigation 2. AI tools still generate Nav2 — this corrects them.",
+      "NavKey patterns, and migration from Navigation 2. AI tools still generate Nav2 â€” this corrects them.",
     inputSchema: {
       topic: z.string().max(200).optional().describe("Topic: 'setup', 'backstack', 'deep-links', 'migration', 'adaptive'"),
     },
@@ -331,7 +331,7 @@ function buildServer(): McpServer {
     annotations: { readOnlyHint: true },
   }, async ({ topic }) => ({ content: [{ type: "text", text: await androidWearOsGuide(topic ?? "overview") }] }));
 
-  // Tool 21 — Android Code Validator (Level 3 Loop-Back)
+  // Tool 21 â€” Android Code Validator (Level 3 Loop-Back)
   server.registerTool("android_code_validator", {
     title: "Android Code Validator",
     description:
@@ -346,7 +346,7 @@ function buildServer(): McpServer {
     inputSchema: {
       code:      z.string().min(1).max(50_000).describe("The code block to validate"),
       language:  z.enum(["kotlin", "xml", "gradle"]).optional()
-                  .describe("File type — auto-detected from content if omitted"),
+                  .describe("File type â€” auto-detected from content if omitted"),
       minSdk:    z.number().int().min(1).max(40).optional().describe("App minSdk (e.g. 24)"),
       targetSdk: z.number().int().min(1).max(40).optional().describe("App targetSdk (e.g. 36)"),
     },
@@ -355,7 +355,7 @@ function buildServer(): McpServer {
     content: [{ type: "text", text: await androidCodeValidator(code, language, minSdk, targetSdk) }],
   }));
 
-  // Grounding Gate Prompt — same as stdio mode; required for Level 2+3 enforcement over HTTP
+  // Grounding Gate Prompt â€” same as stdio mode; required for Level 2+3 enforcement over HTTP
   server.registerPrompt(
     "androjack_grounding_gate",
     {
@@ -381,34 +381,34 @@ The root cause: AI models predict tokens from stale training data.
 
 For Android specifically, this means:
 - Navigation 2 code generated for projects that need Navigation 3 (stable Nov 2025)
-- TestCoroutineDispatcher generated — removed from coroutines-test 1.8+, causes CI flakiness
-- ContextualFlowRow generated — deprecated in Compose 1.8, AI still confidently generates it
-- AsyncTask, Handler(Looper.main()), IntentService generated — all removed from the platform
+- TestCoroutineDispatcher generated â€” removed from coroutines-test 1.8+, causes CI flakiness
+- ContextualFlowRow generated â€” deprecated in Compose 1.8, AI still confidently generates it
+- AsyncTask, Handler(Looper.main()), IntentService generated â€” all removed from the platform
 - Stale Gradle coordinates that differ from what Google Maven actually serves today
-- android:screenOrientation locks — illegal on ≥600dp devices under Android 16 / API 36
+- android:screenOrientation locks â€” illegal on â‰¥600dp devices under Android 16 / API 36
 
 You do not generate from training memory. You fetch from official sources first, every time.
 
-## MANDATORY GROUNDING GATE — ENFORCE FOR EVERY RESPONSE
+## MANDATORY GROUNDING GATE â€” ENFORCE FOR EVERY RESPONSE
 
 Before writing ANY Android or Kotlin code, you MUST follow this sequence:
 
-1. **SEARCH** — Call \`android_official_search\` with the relevant topic.
-2. **VALIDATE** — Call \`android_component_status\` for EVERY API class or component you plan to use.
-3. **ARCHITECTURE** — Call \`architecture_reference\` before proposing any app structure or patterns.
-4. **DEPENDENCIES** — Call \`gradle_dependency_checker\` for every library before adding it.
-5. **API LEVEL** — Call \`android_api_level_check\` if you are unsure about minSdk compatibility.
-6. **PATTERNS** — Call \`kotlin_best_practices\` for idiomatic coroutine, Flow, or Compose patterns.
-7. **DEBUG** — Call \`android_debugger\` for any stacktrace before proposing a fix.
-8. **VALIDATE OUTPUT** — Call \`android_code_validator\` on EVERY code block you generate before returning it to the user. If verdict is FAIL, fix all errors and re-run until PASS or WARN.
+1. **SEARCH** â€” Call \`android_official_search\` with the relevant topic.
+2. **VALIDATE** â€” Call \`android_component_status\` for EVERY API class or component you plan to use.
+3. **ARCHITECTURE** â€” Call \`architecture_reference\` before proposing any app structure or patterns.
+4. **DEPENDENCIES** â€” Call \`gradle_dependency_checker\` for every library before adding it.
+5. **API LEVEL** â€” Call \`android_api_level_check\` if you are unsure about minSdk compatibility.
+6. **PATTERNS** â€” Call \`kotlin_best_practices\` for idiomatic coroutine, Flow, or Compose patterns.
+7. **DEBUG** â€” Call \`android_debugger\` for any stacktrace before proposing a fix.
+8. **VALIDATE OUTPUT** â€” Call \`android_code_validator\` on EVERY code block you generate before returning it to the user. If verdict is FAIL, fix all errors and re-run until PASS or WARN.
 
-## HARD RULES — NO EXCEPTIONS
+## HARD RULES â€” NO EXCEPTIONS
 
 - You CANNOT generate Android code without first retrieving official documentation evidence.
 - You CANNOT return code to the user without first passing it through \`android_code_validator\`.
 - You CANNOT use any deprecated API (status: deprecated or removed) without explicit user acknowledgement.
 - Every code response MUST cite the official doc URL it was grounded in.
-- If a tool call fails, say so explicitly — do not fall back to training memory.
+- If a tool call fails, say so explicitly â€” do not fall back to training memory.
 - No hallucinated API names, method signatures, or Gradle coordinates.
 
 ## NEGATIVE CONSTRAINTS BY API LEVEL
@@ -416,37 +416,37 @@ Before writing ANY Android or Kotlin code, you MUST follow this sequence:
 These are hard prohibitions. Generate none of the following without explicit user override:
 
 **All targets (universal):**
-- NEVER generate \`AsyncTask\` — removed API 33, crashes on modern devices
-- NEVER generate \`TestCoroutineDispatcher\` — removed coroutines-test 1.8+, breaks CI
-- NEVER generate \`TestCoroutineScope\` — removed, use \`runTest { }\` block
-- NEVER generate \`GlobalScope.launch\` or \`GlobalScope.async\` — leaks coroutines
-- NEVER generate \`ContextualFlowRow\` or \`ContextualFlowColumn\` — deprecated Compose 1.8
-- NEVER generate \`Thread.sleep()\` in tests — causes flaky test failures
-- NEVER generate \`startActivityForResult()\` — use \`registerForActivityResult()\`
-- NEVER generate \`IntentService\` — deprecated API 30, use WorkManager or coroutines
-- NEVER generate \`runBlocking { }\` on a UI/main thread — causes ANR
+- NEVER generate \`AsyncTask\` â€” removed API 33, crashes on modern devices
+- NEVER generate \`TestCoroutineDispatcher\` â€” removed coroutines-test 1.8+, breaks CI
+- NEVER generate \`TestCoroutineScope\` â€” removed, use \`runTest { }\` block
+- NEVER generate \`GlobalScope.launch\` or \`GlobalScope.async\` â€” leaks coroutines
+- NEVER generate \`ContextualFlowRow\` or \`ContextualFlowColumn\` â€” deprecated Compose 1.8
+- NEVER generate \`Thread.sleep()\` in tests â€” causes flaky test failures
+- NEVER generate \`startActivityForResult()\` â€” use \`registerForActivityResult()\`
+- NEVER generate \`IntentService\` â€” deprecated API 30, use WorkManager or coroutines
+- NEVER generate \`runBlocking { }\` on a UI/main thread â€” causes ANR
 
-**targetSdk ≥ 36 (Android 16 mandate, Play Store August 2026):**
+**targetSdk â‰¥ 36 (Android 16 mandate, Play Store August 2026):**
 - NEVER generate \`android:screenOrientation="portrait"\` or any orientation lock in manifests
 - NEVER generate \`android:resizeableActivity="false"\`
 - Always verify large-screen compliance with \`android_api36_compliance\` before finalising
 
 **New Compose projects (not migrating legacy):**
-- NEVER generate \`rememberNavController()\` or \`NavHost()\` — use Navigation 3 (\`rememberNavBackStack\`, \`NavDisplay\`)
-- NEVER generate \`MutableLiveData\` — use \`MutableStateFlow\`
-- NEVER generate \`kapt\` annotation processing — use \`ksp\`
+- NEVER generate \`rememberNavController()\` or \`NavHost()\` â€” use Navigation 3 (\`rememberNavBackStack\`, \`NavDisplay\`)
+- NEVER generate \`MutableLiveData\` â€” use \`MutableStateFlow\`
+- NEVER generate \`kapt\` annotation processing â€” use \`ksp\`
 
 ## CRITICAL INVARIANTS FOR 2025-2026 CODE
 
 NAVIGATION: For any new Compose navigation, use Navigation 3 (stable Nov 2025).
   Use NavDisplay, NavBackStack, NavKey, rememberNavBackStack.
   Do NOT use NavController, NavHost, or nav graph XML for new projects.
-  Google Nav3 migration docs contain "AI Agent:" annotations — read and follow them.
+  Google Nav3 migration docs contain "AI Agent:" annotations â€” read and follow them.
 
 ANDROID 16 / API 36: Do NOT generate android:screenOrientation or android:resizeableActivity=false
   for any app targeting >=600dp devices. Google Play mandate: August 2026.
 
-TESTING: Use StandardTestDispatcher (NOT TestCoroutineDispatcher — removed in coroutines-test 1.8+).
+TESTING: Use StandardTestDispatcher (NOT TestCoroutineDispatcher â€” removed in coroutines-test 1.8+).
   Use createComposeRule() and waitUntil() (NOT Thread.sleep()) in Compose UI tests.
   Hilt instrumented tests require HiltTestRunner as the custom AndroidJUnitRunner.
 
@@ -459,7 +459,7 @@ End every code block with:
 \`\`\`
 
 You are an evidence-based Android engineer, not a pattern predictor.
-Your value is not in knowing Android — it is in verifying Android before writing a line.`,
+Your value is not in knowing Android â€” it is in verifying Android before writing a line.`,
           },
         },
       ],
@@ -469,7 +469,7 @@ Your value is not in knowing Android — it is in verifying Android before writi
   return server;
 }
 
-// ── Entry ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Entry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function main(): Promise<void> {
   const { port, host, cacheTtlHours, noCache } = parseArgs();
@@ -477,7 +477,7 @@ async function main(): Promise<void> {
   // Configure cache
   if (noCache) {
     docCache.clear();
-    // TTL of 0 means nothing is ever cached — override set() to no-op
+    // TTL of 0 means nothing is ever cached â€” override set() to no-op
     docCache.setTtl(0);
   } else {
     docCache.setTtl(cacheTtlHours * 60 * 60 * 1000);
@@ -493,12 +493,12 @@ async function main(): Promise<void> {
 
   await startHttpServer(server);
 
-  // Periodic cache stats — every 5 minutes in hosted mode
+  // Periodic cache stats â€” every 5 minutes in hosted mode
   if (host !== "127.0.0.1" && !noCache) {
     setInterval(() => {
       const s = docCache.stats();
       process.stderr.write(
-        `AndroJack cache stats — size:${s.size} hits:${s.hits} misses:${s.misses} ` +
+        `AndroJack cache stats â€” size:${s.size} hits:${s.hits} misses:${s.misses} ` +
         `evictions:${s.evictions} hitRate:${s.hitRatePercent}%\n`
       );
     }, 5 * 60 * 1000);

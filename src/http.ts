@@ -13,6 +13,7 @@
 
 import * as cheerio from "cheerio";
 import { ALLOWED_DOMAINS, HTTP_TIMEOUT_MS, USER_AGENT } from "./constants.js";
+import { docCache, getFetchCacheKey, getFetchCacheTtlMs } from "./cache.js";
 import { logger } from "./logger.js";
 
 // ── Rate limiter (per domain, per process lifetime) ──────────────────────────
@@ -119,6 +120,13 @@ async function fetchWithRetry(
 
 export async function secureFetch(url: string): Promise<string> {
   const parsed = assertAllowedDomain(url);
+  const cacheKey = getFetchCacheKey(url, "html");
+  const cached = docCache.get(cacheKey);
+
+  if (typeof cached === "string") {
+    return cached;
+  }
+
   checkRateLimit(parsed.hostname);
 
   const response = await fetchWithRetry(url, {
@@ -134,11 +142,20 @@ export async function secureFetch(url: string): Promise<string> {
   }
 
   const text = await response.text();
-  return text.length > MAX_BODY_BYTES ? text.slice(0, MAX_BODY_BYTES) : text;
+  const boundedText = text.length > MAX_BODY_BYTES ? text.slice(0, MAX_BODY_BYTES) : text;
+  docCache.set(cacheKey, boundedText, getFetchCacheTtlMs(parsed.hostname, "html"));
+  return boundedText;
 }
 
 export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
   const parsed = assertAllowedDomain(url);
+  const cacheKey = getFetchCacheKey(url, "json");
+  const cached = docCache.get(cacheKey);
+
+  if (cached !== undefined) {
+    return structuredClone(cached as T);
+  }
+
   checkRateLimit(parsed.hostname);
 
   const response = await fetchWithRetry(url, {
@@ -146,7 +163,9 @@ export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
   });
 
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  return (await response.json()) as T;
+  const payload = (await response.json()) as T;
+  docCache.set(cacheKey, structuredClone(payload), getFetchCacheTtlMs(parsed.hostname, "json"));
+  return payload;
 }
 
 // ── HTML extraction (cheerio) ─────────────────────────────────────────────────

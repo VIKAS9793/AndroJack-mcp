@@ -53,13 +53,13 @@ export async function startHttpServer(server: McpServer): Promise<void> {
       res.end(
         JSON.stringify({
           name: "androjack-mcp",
-          version: "1.5.1",
+          version: "1.6.0",
           description:
             "Documentation-grounded Android engineering MCP server. " +
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
           mcp_endpoint: `http://${host}:${port}${MCP_PATH}`,
           spec_version: "2025-11-25",
-          tools: 11,
+          tools: 21,
           read_only: true,
           auth_required: false,
         })

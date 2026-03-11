@@ -1,10 +1,14 @@
 {
   "name": "androjack-mcp",
-  "version": "1.5.1",
+  "version": "1.6.0",
+  "mcpName": "io.github.vikas9793/androjack-mcp",
   "files": [
     "build/",
     "src/",
-    "README.md"
+    "config/",
+    "README.md",
+    "server.json",
+    "manifest.json"
   ],
   "description": "AndroJack: AI that actually knows Android. Real-time dependency tracking, modern architectures, and zero hallucinations.",
   "keywords": [
@@ -24,6 +28,14 @@
     "tablet"
   ],
   "author": "Vikas Sahani <vikassahani17@gmail.com> (https://github.com/VIKAS9793)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
+  },
+  "homepage": "https://github.com/VIKAS9793/AndroJack-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp/issues"
+  },
   "license": "MIT",
   "type": "module",
   "bin": {
