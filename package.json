@@ -76,8 +76,8 @@
     "typescript": "^5.5.0"
   },
   "overrides": {
-    "hono": "^4.12.5",
-    "@hono/node-server": "^1.19.10"
+    "hono": "4.12.7",
+    "@hono/node-server": "1.19.11"
   },
   "engines": {
     "node": ">=18.0.0"

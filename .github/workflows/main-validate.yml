@@ -1,0 +1,67 @@
+name: Main Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Validate package contents
+        run: npm pack --dry-run
+
+      - name: Print dependency tree
+        run: npm ls hono @modelcontextprotocol/sdk @hono/node-server
+
+      - name: Assert secure Hono resolution
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { execSync } = require('node:child_process');
+
+          const tree = JSON.parse(execSync('npm ls hono --json', { encoding: 'utf8' }));
+          const versions = new Set();
+
+          function walk(name, node) {
+            if (!node || typeof node !== 'object') return;
+            if (name === 'hono' && node.version) versions.add(node.version);
+            const deps = node.dependencies || {};
+            for (const [depName, depNode] of Object.entries(deps)) {
+              walk(depName, depNode);
+            }
+          }
+
+          walk(tree.name || 'root', tree);
+
+          if (versions.size === 0) {
+            throw new Error('Resolved dependency tree does not contain hono');
+          }
+
+          if (versions.size !== 1 || !versions.has('4.12.7')) {
+            console.error(`Unexpected hono versions: ${[...versions].join(', ')}`);
+            process.exit(1);
+          }
+          NODE
