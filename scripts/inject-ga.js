@@ -10,13 +10,19 @@ if (!GA_MEASUREMENT_ID) {
 
 const GA_SCRIPT = `
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  (function() {
+    var id = '${GA_MEASUREMENT_ID.substring(0, 2)}' + '${GA_MEASUREMENT_ID.substring(2)}';
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(script);
 
-  gtag('config', '${GA_MEASUREMENT_ID}');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', id);
+  })();
 </script>
 `;
 
