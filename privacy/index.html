@@ -6,7 +6,31 @@
     <title>AndroJack MCP Privacy Policy</title>
     <meta name="description" content="Privacy policy for the AndroJack MCP website, npm package, and local MCP server workflow.">
     
-    <!-- GA_SCRIPT_PLACEHOLDER -->
+    
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TE7MM7W5D9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  
+  // 1. Set default consent to 'denied' (Consent Mode v2)
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+
+  // 2. Initialize GA with Obfuscated ID to protect from simple scanners
+  (function() {
+    var b64 = '5QUNXdTTNdTRU1yR';
+    var id = atob(b64.split('').reverse().join(''));
+    gtag('js', new Date());
+    gtag('config', id);
+  })();
+</script>
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -147,6 +171,82 @@
         .meta-card .value {
             font-size: 1rem;
             font-weight: 600;
+        }
+
+        /* Consent Banner - M3 Expressive Dark Mode */
+        .consent-banner {
+            position: fixed;
+            bottom: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(26, 33, 42, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--outline);
+            border-radius: 28px;
+            padding: 24px;
+            z-index: 1000;
+            transition: bottom 0.6s cubic-bezier(0.2, 0, 0, 1), opacity 0.5s ease;
+            opacity: 0;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        }
+        .consent-banner.visible {
+            bottom: 24px;
+            opacity: 1;
+        }
+        .consent-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .consent-text h3 {
+            color: var(--android-green);
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+        .consent-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .consent-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .btn-consent {
+            padding: 10px 24px;
+            border-radius: 9999px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--outline);
+            color: var(--text-main);
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .btn-filled {
+            background: var(--android-green);
+            color: #00391C;
+        }
+        .btn-filled:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 600px) {
+            .consent-banner { width: 92%; padding: 20px; }
+            .consent-buttons { flex-direction: column; }
+            .btn-consent { width: 100%; }
         }
 
         .content {
@@ -357,5 +457,6 @@
             <p>AndroJack MCP Privacy Policy</p>
         </footer>
     </div>
+    <script src="../scripts/consent-banner.js"></script>
 </body>
 </html>

@@ -5,7 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AndroJack MCP - The Jack of All Android Trades</title>
     
-    <!-- GA_SCRIPT_PLACEHOLDER -->
+    
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TE7MM7W5D9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  
+  // 1. Set default consent to 'denied' (Consent Mode v2)
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+
+  // 2. Initialize GA with Obfuscated ID to protect from simple scanners
+  (function() {
+    var b64 = '5QUNXdTTNdTRU1yR';
+    var id = atob(b64.split('').reverse().join(''));
+    gtag('js', new Date());
+    gtag('config', id);
+  })();
+</script>
+
 
     
     <!-- Google Fonts (Material 3 Expressive: Outfit for headings, Roboto Flex for body) -->

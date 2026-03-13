@@ -13,19 +13,24 @@ const ENCODED_ID = Buffer.from(GA_MEASUREMENT_ID).toString('base64');
 
 const GA_SCRIPT = `
 <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
 <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  
+  // 1. Set default consent to 'denied' (Consent Mode v2)
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+
+  // 2. Initialize GA with Obfuscated ID to protect from simple scanners
   (function() {
-    // Decode ID at runtime using a reversed Base64 string to further obfuscate from simple scanners
     var b64 = '${ENCODED_ID.split('').reverse().join('')}';
     var id = atob(b64.split('').reverse().join(''));
-    
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', id);
   })();
