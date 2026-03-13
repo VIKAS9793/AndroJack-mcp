@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "" # No build command strictly needed for vanilla HTML
+  command = "node scripts/inject-ga.js" # Injects GA tag securely during build
 
 [[redirects]]
   from = "/privacy"
