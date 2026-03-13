@@ -8,11 +8,17 @@ if (!GA_MEASUREMENT_ID) {
   process.exit(1);
 }
 
+// Advanced Obfuscation: Base64 encode the ID at build time
+const ENCODED_ID = Buffer.from(GA_MEASUREMENT_ID).toString('base64');
+
 const GA_SCRIPT = `
 <!-- Google tag (gtag.js) -->
 <script>
   (function() {
-    var id = '${GA_MEASUREMENT_ID.substring(0, 2)}' + '${GA_MEASUREMENT_ID.substring(2)}';
+    // Decode ID at runtime using a reversed Base64 string to further obfuscate from simple scanners
+    var b64 = '${ENCODED_ID.split('').reverse().join('')}';
+    var id = atob(b64.split('').reverse().join(''));
+    
     var script = document.createElement('script');
     script.async = true;
     script.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;

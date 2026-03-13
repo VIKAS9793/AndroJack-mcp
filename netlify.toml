@@ -1,6 +1,8 @@
 [build]
   publish = "."
   command = "node scripts/inject-ga.js" # Injects GA tag securely during build
+  [build.environment]
+    SECRETS_SCAN_OMIT_KEYS = "GA_MEASUREMENT_ID"
 
 [[redirects]]
   from = "/privacy"
