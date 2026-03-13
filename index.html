@@ -132,6 +132,82 @@
 
         /* Base Layouts */
         main { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+
+        /* Consent Banner - M3 Expressive Dark Mode */
+        .consent-banner {
+            position: fixed;
+            bottom: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(26, 33, 42, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 24px;
+            z-index: 1000;
+            transition: bottom 0.6s cubic-bezier(0.2, 0, 0, 1), opacity 0.5s ease;
+            opacity: 0;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        }
+        .consent-banner.visible {
+            bottom: 24px;
+            opacity: 1;
+        }
+        .consent-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .consent-text h3 {
+            color: var(--android-green);
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+        .consent-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .consent-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .btn-consent {
+            padding: 10px 24px;
+            border-radius: 9999px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .btn-filled {
+            background: var(--android-green);
+            color: #00391C;
+        }
+        .btn-filled:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 600px) {
+            .consent-banner { width: 92%; padding: 20px; }
+            .consent-buttons { flex-direction: column; }
+            .btn-consent { width: 100%; }
+        }
         .section-header { text-align: center; margin-bottom: 3.5rem; }
         .section-header h2 { font-size: 2.75rem; margin-bottom: 0.75rem; }
         .section-header p { color: var(--text-muted); font-size: 1.15rem; }
@@ -1109,5 +1185,6 @@
             updateMetricsRefreshed();
         });
     </script>
+    <script src="scripts/consent-banner.js"></script>
 </body>
 </html>
