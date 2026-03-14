@@ -680,6 +680,30 @@
         }
         .animate-bounce-in { animation: bounceIn 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
         
+        /* Skeleton Shimmer for CLS (Mobile) */
+        @keyframes skeleton-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 2s infinite linear;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .mini-stat {
+            min-height: 104px; /* Matches populated height on mobile */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .mini-value.loading {
+            min-height: 36px;
+            width: 80px;
+            margin-top: 4px;
+        }
+
         .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
         .delay-1 { animation-delay: 0.15s; }
         .delay-2 { animation-delay: 0.3s; }
@@ -943,8 +967,6 @@
             <!-- Product Visual Showoff -->
             <div class="product-showcase fade-in-up delay-2">
                 <picture>
-                    <source srcset="assets/killer_argument.avif" type="image/avif">
-                    <source srcset="assets/killer_argument.webp" type="image/webp">
                     <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img" width="1000" height="535" loading="lazy" decoding="async" onerror="this.style.display='none'">
                 </picture>
             </div>
@@ -976,11 +998,11 @@
                     <div class="mini-stat-grid">
                         <div class="mini-stat">
                             <span class="mini-label">Official 7-day total</span>
-                            <div class="mini-value" id="weekly-downloads">Loading...</div>
+                            <div class="mini-value loading skeleton" id="weekly-downloads"></div>
                         </div>
                         <div class="mini-stat">
                             <span class="mini-label">Published version</span>
-                            <div class="mini-value mini-value-small" id="npm-version">Loading...</div>
+                            <div class="mini-value mini-value-small loading skeleton" id="npm-version" style="width: 50px;"></div>
                         </div>
                     </div>
                     <div class="traction-actions">
@@ -1007,11 +1029,11 @@
                     <div class="mini-stat-grid">
                         <div class="mini-stat">
                             <span class="mini-label">Official total installs</span>
-                            <div class="mini-value" id="vscode-downloads">Loading...</div>
+                            <div class="mini-value loading skeleton" id="vscode-downloads"></div>
                         </div>
                         <div class="mini-stat">
                             <span class="mini-label">Published version</span>
-                            <div class="mini-value mini-value-small" id="vscode-version">Loading...</div>
+                            <div class="mini-value mini-value-small loading skeleton" id="vscode-version" style="width: 50px;"></div>
                         </div>
                     </div>
                     <div class="traction-actions">
@@ -1146,6 +1168,7 @@
         function setMetricNumber(elementId, value) {
             const element = document.getElementById(elementId);
             if (!element) return;
+            element.classList.remove('loading', 'skeleton');
             if (!Number.isFinite(value) || value < 0) {
                 element.textContent = 'Unavailable';
                 return;
@@ -1156,6 +1179,8 @@
         function setMetricText(elementId, value) {
             const element = document.getElementById(elementId);
             if (!element) return;
+            element.classList.remove('loading', 'skeleton');
+            element.style.width = 'auto';
             element.textContent = value || 'Unavailable';
         }
 
