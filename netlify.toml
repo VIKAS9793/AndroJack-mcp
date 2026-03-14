@@ -2,7 +2,7 @@
   publish = "."
   command = "node scripts/inject-ga.js && node scripts/inject-indexnow.js" # Injects tags securely during build
   [build.environment]
-    SECRETS_SCAN_OMIT_KEYS = "GA_MEASUREMENT_ID"
+    SECRETS_SCAN_OMIT_KEYS = "GA_MEASUREMENT_ID, INDEXNOW_KEY"
 
 [[redirects]]
   from = "/privacy"
