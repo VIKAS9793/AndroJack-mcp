@@ -8,6 +8,10 @@ AndroJack MCP is a documentation-grounded Android engineering MCP server. This e
 
 Install the extension in VS Code, or use the npm package directly in other MCP clients. For this release, the wrapper launches `npx -y androjack-mcp@1.6.0` so Marketplace installs resolve to the exact reviewed MCP build. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
 
+## 🌐 Official Website
+
+**[androjack-web.netlify.app](https://androjack-web.netlify.app)** — live traction metrics, full install guide, and product demo.
+
 ## 🚀 Why AndroJack?
 Stop relying on AI models trained on outdated data. AndroJack grounds your AI assistant in real-time, verified Android documentation and modern Android engineering practices.
 
