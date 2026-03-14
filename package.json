@@ -1,0 +1,12 @@
+{
+  "name": "androjack-web",
+  "version": "1.0.0",
+  "description": "AndroJack MCP Web Landing Page",
+  "main": "index.html",
+  "scripts": {
+    "convert:images": "node scripts/convert-images.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

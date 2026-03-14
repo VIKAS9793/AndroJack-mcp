@@ -2,6 +2,23 @@
 <html lang="en">
 <head>
     <!-- ══ Primary SEO ══════════════════════════════════════════ -->
+    <!-- ══ Preconnect: external APIs used by live metrics ════════ -->
+    <!-- npm Registry API -->
+    <link rel="preconnect" href="https://registry.npmjs.org" />
+    <link rel="dns-prefetch" href="https://registry.npmjs.org" />
+    
+    <!-- npm Downloads API -->
+    <link rel="preconnect" href="https://api.npmjs.org" />
+    <link rel="dns-prefetch" href="https://api.npmjs.org" />
+    
+    <!-- VS Code Marketplace API -->
+    <link rel="preconnect" href="https://marketplace.visualstudio.com" />
+    <link rel="dns-prefetch" href="https://marketplace.visualstudio.com" />
+    
+    <!-- GitHub (if used) -->
+    <link rel="preconnect" href="https://api.github.com" />
+    <link rel="dns-prefetch" href="https://api.github.com" />
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="jz6TvIapWs3LK9imvigZfsgs5gm7haQflaumQC70o5M" />
@@ -967,7 +984,24 @@
             <!-- Product Visual Showoff -->
             <div class="product-showcase fade-in-up delay-2">
                 <picture>
-                    <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img" width="1000" height="535" loading="lazy" decoding="async" onerror="this.style.display='none'">
+                  <source
+                    type="image/webp"
+                    srcSet="
+                      assets/killer_argument-480w.webp  480w,
+                      assets/killer_argument-800w.webp  800w,
+                      assets/killer_argument.webp       1200w
+                    "
+                    sizes="(max-width: 600px) 480px, (max-width: 900px) 800px, 1200px"
+                  />
+                  <img
+                    src="assets/killer_argument.png"
+                    alt="AndroJack MCP Grounding Demonstration"
+                    width="640"
+                    height="640"
+                    loading="lazy"
+                    decoding="async"
+                    style="width: 100%; height: auto;"
+                  />
                 </picture>
             </div>
         </section>
@@ -996,13 +1030,13 @@
                         <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="traction-link">Open package</a>
                     </div>
                     <div class="mini-stat-grid">
-                        <div class="mini-stat">
+                        <div class="mini-stat" style="min-height: 2.5rem;">
                             <span class="mini-label">Official 7-day total</span>
-                            <div class="mini-value loading skeleton" id="weekly-downloads"></div>
+                            <div class="mini-value loading skeleton" id="weekly-downloads" style="min-height: 2.5rem;"></div>
                         </div>
-                        <div class="mini-stat">
+                        <div class="mini-stat" style="min-height: 2.5rem;">
                             <span class="mini-label">Published version</span>
-                            <div class="mini-value mini-value-small loading skeleton" id="npm-version" style="width: 50px;"></div>
+                            <div class="mini-value mini-value-small loading skeleton" id="npm-version" style="width: 50px; min-height: 2.5rem;"></div>
                         </div>
                     </div>
                     <div class="traction-actions">
@@ -1027,13 +1061,13 @@
                         <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="traction-link">Open listing</a>
                     </div>
                     <div class="mini-stat-grid">
-                        <div class="mini-stat">
+                        <div class="mini-stat" style="min-height: 2.5rem;">
                             <span class="mini-label">Official total installs</span>
-                            <div class="mini-value loading skeleton" id="vscode-downloads"></div>
+                            <div class="mini-value loading skeleton" id="vscode-downloads" style="min-height: 2.5rem;"></div>
                         </div>
-                        <div class="mini-stat">
+                        <div class="mini-stat" style="min-height: 2.5rem;">
                             <span class="mini-label">Published version</span>
-                            <div class="mini-value mini-value-small loading skeleton" id="vscode-version" style="width: 50px;"></div>
+                            <div class="mini-value mini-value-small loading skeleton" id="vscode-version" style="width: 50px; min-height: 2.5rem;"></div>
                         </div>
                     </div>
                     <div class="traction-actions">
