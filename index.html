@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <!-- ══ Primary SEO ══════════════════════════════════════════ -->
-    <!-- ══ Preconnect: external APIs used by live metrics ════════ -->
+    <!-- ══ Preconnect: the 4 most critical origins ════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://registry.npmjs.org" />
     <link rel="preconnect" href="https://api.npmjs.org" />
-    <link rel="preconnect" href="https://marketplace.visualstudio.com" />
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="jz6TvIapWs3LK9imvigZfsgs5gm7haQflaumQC70o5M" />
+    <!-- INDEXNOW_VERIFICATION_PLACEHOLDER -->
     <title>AndroJack MCP — Documentation-Grounded Android Dev Verification</title>
     <meta name="description"
           content="AndroJack MCP is a 21-tool Model Context Protocol server
@@ -77,10 +79,8 @@
     <!-- GA_SCRIPT_PLACEHOLDER -->
 
     
-    <!-- Google Fonts (Material 3 Expressive: Outfit for headings, Roboto Flex for body) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
     <!-- INLINED & M3E OVERHAULED style.css -->
@@ -155,18 +155,19 @@
         .nav-links a { 
             color: var(--text-muted); 
             text-decoration: none; 
-            margin-left: 2rem; 
-            padding: 0.5rem 0; /* Ensures 24px+ touch target height */
+            margin-left: 0.75rem; 
+            padding: 0.5rem 1.2rem; 
             font-weight: 500; 
-            transition: color 0.3s cubic-bezier(0.2, 0, 0, 1); 
-        }
-        .nav-links a:hover { color: var(--text-main); }
-        .nav-btn {
-            background: var(--surface-highest);
+            transition: all 0.2s cubic-bezier(0, 0, 0, 1); 
             border: 1px solid var(--glass-border);
-            padding: 0.6rem 1.2rem;
-            border-radius: 9999px; /* M3 Pill Shape */
-            color: var(--text-main) !important;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-links a:hover { 
+            color: var(--text-main); 
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         /* Typography */
@@ -302,488 +303,42 @@
             gap: 0.5rem;
         }
         .btn-primary {
-            background: var(--mcp-purple);
-            color: #062E6F; /* M3 On-Primary */
-            box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.3);
+            background: transparent;
+            color: var(--mcp-purple);
+            border: 1.5px solid var(--mcp-purple);
         }
         .btn-primary:hover { 
-            background: #D3E3FD; 
-            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3);
+            background: rgba(168, 199, 250, 0.1); 
             transform: translateY(-2px);
         }
         .btn-secondary {
-            background: var(--glass-bg);
+            background: transparent;
             color: var(--text-main);
-            border: 1px solid var(--glass-border);
+            border: 1.5px solid var(--glass-border);
         }
-        .btn-secondary:hover { background: var(--surface-highest); transform: translateY(-2px); }
+        .btn-secondary:hover { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-color: var(--text-main);
+            transform: translateY(-2px); 
+        }
         .btn-outline {
             background: transparent;
-            border: 1px solid var(--surface-highest);
+            border: 1.5px solid var(--surface-highest);
             color: var(--text-main);
         }
         .btn-outline:hover { border-color: var(--text-main); background: var(--glass-bg); }
 
-        /* Bouncy Hovers */
-        .bounce-hover:hover { transform: translateY(-4px) scale(1.02); }
-
-        /* Terminal Illusion (M3 Spec) */
-        .terminal-card {
-            background: var(--surface-highest);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px; /* M3 Large Shape */
-            width: 100%;
-            max-width: 500px;
-            text-align: left;
-            overflow: hidden;
-            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3); /* M3 Elevation 2 */
-            margin: 0 auto 3rem;
-        }
-        .terminal-header {
-            background: var(--glass-bg);
-            padding: 0.8rem 1.2rem;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .dots span {
-            display: inline-block;
-            width: 12px; height: 12px;
-            border-radius: 50%; margin-right: 8px;
-        }
-        .dots span:nth-child(1) { background: var(--error-red); }
-        .dots span:nth-child(2) { background: #FBBF24; }
-        .dots span:nth-child(3) { background: var(--android-green); }
-        .terminal-title { margin-left: auto; margin-right: auto; color: var(--text-muted); font-size: 0.85rem; font-family: 'Fira Code', monospace;}
-        .terminal-body { padding: 1.5rem; font-family: 'Fira Code', monospace; font-size: 1.1rem; color: var(--mcp-purple);}
-        .prompt { color: var(--text-muted); margin-right: 8px;}
-        .command-list {
-            display: grid;
-            gap: 0.85rem;
-        }
-        .quick-command {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-        .quick-command .command-label {
-            min-width: 110px;
-            color: var(--text-muted);
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        /* Distribution Paths */
-        .distribution-paths {
-            width: 100%;
-            max-width: 1040px;
-            margin: 0 auto 4rem;
-        }
-        .distribution-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.5rem;
-        }
-        .distribution-card {
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            padding: 1.2rem;
-        }
-        .distribution-head {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.7rem;
-        }
-        .distribution-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .distribution-icon svg {
-            width: 24px;
-            height: 24px;
-        }
-        .distribution-icon-npm {
-            background: rgba(203, 56, 55, 0.16);
-            color: #f88379;
-        }
-        .distribution-icon-vscode {
-            background: rgba(0, 122, 204, 0.16);
-            color: #4fc3ff;
-        }
-        .distribution-kicker {
-            display: inline-block;
-            color: var(--text-muted);
-            font-size: 0.74rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.2rem;
-        }
-        .distribution-card h3 {
-            font-size: 1.12rem;
-            margin-bottom: 0.15rem;
-        }
-        .distribution-card p {
-            color: var(--text-muted);
-            font-size: 0.84rem;
-            line-height: 1.35;
-        }
-        .distribution-command {
-            font-family: 'Fira Code', monospace;
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 0.75rem 0.85rem;
-            font-size: 0.9rem;
-            overflow-x: auto;
-        }
-        .distribution-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-        .distribution-note {
-            color: var(--text-muted);
-            font-size: 0.78rem;
-            line-height: 1.28;
-        }
-
-        /* Animated Worker Metaphor Container */
-        .metaphor-container {
-            width: 100%;
-            max-width: 700px;
-            margin: 0 auto 4rem auto;
-            background: var(--glass-bg);
-            border-radius: 32px;
-            border: 1px solid var(--glass-border);
-            padding: 1.5rem;
-            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .metaphor-svg { width: 100%; height: auto; display: block; }
-        
-        /* Metaphor Animations */
-        .svg-float { animation: float 4s ease-in-out infinite; }
-        .svg-wrench { animation: fix 1.2s ease-in-out infinite alternate; transform-origin: 65% 55%; }
-        .svg-gear { animation: spin 8s linear infinite; transform-origin: center; }
-        .svg-gear-reverse { animation: spin-reverse 6s linear infinite; transform-origin: center; }
-        .svg-pulse-code { animation: pulseOpacity 2s ease-in-out infinite alternate; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        @keyframes fix { 0% { transform: rotate(-25deg); } 100% { transform: rotate(15deg); } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
-        @keyframes pulseOpacity { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* Product Look */
-        .product-showcase {
-            max-width: 1000px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 10;
-        }
-        .showcase-img {
-            width: 100%;
-            height: auto;
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0px 8px 12px 6px rgba(0,0,0,0.15), 0px 4px 4px 0px rgba(0,0,0,0.3); /* M3 Elevation 4 */
-        }
-
-        /* Glassmorphism Cards: M3E Extra Large Shapes */
-        .glass-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 32px; /* M3E Extra Large Size */
-            padding: 2.5rem;
-            transition: all 0.4s cubic-bezier(0.2, 0, 0, 1); 
-            box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15); /* M3 Elevation 1 */
-        }
-        .bouncy-card:hover { 
-            transform: translateY(-8px); 
-            border-color: rgba(255, 255, 255, 0.15); 
-            box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3); /* M3 Elevation 2 */
-        }
-
-        /* Metrics Section */
-        .metrics { padding: 4.5rem 0; }
-        .traction-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-        .traction-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-            padding: 1.4rem;
-        }
-        .traction-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-        }
-        .traction-platform {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-        .traction-platform .distribution-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-        }
-        .traction-platform h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.1rem;
-        }
-        .traction-platform p {
-            color: var(--text-muted);
-            font-size: 0.88rem;
-        }
-        .traction-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.84rem;
-            white-space: nowrap;
-        }
-        .traction-link:hover {
-            color: var(--text-main);
-        }
-        .mini-stat-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.75rem;
-        }
-        .mini-stat {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 0.85rem 0.95rem;
-        }
-        .mini-label {
-            display: block;
-            color: var(--text-muted);
-            font-size: 0.76rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 0.45rem;
-        }
-        .mini-value {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--mcp-purple);
-            line-height: 1;
-        }
-        .mini-value-small {
-            font-size: 1.2rem;
-        }
-        .traction-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-        .metrics-source {
-            color: var(--text-muted);
-            font-size: 0.78rem;
-            line-height: 1.35;
-        }
-        .metrics-note {
-            margin-top: 1rem;
-            color: var(--text-muted);
-            font-size: 0.84rem;
-            line-height: 1.5;
-            text-align: center;
-        }
-        .metrics-note strong {
-            color: var(--text-main);
-            font-weight: 600;
-        }
-        .distribution-actions .btn,
-        .traction-actions .btn {
-            padding: 0.72rem 1rem;
-            font-size: 0.95rem;
-        }
-
-        /* Features */
-        .features { padding: 4.5rem 0; }
-        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
-        .icon-wrap { 
-            width: 64px; height: 64px;
-            border-radius: 24px; /* M3 Medium Shape */
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 1.5rem; 
-        }
-        .android-burst { background: rgba(61, 220, 132, 0.15); }
-        .mcp-burst { background: rgba(168, 199, 250, 0.15); }
-        .github-burst { background: rgba(241, 224, 90, 0.15); }
-        .error-burst { background: rgba(255, 180, 171, 0.15); }
-        
-        .feature-grid h3 { font-size: 1.5rem; margin-bottom: 1rem; }
-        .feature-grid p { color: var(--text-muted); line-height: 1.7;}
-
-        /* Philosophy Section */
-        .philosophy { padding: 4.5rem 0; }
-        .philosophy-card { margin-top: 2rem; }
-        .philosophy-card h3 { font-size: 1.7rem; color: var(--android-green); margin-bottom: 1rem; margin-top: 2.5rem; }
-        .philosophy-card h3:first-of-type { margin-top: 0; color: var(--error-red);}
-        .philosophy-card p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; }
-
-        /* Use Cases Section */
-        .use-cases { padding: 4.5rem 0; }
-        .use-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        
-        .use-case-pro { border-top: 4px solid var(--android-green); }
-        .use-case-pro h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
-        
-        .use-case-con { border-top: 4px solid var(--error-red); }
-        .use-case-con h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
-        
-        .use-case-list { list-style: none; color: var(--text-muted); padding-left: 0; }
-        .use-case-list li { margin-bottom: 1.2rem; position: relative; padding-left: 1.5rem; line-height: 1.6; }
-        .use-case-list li::before { content: "•"; position: absolute; left: 0; font-weight: bold; font-size: 1.2rem; line-height: 1;}
-        .use-case-pro .use-case-list li::before { color: var(--android-green); }
-        .use-case-con .use-case-list li::before { color: var(--error-red); }
-        .use-case-list strong { color: var(--text-main); font-weight: 600; }
-
-        /* Contact Block */
-        .contact-block {
-            text-align: center;
-            margin: 4.5rem 0;
-            background: linear-gradient(180deg, rgba(168,199,250,0.05) 0%, rgba(255,255,255,0.01) 100%);
-        }
-        .contact-block h2 { display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
-        .contact-block p { margin: 1rem 0 2.5rem; color: var(--text-muted); font-size: 1.1rem;}
-        .contact-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;}
-
-        /* Footer */
-        footer { text-align: center; padding: 3rem 5%; color: var(--text-muted); border-top: 1px solid var(--glass-border); }
-        footer a { color: var(--mcp-purple); text-decoration: none; font-weight: 500; transition: color 0.3s;}
-        footer a:hover { color: var(--text-main); }
-
-        /* Animations */
-        @keyframes drift {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(30px) scale(1.1); }
-        }
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .animate-bounce-in { animation: bounceIn 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
-        
-        /* Skeleton Shimmer for CLS (Mobile) - Composited for 60fps */
-        @keyframes skeleton-shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        .skeleton {
-            background: rgba(255,255,255,0.04);
-            position: relative;
-            overflow: hidden;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .skeleton::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            animation: skeleton-shimmer 1.5s infinite linear;
-        }
-        .mini-stat {
-            min-height: 104px; /* Matches populated height on mobile */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .mini-value.loading {
-            min-height: 36px;
-            width: 80px;
-            margin-top: 4px;
-        }
-
-        .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
-        .delay-1 { animation-delay: 0.15s; }
-        .delay-2 { animation-delay: 0.3s; }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* Responsive Breakpoints (Preserved from original) */
-        @media (max-width: 900px) {
-            .distribution-grid, .traction-grid, .feature-grid, .use-cases-grid { grid-template-columns: 1fr; }
-            .hero-title { font-size: 3.2rem; }
-            .contact-links { flex-direction: column; }
-        }
 
         @media (max-width: 640px) {
-            nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.75rem;
-            }
-            .nav-links a {
-                margin-left: 0;
-            }
-            .mini-stat-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 0.6rem;
-            }
-            .mini-value {
-                font-size: 1.45rem;
-            }
-            .mini-value-small {
-                font-size: 1rem;
-            }
-            .quick-command .command-label {
-                min-width: 100%;
-            }
-            .distribution-card,
-            .traction-card {
-                padding: 1.1rem;
-            }
-            .traction-card {
-                gap: 0.7rem;
-                padding: 1rem;
-            }
-            .distribution-head,
-            .traction-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .distribution-command,
-            .mini-stat {
-                width: 100%;
-            }
-            .mini-label {
-                font-size: 0.68rem;
-            }
-            .metrics-source,
-            .metrics-note {
-                font-size: 0.76rem;
-            }
-            .traction-actions .btn {
-                padding: 0.64rem 0.9rem;
-                font-size: 0.9rem;
-            }
+            nav { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+            .nav-links a { margin-left: 0; }
+            .quick-command .command-label { min-width: 100%; }
         }
     </style>
+    <!-- Non-critical CSS loaded asynchronously to improve Mobile FCP/LCP -->
+    <link rel="stylesheet" href="assets/index-below.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="assets/index-below.css"></noscript>
 </head>
 <body>
     
@@ -814,7 +369,7 @@
             <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank">GitHub</a>
             <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank">VS Code</a>
             <a href="/privacy">Privacy</a>
-            <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank" class="nav-btn">NPM Registry</a>
+            <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank">NPM Registry</a>
         </div>
     </nav>
 

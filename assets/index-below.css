@@ -1,0 +1,265 @@
+/* assets/index-below.css - Non-critical CSS for AndroJack MCP */
+
+/* Bouncy Hovers */
+.bounce-hover:hover { transform: translateY(-4px) scale(1.02); }
+
+/* Bouncy Cards */
+.bouncy-card:hover { 
+    transform: translateY(-8px); 
+    border-color: rgba(255, 255, 255, 0.15); 
+    box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3); 
+}
+
+/* Metrics Section */
+.metrics { padding: 4.5rem 0; }
+.traction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+.traction-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem;
+}
+.distribution-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem;
+}
+.traction-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.traction-platform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+.traction-platform .distribution-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+}
+.traction-platform h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.1rem;
+}
+.traction-platform p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+.traction-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.84rem;
+    white-space: nowrap;
+}
+.traction-link:hover {
+    color: var(--text-main);
+}
+.mini-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+.mini-stat {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 0.85rem 0.95rem;
+}
+.mini-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.45rem;
+}
+.mini-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--mcp-purple);
+    line-height: 1;
+}
+.mini-value-small {
+    font-size: 1.2rem;
+}
+.distribution-command {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95rem;
+    color: var(--android-green);
+    margin: 0.5rem 0;
+    word-break: break-all;
+}
+.traction-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+.metrics-source {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+.metrics-note {
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    text-align: center;
+}
+.metrics-note strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+/* Features */
+.features { padding: 4.5rem 0; }
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.icon-wrap { 
+    width: 64px; height: 64px;
+    border-radius: 24px; 
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem; 
+}
+.android-burst { background: rgba(61, 220, 132, 0.15); }
+.mcp-burst { background: rgba(168, 199, 250, 0.15); }
+.github-burst { background: rgba(241, 224, 90, 0.15); }
+.error-burst { background: rgba(255, 180, 171, 0.15); }
+
+.feature-grid h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+.feature-grid p { color: var(--text-muted); line-height: 1.7;}
+
+/* Philosophy Section */
+.philosophy { padding: 4.5rem 0; }
+.philosophy-card { margin-top: 2rem; }
+.philosophy-card h3 { font-size: 1.7rem; color: var(--android-green); margin-bottom: 1rem; margin-top: 2.5rem; }
+.philosophy-card h3:first-of-type { margin-top: 0; color: var(--error-red);}
+.philosophy-card p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; }
+
+/* Use Cases Section */
+.use-cases { padding: 4.5rem 0; }
+.use-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+.use-case-pro { border-top: 4px solid var(--android-green); }
+.use-case-pro h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
+
+.use-case-con { border-top: 4px solid var(--error-red); }
+.use-case-con h3 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 1.5rem; }
+
+.use-case-list { list-style: none; color: var(--text-muted); padding-left: 0; }
+.use-case-list li { margin-bottom: 1.2rem; position: relative; padding-left: 1.5rem; line-height: 1.6; }
+.use-case-list li::before { content: "•"; position: absolute; left: 0; font-weight: bold; font-size: 1.2rem; line-height: 1;}
+.use-case-pro .use-case-list li::before { color: var(--android-green); }
+.use-case-con .use-case-list li::before { color: var(--error-red); }
+.use-case-list strong { color: var(--text-main); font-weight: 600; }
+
+/* Contact Block */
+.contact-block {
+    text-align: center;
+    margin: 4.5rem 0;
+    background: linear-gradient(180deg, rgba(168,199,250,0.05) 0%, rgba(255,255,255,0.01) 100%);
+}
+.contact-block h2 { display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+.contact-block p { margin: 1rem 0 2.5rem; color: var(--text-muted); font-size: 1.1rem;}
+.contact-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;}
+
+/* Footer */
+footer { text-align: center; padding: 3rem 5%; color: var(--text-muted); border-top: 1px solid var(--glass-border); }
+footer a { color: var(--mcp-purple); text-decoration: none; font-weight: 500; transition: color 0.3s;}
+footer a:hover { color: var(--text-main); }
+
+/* Skeleton Shimmer for CLS (Mobile) - Composited for 60fps */
+@keyframes skeleton-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+.skeleton {
+    background: rgba(255,255,255,0.04);
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    display: inline-block;
+}
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: skeleton-shimmer 1.5s infinite linear;
+}
+.mini-stat {
+    min-height: 104px; /* Matches populated height on mobile */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.mini-value.loading {
+    min-height: 36px;
+    width: 80px;
+    margin-top: 4px;
+}
+
+.fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* Responsive Breakpoints (Section-Specific) */
+@media (max-width: 900px) {
+    .distribution-grid, .traction-grid, .feature-grid, .use-cases-grid { grid-template-columns: 1fr; }
+    .contact-links { flex-direction: column; }
+}
+
+@media (max-width: 640px) {
+    .mini-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+    .mini-value {
+        font-size: 1.45rem;
+    }
+    .mini-value-small {
+        font-size: 1rem;
+    }
+    .distribution-card,
+    .traction-card {
+        padding: 1.1rem;
+    }
+    .traction-card {
+        gap: 0.7rem;
+        padding: 1rem;
+    }
+    .distribution-head,
+    .traction-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .mini-stat {
+        width: 100%;
+    }
+    .mini-label {
+        font-size: 0.68rem;
+    }
+    .metrics-source,
+    .metrics-note {
+        font-size: 0.76rem;
+    }
+    .traction-actions .btn {
+        padding: 0.64rem 0.9rem;
+        font-size: 0.9rem;
+    }
+}

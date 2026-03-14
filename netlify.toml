@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "node scripts/inject-ga.js" # Injects GA tag securely during build
+  command = "node scripts/inject-ga.js && node scripts/inject-indexnow.js" # Injects tags securely during build
   [build.environment]
     SECRETS_SCAN_OMIT_KEYS = "GA_MEASUREMENT_ID"
 

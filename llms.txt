@@ -23,7 +23,7 @@ documentation-backed code suggestions — not hallucinated APIs.
 - [Website](https://androjack-web.netlify.app)
 - [npm Package](https://www.npmjs.com/package/androjack-mcp)
 - [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=vikas9793.androjack-vscode)
-- [GitHub Repository](https://github.com/vikas9793/androjack-mcp)
+- [GitHub Repository](https://github.com/VIKAS9793/AndroJack-mcp)
 
 ## Installation
 

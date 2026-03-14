@@ -2,6 +2,7 @@
   "name": "androjack-web",
   "version": "1.0.0",
   "description": "AndroJack MCP Web Landing Page",
+  "homepage": "https://androjack-web.netlify.app",
   "main": "index.html",
   "scripts": {
     "convert:images": "node scripts/convert-images.mjs"

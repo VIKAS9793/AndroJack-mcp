@@ -1,5 +1,7 @@
 # AndroJack MCP - Product Landing Page
 
+**[→ androjack-web.netlify.app](https://androjack-web.netlify.app)** — live demo, install guides, and traction metrics.
+
 This branch (`androjack-web-page`) contains the sources for the AndroJack MCP product landing page. 
 
 It is completely isolated from the main Model Context Protocol server codebase (`main` branch) to optimize for static site hosting platforms like **Netlify** or **GitHub Pages**.
