@@ -1,0 +1,64 @@
+# ============================================================
+# AndroJack MCP — robots.txt
+# Updated: 2026-03-14
+# Spec version: 1.0.0
+# ============================================================
+
+# ── Default: allow all standard crawlers ─────────────────────
+User-agent: *
+Allow: /
+Crawl-delay: 1
+Sitemap: https://androjack-web.netlify.app/sitemap.xml
+
+# ── Google ───────────────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+
+# Blocks Google from using content for AI model training
+# while keeping pages in search index.
+User-agent: Google-Extended
+Disallow: /
+
+# ── Bing / Microsoft ─────────────────────────────────────────
+User-agent: Bingbot
+Allow: /
+
+# ── AI Retrieval Agents (allow — surfaces in AI search) ──────
+# These bots serve live answers; allowing them increases
+# AndroJack's visibility in ChatGPT, Perplexity, Claude, etc.
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+# ── AI Training Crawlers (block — prevents dataset scraping) ──
+# These bots harvest content for model training only.
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+# ── Sitemap pointer (also declared above under * block) ───────
+Sitemap: https://androjack-web.netlify.app/sitemap.xml
