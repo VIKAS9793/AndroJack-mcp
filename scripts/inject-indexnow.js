@@ -47,12 +47,13 @@ filesToUpdate.forEach(file => {
 });
 
 // 2. Create the Verification Text File (Option 1 of IndexNow spec)
-// This is necessary for Bing verification, so we white-list this key in netlify.toml
-const verificationFilePath = path.join(__dirname, '..', 'public', `${INDEXNOW_KEY}.txt`);
+// Path: <KEY>.txt (ROOT of the website)
+// Content: <KEY>
+const verificationFilePath = path.join(__dirname, '..', `${INDEXNOW_KEY}.txt`);
 
 try {
   fs.writeFileSync(verificationFilePath, INDEXNOW_KEY, 'utf8');
-  console.log(`Successfully created IndexNow verification file: public/${INDEXNOW_KEY}.txt`);
+  console.log(`Successfully created IndexNow verification file: ${INDEXNOW_KEY}.txt`);
 } catch (error) {
   console.error(`Error creating IndexNow verification file: ${error.message}`);
   process.exit(1);
