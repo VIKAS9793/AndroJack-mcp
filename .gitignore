@@ -4,3 +4,8 @@ node_modules/
 npm-debug.log
 .DS_Store
 build/
+
+# Internal Specs & Plans
+*_SPEC.md
+*_PLAN.md
+VISIBILITY_ACTION_PLAN.md
