@@ -218,14 +218,10 @@ Also submit these external pages that link TO AndroJack
    - Enter: `https://androjack-web.netlify.app`
    - Click **Add**
 
-**4. Verify ownership — choose "XML file" method (fastest for Netlify):**
-   - Download the provided `BingSiteAuth.xml` file
-   - Place it at: `/public/BingSiteAuth.xml` in your repo
-   - Deploy to Netlify
-   - Click **Verify** in Bing Webmaster Tools
-
-   Alternative (if GSC is already set up): use **"Import from Google Search Console"**
-   — this auto-verifies and imports your sitemap in one step.
+**4. Verify ownership — Secure Import (Recommended):**
+   - Click **"Add a site"**
+   - Choose **"Import from Google Search Console"**
+   - This auto-verifies your ownership without needing any manual file uploads or meta tags on your server.
 
 **5. Submit sitemap:**
    - Left sidebar → **Sitemaps**
