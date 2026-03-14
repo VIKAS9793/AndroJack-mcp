@@ -75,7 +75,7 @@
     <!-- Google Fonts (Material 3 Expressive: Outfit for headings, Roboto Flex for body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
     <!-- INLINED & M3E OVERHAULED style.css -->
@@ -88,7 +88,7 @@
             --surface-highest: #2E3541; /* M3 Surface Container Highest */
             
             --text-main: #E2E2E9; /* M3 On-Surface */
-            --text-muted: #C2C7CF; /* M3 On-Surface Variant */
+            --text-muted: #D1D4D9; /* M3 On-Surface Variant (WCAG 2.2 Compliant) */
             
             --android-green: #3DDC84; /* Kept brand identity */
             --mcp-purple: #A8C7FA; /* Upgraded to M3 Primary Blue/Purple tint */
@@ -131,6 +131,7 @@
             filter: blur(140px);
             z-index: -1;
             opacity: 0.12;
+            will-change: transform, opacity;
             animation: drift 12s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
         }
         .glow-green { background: var(--android-green); top: -200px; left: -100px; }
@@ -150,6 +151,7 @@
             color: var(--text-muted); 
             text-decoration: none; 
             margin-left: 2rem; 
+            padding: 0.5rem 0; /* Ensures 24px+ touch target height */
             font-weight: 500; 
             transition: color 0.3s cubic-bezier(0.2, 0, 0, 1); 
         }
@@ -272,7 +274,13 @@
         .badge-android { background: rgba(61, 220, 132, 0.1); color: var(--android-green); border: 1px solid rgba(61, 220, 132, 0.3); }
         .badge-mcp { background: rgba(168, 199, 250, 0.1); color: var(--mcp-purple); border: 1px solid rgba(168, 199, 250, 0.3); }
 
-        .hero-title { font-size: 5rem; line-height: 1.05; margin-bottom: 1.5rem; letter-spacing: -2px; }
+        .hero-title { 
+            font-size: 5rem; 
+            line-height: 1.05; 
+            margin-bottom: 1.5rem; 
+            letter-spacing: -2px; 
+            text-wrap: balance; 
+        }
         .hero-subtitle { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem; }
 
         /* Buttons (M3E Standard) */
@@ -747,9 +755,9 @@
     <div class="glow glow-green"></div>
     <div class="glow glow-purple"></div>
 
-    <nav>
+    <nav aria-label="Main Navigation">
         <div class="logo" style="display: flex; align-items: center;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;" fetchpriority="high" role="img">
                 <rect x="4" y="9" width="16" height="11" rx="3" fill="url(#logo-grad)"/>
                 <path d="M8 9V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V9" stroke="url(#logo-grad)" stroke-width="2"/>
                 <circle cx="8.5" cy="14.5" r="1.5" fill="#1a1d24"/>
@@ -782,7 +790,7 @@
                 <span class="badge badge-mcp">MCP Protocol Ready</span>
             </div>
             
-            <h1 class="hero-title animate-bounce-in">
+            <h1 class="hero-title animate-bounce-in" fetchpriority="high">
                 The <span class="text-gradient">Jack</span> of All <br/> Android Trades
             </h1>
             
@@ -833,7 +841,7 @@
                             </div>
                             <div>
                                 <span class="distribution-kicker">Core MCP Server</span>
-                                <h3>Install from npm</h3>
+                                <h2>Install from npm</h2>
                                 <p>Best for Claude Desktop, Cursor, Windsurf, Kiro, and direct MCP installs.</p>
                             </div>
                         </div>
@@ -853,7 +861,7 @@
                             </div>
                             <div>
                                 <span class="distribution-kicker">IDE Wrapper</span>
-                                <h3>Install in VS Code</h3>
+                                <h2>Install in VS Code</h2>
                                 <p>Best for developers who want Marketplace install, updates, and IDE-native discovery.</p>
                             </div>
                         </div>
@@ -934,7 +942,11 @@
 
             <!-- Product Visual Showoff -->
             <div class="product-showcase fade-in-up delay-2">
-                <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img" onerror="this.style.display='none'">
+                <picture>
+                    <source srcset="assets/killer_argument.avif" type="image/avif">
+                    <source srcset="assets/killer_argument.webp" type="image/webp">
+                    <img src="assets/killer_argument.png" alt="AndroJack MCP Grounding Demonstration" class="showcase-img" width="1000" height="535" loading="lazy" decoding="async" onerror="this.style.display='none'">
+                </picture>
             </div>
         </section>
 
@@ -955,7 +967,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3>npm Registry</h3>
+                                <h2>npm Registry</h2>
                                 <p>Core MCP package traction</p>
                             </div>
                         </div>
@@ -986,7 +998,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3>VS Code Marketplace</h3>
+                                <h2>VS Code Marketplace</h2>
                                 <p>Wrapper extension traction</p>
                             </div>
                         </div>
@@ -1023,21 +1035,30 @@
             <div class="feature-grid">
                 <div class="glass-card bouncy-card">
                     <div class="icon-wrap android-burst">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--android-green);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--android-green);" role="img" aria-labelledby="icon-validator-title">
+                            <title id="icon-validator-title">Validator Icon</title>
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
                     </div>
                     <h3>Level 3 Validator</h3>
                     <p>Blocks AI from generating discontinued APIs like AsyncTask or ContextualFlowRow before you even see the code.</p>
                 </div>
                 <div class="glass-card bouncy-card">
                     <div class="icon-wrap mcp-burst">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--mcp-purple);"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--mcp-purple);" role="img" aria-labelledby="icon-mcp-title">
+                            <title id="icon-mcp-title">MCP Protocol Icon</title>
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
                     </div>
                     <h3>Android 16 Ready</h3>
                     <p>Enforces Play Store compliance for foldable architectures and large-screen WindowSizeClass rules automatically.</p>
                 </div>
                 <div class="glass-card bouncy-card">
                     <div class="icon-wrap github-burst">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f1e05a;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f1e05a;" role="img" aria-labelledby="icon-config-title">
+                            <title id="icon-config-title">Zero Config Icon</title>
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
                     </div>
                     <h3>Zero Configuration</h3>
                     <p>Compatible with Claude Desktop, Cursor, and Windsurf instantly via a single automated installation command.</p>

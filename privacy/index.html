@@ -36,7 +36,7 @@
             --surface: #1a212a;
             --outline: rgba(194, 199, 207, 0.14);
             --text-main: #e2e2e9;
-            --text-muted: #c2c7cf;
+            --text-muted: #D1D4D9; /* M3 On-Surface Variant (WCAG 2.2 Compliant) */
             --android-green: #3ddc84;
             --primary: #a8c7fa;
         }
@@ -312,7 +312,20 @@
 <body>
     <div class="page">
         <header class="topbar">
-            <a class="brand" href="/">AndroJack MCP</a>
+            <a class="brand" href="/" style="display: flex; align-items: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;" role="img">
+                    <title>AndroJack Logo</title>
+                    <rect x="4" y="9" width="16" height="11" rx="3" fill="url(#logo-grad)"/>
+                    <path d="M8 9V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V9" stroke="url(#logo-grad)" stroke-width="2"/>
+                    <defs>
+                        <linearGradient id="logo-grad" x1="4" y1="3" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#3ddc84"/>
+                            <stop offset="1" stop-color="#A8C7FA"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                AndroJack MCP
+            </a>
             <nav class="toplinks" aria-label="Privacy page links">
                 <a href="/">Home</a>
                 <a href="https://github.com/VIKAS9793/AndroJack-mcp" target="_blank" rel="noreferrer">GitHub</a>
