@@ -18,6 +18,7 @@
 <br/>
 
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
+[![Website](https://img.shields.io/badge/Website-androjack--web.netlify.app-0A7AFF?style=flat-square&logo=netlify&logoColor=white)](https://androjack-web.netlify.app)
 [![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
@@ -523,6 +524,8 @@ Each tool lists the **specific failure mode it prevents** — not just what it d
 ---
 
 ## 🚀 Quick Start — Zero Install Required
+
+**[→ androjack-web.netlify.app](https://androjack-web.netlify.app)** — live demo, install guides, and traction metrics.
 
 ### Option 0 — Anthropic Directory (pending connector approval)
 
