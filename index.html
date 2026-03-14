@@ -3,21 +3,9 @@
 <head>
     <!-- ══ Primary SEO ══════════════════════════════════════════ -->
     <!-- ══ Preconnect: external APIs used by live metrics ════════ -->
-    <!-- npm Registry API -->
     <link rel="preconnect" href="https://registry.npmjs.org" />
-    <link rel="dns-prefetch" href="https://registry.npmjs.org" />
-    
-    <!-- npm Downloads API -->
     <link rel="preconnect" href="https://api.npmjs.org" />
-    <link rel="dns-prefetch" href="https://api.npmjs.org" />
-    
-    <!-- VS Code Marketplace API -->
     <link rel="preconnect" href="https://marketplace.visualstudio.com" />
-    <link rel="dns-prefetch" href="https://marketplace.visualstudio.com" />
-    
-    <!-- GitHub (if used) -->
-    <link rel="preconnect" href="https://api.github.com" />
-    <link rel="dns-prefetch" href="https://api.github.com" />
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -697,17 +685,24 @@
         }
         .animate-bounce-in { animation: bounceIn 0.8s cubic-bezier(0.2, 0, 0, 1) forwards; }
         
-        /* Skeleton Shimmer for CLS (Mobile) */
+        /* Skeleton Shimmer for CLS (Mobile) - Composited for 60fps */
         @keyframes skeleton-shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
-            background-size: 200% 100%;
-            animation: skeleton-shimmer 2s infinite linear;
+            background: rgba(255,255,255,0.04);
+            position: relative;
+            overflow: hidden;
             border-radius: 4px;
             display: inline-block;
+        }
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            animation: skeleton-shimmer 1.5s infinite linear;
         }
         .mini-stat {
             min-height: 104px; /* Matches populated height on mobile */
