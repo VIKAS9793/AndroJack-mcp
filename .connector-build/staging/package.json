@@ -1,0 +1,89 @@
+{
+  "name": "androjack-mcp",
+  "version": "1.6.0",
+  "mcpName": "io.github.vikas9793/androjack-mcp",
+  "files": [
+    "assets/icon.png",
+    "build/",
+    "src/",
+    "config/",
+    "README.md",
+    "server.json",
+    "manifest.json"
+  ],
+  "description": "AndroJack: AI that actually knows Android. Real-time dependency tracking, modern architectures, and zero hallucinations.",
+  "keywords": [
+    "ai",
+    "android",
+    "androjack",
+    "compose",
+    "developer-tools",
+    "foldable",
+    "jetpack",
+    "kotlin",
+    "large-screen",
+    "mcp",
+    "offline-first",
+    "paging",
+    "scalability",
+    "tablet"
+  ],
+  "author": "Vikas Sahani <vikassahani17@gmail.com> (https://github.com/VIKAS9793)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
+  },
+  "homepage": "https://github.com/VIKAS9793/AndroJack-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/VIKAS9793/AndroJack-mcp/issues"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "androjack-mcp": "build/index.js",
+    "androjack": "build/install.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "connector:validate": "npm run build && node ./scripts/check-connector-readiness.mjs && node ./scripts/build-connector-bundle.mjs validate",
+    "connector:pack": "npm run build && node ./scripts/check-connector-readiness.mjs && node ./scripts/build-connector-bundle.mjs pack",
+    "connector:info": "node ./scripts/build-connector-bundle.mjs info",
+    "install-mcp": "node build/install.js install",
+    "install-mcp:auto": "node build/install.js install --auto",
+    "install-mcp:list": "node build/install.js install --list",
+    "install-mcp:cursor": "node build/install.js install --ide=cursor",
+    "install-mcp:vscode": "node build/install.js install --ide=vscode",
+    "install-mcp:claude": "node build/install.js install --ide=claude",
+    "install-mcp:windsurf": "node build/install.js install --ide=windsurf",
+    "install-mcp:jetbrains": "node build/install.js install --ide=jetbrains",
+    "install-mcp:antigravity": "node build/install.js install --ide=antigravity",
+    "install-mcp:kiro": "node build/install.js install --ide=kiro",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "chalk": "^5.6.2",
+    "cheerio": "^1.0.0",
+    "figlet": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "ora": "^9.3.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.7.0",
+    "@types/gradient-string": "^1.1.6",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "hono": "4.12.7",
+    "@hono/node-server": "1.19.11"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The following versions of AndroJack-mcp are currently being supported with security updates:
+The following versions of androjack-mcp are currently being supported with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,7 +11,7 @@ The following versions of AndroJack-mcp are currently being supported with secur
 
 ## Reporting a Vulnerability
 
-We take the security of AndroJack-mcp seriously. If you believe you have found a security vulnerability, please do **not** open a public issue. Instead, please report it privately.
+We take the security of androjack-mcp seriously. If you believe you have found a security vulnerability, please do **not** open a public issue. Instead, please report it privately.
 
 Please send an email to **vikassahani17@gmail.com**.
 

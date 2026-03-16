@@ -6,10 +6,10 @@
  * Supports both automated (--auto) and guided interactive installation.
  *
  * Usage:
- *   npx androjack-mcp@1.6.0 install           â†’ interactive guided mode
- *   npx androjack-mcp@1.6.0 install --auto    â†’ auto-detect and install to all found IDEs
- *   npx androjack-mcp@1.6.0 install --ide cursor   â†’ target a specific IDE
- *   npx androjack-mcp@1.6.0 install --list    â†’ list all supported IDEs and their status
+ *   npx androjack-mcp@1.6.1 install           â†’ interactive guided mode
+ *   npx androjack-mcp@1.6.1 install --auto    â†’ auto-detect and install to all found IDEs
+ *   npx androjack-mcp@1.6.1 install --ide cursor   â†’ target a specific IDE
+ *   npx androjack-mcp@1.6.1 install --list    â†’ list all supported IDEs and their status
  */
 
 import * as fs from "fs";
@@ -43,7 +43,7 @@ interface InstallResult {
 
 const SERVER_CONFIG_STANDARD = {
   command: "npx",
-  args: ["-y", "androjack-mcp@1.6.0"],
+  args: ["-y", "androjack-mcp@1.6.1"],
   env: {},
   autoApprove: [],
   disabled: false,
@@ -52,7 +52,7 @@ const SERVER_CONFIG_STANDARD = {
 const SERVER_CONFIG_VSCODE = {
   type: "stdio",
   command: "npx",
-  args: ["-y", "androjack-mcp@1.6.0"],
+  args: ["-y", "androjack-mcp@1.6.1"],
 };
 
 // â”€â”€ IDE Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -137,7 +137,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
       oneClickUrl: (() => {
         const name = encodeURIComponent("androjack");
         const config = encodeURIComponent(
-          JSON.stringify({ command: "npx", args: ["-y", "androjack-mcp@1.6.0"], disabled: false, autoApprove: [] })
+          JSON.stringify({ command: "npx", args: ["-y", "androjack-mcp@1.6.1"], disabled: false, autoApprove: [] })
         );
         return `https://kiro.dev/launch/mcp/add?name=${name}&config=${config}`;
       })(),
@@ -465,7 +465,7 @@ async function main(): Promise<void> {
         chalk.dim(
           "  Tip: to get the full arrow-key UI, run this in an integrated terminal\n" +
           "  (VS Code Â· Cursor Â· Android Studio Â· IntelliJ Â· Windows Terminal).\n" +
-          "  Or run:  " + chalk.white("npx androjack-mcp@1.6.0 install --auto") + chalk.dim("  to skip the menu.\n")
+          "  Or run:  " + chalk.white("npx androjack-mcp@1.6.1 install --auto") + chalk.dim("  to skip the menu.\n")
         )
       );
 
@@ -599,7 +599,7 @@ async function main(): Promise<void> {
       clack.outro(
         chalk.bold.green(`âœ“ ${ok} installed`) +
         (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
-        chalk.dim("  Run  npx androjack-mcp@1.6.0 install --list  to verify.")
+        chalk.dim("  Run  npx androjack-mcp@1.6.1 install --list  to verify.")
       );
       return;
     }
@@ -676,7 +676,7 @@ async function main(): Promise<void> {
       clack.outro(
         chalk.bold.green(`âœ“ ${ok} installed`) +
         (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
-        chalk.dim("  Run  npx androjack-mcp@1.6.0 install --list  to verify.")
+        chalk.dim("  Run  npx androjack-mcp@1.6.1 install --list  to verify.")
       );
       return;
     }

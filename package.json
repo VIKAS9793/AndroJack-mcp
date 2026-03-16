@@ -1,7 +1,7 @@
 {
   "name": "androjack-mcp",
-  "version": "1.6.0",
-  "mcpName": "io.github.vikas9793/androjack-mcp",
+  "version": "1.6.1",
+  "mcpName": "io.github.VIKAS9793/androjack",
   "files": [
     "build/",
     "src/",
@@ -10,31 +10,26 @@
     "server.json",
     "manifest.json"
   ],
-  "description": "AndroJack: AI that actually knows Android. Real-time dependency tracking, modern architectures, and zero hallucinations.",
+  "description": "MCP server that validates AI-generated Android code against official SDK documentation.",
   "keywords": [
-    "ai",
-    "android",
-    "androjack",
-    "compose",
-    "developer-tools",
-    "foldable",
-    "jetpack",
-    "kotlin",
-    "large-screen",
     "mcp",
-    "offline-first",
-    "paging",
-    "scalability",
-    "tablet"
+    "android",
+    "ai-tools",
+    "developer-tools",
+    "llm",
+    "ai-validation",
+    "kotlin",
+    "jetpack-compose",
+    "android-sdk"
   ],
-  "author": "Vikas Sahani <vikassahani17@gmail.com> (https://github.com/VIKAS9793)",
+  "author": "Vikas Sahani",
   "repository": {
     "type": "git",
-    "url": "https://github.com/VIKAS9793/AndroJack-mcp.git"
+    "url": "https://github.com/VIKAS9793/androjack-mcp"
   },
-  "homepage": "https://github.com/VIKAS9793/AndroJack-mcp#readme",
+  "homepage": "https://androjack-web.netlify.app",
   "bugs": {
-    "url": "https://github.com/VIKAS9793/AndroJack-mcp/issues"
+    "url": "https://github.com/VIKAS9793/androjack-mcp/issues"
   },
   "license": "MIT",
   "type": "module",

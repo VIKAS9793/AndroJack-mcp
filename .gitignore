@@ -26,3 +26,9 @@ _test_playground/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Accidental/Large binaries
+*.mcpb
+.connector-build/
+out/
+.vscode-test/

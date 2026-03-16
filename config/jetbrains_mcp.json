@@ -9,7 +9,7 @@
     "   Name:    AndroJack",
     "   Type:    stdio",
     "   Command: npx",
-    "   Args:    -y androjack-mcp@1.6.0",
+    "   Args:    -y androjack-mcp@1.6.1",
     "",
     "OR use the mcp.json file approach if your version supports it:",
     "   ~/.config/JetBrains/<IDE><version>/mcp.json",
@@ -22,7 +22,7 @@
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"]
+      "args": ["-y", "androjack-mcp@1.6.1"]
     }
   }
 }
