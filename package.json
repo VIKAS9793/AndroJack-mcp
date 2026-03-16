@@ -1,7 +1,7 @@
 {
   "name": "androjack-mcp",
-  "version": "1.6.0",
-  "mcpName": "io.github.vikas9793/androjack-mcp",
+  "version": "1.6.1",
+  "mcpName": "io.github.VIKAS9793/androjack",
   "files": [
     "assets/icon.png",
     "build/",

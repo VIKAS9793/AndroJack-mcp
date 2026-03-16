@@ -3,7 +3,7 @@
   "manifest_version": "0.3",
   "name": "androjack-mcp",
   "display_name": "AndroJack MCP",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Documentation-grounded verification tools for Android development. Validates AI-generated Android code against official Android documentation to prevent hallucinated APIs, deprecated Jetpack patterns, and Play Store compliance failures.",
   "author": {
     "name": "Vikas Sahani",

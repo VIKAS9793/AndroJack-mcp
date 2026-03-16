@@ -30,3 +30,6 @@ _test_playground/
 # OS files
 .DS_Store
 Thumbs.db
+
+# MCP Publishing secrets
+.mcpregistry_*

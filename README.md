@@ -31,9 +31,9 @@
 ### 🚀 One-Click Install
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi4wIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjAiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.0%22%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi4xIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjEiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.1%22%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 **VS Code distribution:** AndroJack MCP is also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode). The `VS Code` badge above always reflects the currently published Marketplace version.
@@ -538,10 +538,10 @@ Until that directory listing is live, use the npm path below.
 
 > **Review note:** AndroJack does not require an account, API key, cloud project, or test credentials. It uses public documentation and artifact sources only.
 
-### Option 1 — Interactive CLI (v1.6.0) ✨ Recommended
+### Option 1 — Interactive CLI (v1.6.1) ✨ Recommended
 
 ```bash
-npx androjack-mcp@1.6.0 install
+npx androjack-mcp@1.6.1 install
 ```
 
 Launches a full animated terminal wizard:
@@ -559,19 +559,19 @@ Launches a full animated terminal wizard:
 
 ```bash
 # Auto-detect and install to all found IDEs
-npx androjack-mcp@1.6.0 install --auto
+npx androjack-mcp@1.6.1 install --auto
 
 # Install to one specific IDE
-npx androjack-mcp@1.6.0 install --ide=cursor
-npx androjack-mcp@1.6.0 install --ide=claude
-npx androjack-mcp@1.6.0 install --ide=vscode
-npx androjack-mcp@1.6.0 install --ide=windsurf
-npx androjack-mcp@1.6.0 install --ide=jetbrains
-npx androjack-mcp@1.6.0 install --ide=antigravity
-npx androjack-mcp@1.6.0 install --ide=kiro
+npx androjack-mcp@1.6.1 install --ide=cursor
+npx androjack-mcp@1.6.1 install --ide=claude
+npx androjack-mcp@1.6.1 install --ide=vscode
+npx androjack-mcp@1.6.1 install --ide=windsurf
+npx androjack-mcp@1.6.1 install --ide=jetbrains
+npx androjack-mcp@1.6.1 install --ide=antigravity
+npx androjack-mcp@1.6.1 install --ide=kiro
 
 # Check what's installed where
-npx androjack-mcp@1.6.0 install --list
+npx androjack-mcp@1.6.1 install --list
 ```
 
 ### Option 3 — From your IDE's NPM Scripts panel (one click)
@@ -594,7 +594,7 @@ install-mcp:list       ← see detection status
 ### Option 4 — Test all tools (no IDE needed)
 
 ```bash
-npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.0
+npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.1
 ```
 
 > **Requires:** Node.js 18+. Nothing else.
@@ -621,7 +621,7 @@ npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.0
 
 ### AWS Kiro
 
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.1%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 
 ---
 
@@ -635,7 +635,7 @@ npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.0
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"],
+      "args": ["-y", "androjack-mcp@1.6.1"],
       "env": {},
       "autoApprove": [],
       "disabled": false
@@ -655,7 +655,7 @@ npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.0
     "androjack": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"]
+      "args": ["-y", "androjack-mcp@1.6.1"]
     }
   }
 }
@@ -671,7 +671,7 @@ npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.0
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"]
+      "args": ["-y", "androjack-mcp@1.6.1"]
     }
   }
 }
@@ -691,7 +691,7 @@ UI path: Agent pane → `...` → **MCP Servers** → **Manage MCP Servers** →
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"],
+      "args": ["-y", "androjack-mcp@1.6.1"],
       "disabled": false,
       "autoApprove": []
     }
@@ -700,7 +700,7 @@ UI path: Agent pane → `...` → **MCP Servers** → **Manage MCP Servers** →
 ```
 
 Place at `.kiro/settings/mcp.json` (project) or `~/.kiro/settings/mcp.json` (global).
-Or use the CLI: `kiro-cli mcp add --name androjack --command npx --args '-y androjack-mcp@1.6.0' --scope workspace`
+Or use the CLI: `kiro-cli mcp add --name androjack --command npx --args '-y androjack-mcp@1.6.1' --scope workspace`
 
 </details>
 
@@ -788,9 +788,9 @@ In February 2026, Google launched the Developer Knowledge MCP in public preview 
 | **Mechanism** | Context Retrieval | Context Enforcement |
 | **Scope** | Generalist — Firebase, Cloud, Android, Maps, and more | Android specialist — 21 tools, one domain, zero drift |
 | **Tools** | 3 retrieval tools (`search_documents`, `get_document`, `batch_get_documents`) | 21 specialized tools — live version checks, deprecation registry, Gradle lookups, API level validation, loop-back code validator |
-| **Setup** | Google Cloud project + API key + `gcloud` CLI required | `npx androjack-mcp@1.6.0` — zero auth, zero cloud project |
+| **Setup** | Google Cloud project + API key + `gcloud` CLI required | `npx androjack-mcp@1.6.1` — zero auth, zero cloud project |
 | **Enforcement** | Passive — AI decides when to retrieve | Active — tool descriptions mandate calls before every task type |
-| **Status** | Public preview (v1alpha / experimental) | Stable (v1.6.0) |
+| **Status** | Public preview (v1alpha / experimental) | Stable (v1.6.1) |
 
 **Why you need both in production:**
 Google's tool cures AI "ignorance" by providing official text. However, **AndroJack cures AI "bad habits."** If you ask an AI to refactor an app, Google's tool will provide the new docs. But **AndroJack** is the tool that actively blocks the AI from writing legacy XML, enforces Jetpack Compose, checks Gradle versions against Maven, and ensures your `minSdk` doesn't violate Android 16's Play Store mandate.
@@ -808,7 +808,7 @@ Google tells the AI the rules; **AndroJack forces the AI to follow them.**
 | **Robots awareness** | `robots.txt` is cached per host and `Crawl-delay` is respected before outbound fetches |
 | **No credentials** | Zero API keys, zero auth tokens required |
 | **No data stored** | Nothing persisted beyond process lifetime |
-| **Transparent agent** | User-Agent: `AndroJack-MCP/1.6.0 (documentation-grounding bot; not-a-scraper)` |
+| **Transparent agent** | User-Agent: `AndroJack-MCP/1.6.1 (documentation-grounding bot; not-a-scraper)` |
 | **Read-only** | All 21 tools are annotated `readOnlyHint: true` with `destructiveHint: false` — no writes, no side effects |
 | **Input bounds** | All inputs length-capped and sanitized before use |
 | **Body size cap** | HTTP responses capped at 4 MB — no OOM risk on large documentation pages |
@@ -916,9 +916,9 @@ No. It runs locally and only makes outbound requests to allowlisted documentatio
 No. The local MCP server runs on the user's machine and queries public official documentation and artifact sources. There is no AndroJack account system, no API token, and no review account needed.
 
 **Why does the VS Code extension need its own release if the MCP code lives on `main`?**  
-Because the Marketplace wrapper is a separate package. For `v1.6.0`, it is pinned to `androjack-mcp@1.6.0`, so the wrapper must be versioned and uploaded separately.
+Because the Marketplace wrapper is a separate package. For `v1.6.1`, it is pinned to `androjack-mcp@1.6.1`, so the wrapper must be versioned and uploaded separately.
 
-**Why pin `npx -y androjack-mcp@1.6.0` instead of using the floating latest package?**  
+**Why pin `npx -y androjack-mcp@1.6.1` instead of using the floating latest package?**  
 Pinning guarantees reproducible installs, clearer support, and predictable review behavior. It avoids stale local `npx` cache surprises.
 
 ## 🛠️ Troubleshooting
@@ -944,13 +944,13 @@ Pinning guarantees reproducible installs, clearer support, and predictable revie
 
 ## 📋 Changelog
 
-### v1.6.0 — Pinned Distribution, Shared Cache Wiring, and Registry Metadata
+### v1.6.1 — Pinned Distribution, Shared Cache Wiring, and Registry Metadata
 
-- **New:** Exact `@1.6.0` pinning across shipped config examples, installer output, one-click install links, and the VS Code Marketplace wrapper release flow.
+- **New:** Exact `@1.6.1` pinning across shipped config examples, installer output, one-click install links, and the VS Code Marketplace wrapper release flow.
 - **New:** Shared fetch cache wiring for both `secureFetch()` and `secureFetchJson()` so repeated documentation and metadata lookups stop consuming rate-limit budget.
 - **New:** Responsible crawling support with cached `robots.txt` rules and `Crawl-delay` handling per host.
 - **New:** Official MCP registry metadata with `server.json` plus package-level `mcpName`.
-- **Fix:** User-Agent now reports the correct released version: `AndroJack-MCP/1.6.0`.
+- **Fix:** User-Agent now reports the correct released version: `AndroJack-MCP/1.6.1`.
 - **Docs:** Added explicit privacy policy, infrastructure, examples, and FAQ sections for release reviewers and end users.
 
 ### v1.7.0 — Planned Infrastructure Follow-Up

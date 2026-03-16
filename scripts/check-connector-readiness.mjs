@@ -86,7 +86,7 @@ assert(readme.includes("https://androjack-web.netlify.app/privacy"), "README mus
 assert(manifest.manifest_version === "0.3", 'manifest.json must set "manifest_version" to "0.3".');
 assert(typeof manifest.name === "string" && manifest.name.length > 0, "manifest.json must include name.");
 assert(typeof manifest.display_name === "string" && manifest.display_name.length > 0, "manifest.json must include display_name.");
-assert(manifest.version === "1.6.0", 'manifest.json must include version "1.6.0".');
+assert(manifest.version === "1.6.1", 'manifest.json must include version "1.6.1".');
 assert(typeof manifest.description === "string" && manifest.description.length > 0, "manifest.json must include description.");
 assert(Array.isArray(manifest.privacy_policies) && manifest.privacy_policies.length > 0, "manifest.json must include privacy_policies.");
 assert(typeof manifest.icon === "string" && manifest.icon.length > 0, "manifest.json must include icon.");

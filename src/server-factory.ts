@@ -57,7 +57,7 @@ Validation expectations:
 export function createAndroJackServer(): McpServer {
   const server = new McpServer({
     name: "androjack-mcp",
-    version: "1.6.0",
+    version: "1.6.1",
   });
 
   server.registerTool(

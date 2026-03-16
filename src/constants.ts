@@ -35,7 +35,7 @@ export const JETPACK_BOM_URL =
 // ── HTTP Client Config ──────────────────────────────────────────────────────
 export const HTTP_TIMEOUT_MS = 12_000;
 export const USER_AGENT =
-  "AndroJack-MCP/1.6.0 (documentation-grounding bot; not-a-scraper)";
+  "AndroJack-MCP/1.6.1 (documentation-grounding bot; not-a-scraper)";
 
 // ── Built-in Component Status Registry ─────────────────────────────────────
 // Ground truth for deprecated / replaced APIs so the tool can answer

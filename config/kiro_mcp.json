@@ -1,7 +1,7 @@
 {
   "_what_is_this": "AWS Kiro is Amazon's agentic AI IDE (GA 2025). Full MCP support built-in.",
   "_docs": "https://kiro.dev/docs/mcp/",
-  "_one_click_install": "https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D",
+  "_one_click_install": "https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.1%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D",
 
   "_instructions": [
     "OPTION A – One-click install (easiest):",
@@ -11,7 +11,7 @@
     "OPTION B – Kiro IDE UI:",
     "  1. Open Kiro",
     "  2. Click the MCP configuration panel in Settings",
-    "  3. Click '+ Add' and fill in command: npx, args: -y androjack-mcp@1.6.0",
+    "  3. Click '+ Add' and fill in command: npx, args: -y androjack-mcp@1.6.1",
     "",
     "OPTION C – Project-level file (recommended for Android repos):",
     "  Create: <your-android-project>/.kiro/settings/mcp.json",
@@ -23,7 +23,7 @@
     "  Paste the mcpServers block below.",
     "",
     "OPTION E – Kiro CLI:",
-    "  kiro-cli mcp add --name androjack --scope workspace --command npx --args '-y androjack-mcp@1.6.0'",
+    "  kiro-cli mcp add --name androjack --scope workspace --command npx --args '-y androjack-mcp@1.6.1'",
     "",
     "Kiro also supports 'Powers' — bundled MCP + steering docs packages.",
     "See: https://kiro.dev/docs/powers/installation/ to package AndroJack as a Kiro Power."
@@ -32,7 +32,7 @@
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.0"],
+      "args": ["-y", "androjack-mcp@1.6.1"],
       "disabled": false,
       "autoApprove": []
     }

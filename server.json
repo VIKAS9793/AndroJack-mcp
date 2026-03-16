@@ -3,7 +3,7 @@
   "name": "io.github.vikas9793/androjack-mcp",
   "title": "AndroJack MCP",
   "description": "Documentation-grounded Android engineering MCP server with live official-source verification, dependency checks, API audits, and Android-focused AI validation tools.",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "repository": {
     "url": "https://github.com/VIKAS9793/AndroJack-mcp",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "androjack-mcp",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "transport": {
         "type": "stdio"
       }

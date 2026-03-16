@@ -196,7 +196,7 @@ Developer asks to migrate legacy code. AndroJack:
 
 | # | Question | Owner | Due |
 |---|---|---|---|
-| OQ-01 | Should v1.6.0 include AST-based rules for structural absence bugs? | PM | Q2 2026 |
+| OQ-01 | Should v1.6.1 include AST-based rules for structural absence bugs? | PM | Q2 2026 |
 | OQ-02 | Does `android_code_validator` need a MISSING_CONTENT_DESCRIPTION rule? | Engineering | Q2 2026 |
 | OQ-03 | What is the right opt-in mechanism for MCPcat telemetry? | PM | Q3 2026 |
 | OQ-04 | How should we handle Play Store policy changes (monthly cycle)? | Engineering | Ongoing |
