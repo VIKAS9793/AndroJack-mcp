@@ -421,7 +421,7 @@
                         </div>
                         <div class="quick-command">
                             <span class="command-label">VS Code</span>
-                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode</code>
+                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode@1.6.1</code>
                         </div>
                     </div>
                 </div>
@@ -462,7 +462,7 @@
                                 <p>Best for developers who want Marketplace install, updates, and IDE-native discovery.</p>
                             </div>
                         </div>
-                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode</div>
+                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode@1.6.1</div>
                         <div class="distribution-actions">
                             <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode" target="_blank" class="btn btn-secondary">Open VS Code Marketplace</a>
                         </div>
@@ -844,7 +844,9 @@
                 const version = extension?.versions?.[0]?.version;
 
                 setMetricNumber('vscode-downloads', installCount);
-                setMetricText('vscode-version', version ? `v${version}` : null);
+                // Fallback to v1.6.1 if API lags or returns older version
+                const displayVersion = (version && version >= '1.6.1') ? version : '1.6.1';
+                setMetricText('vscode-version', `v${displayVersion}`);
             } catch (error) {
                 console.error('Failed to fetch VS Code Marketplace metrics:', error);
                 setMetricText('vscode-downloads', 'Unavailable');
