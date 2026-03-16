@@ -32,3 +32,4 @@ Thumbs.db
 .connector-build/
 out/
 .vscode-test/
+.mcpregistry_*

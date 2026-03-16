@@ -1,9 +1,9 @@
 {
-  "name": "androjack-mcp",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.VIKAS9793/androjack",
   "title": "AndroJack MCP",
   "description": "MCP server that validates AI-generated Android code against official SDK documentation.",
   "version": "1.6.1",
-  "mcpName": "io.github.VIKAS9793/androjack",
   "repository": {
     "url": "https://github.com/VIKAS9793/androjack-mcp",
     "source": "github"
