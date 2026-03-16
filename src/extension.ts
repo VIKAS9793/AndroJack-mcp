@@ -5,12 +5,21 @@ export function activate(context: vscode.ExtensionContext) {
 
     // In 2026, the standard for MCP integrations is the registerMcpServerDefinitionProvider API
     // This allows the AI tool (Copilot/Claude etc) to dynamically discover and spin up the MCP server
-    const mcpProvider = vscode.lm.registerMcpServerDefinitionProvider('androjack', {
+    const registerProvider = (vscode as any)?.lm?.registerMcpServerDefinitionProvider as
+        | undefined
+        | ((id: string, provider: unknown) => vscode.Disposable);
+
+    if (!registerProvider) {
+        console.warn('VS Code MCP API not available; skipping MCP provider registration.');
+        return;
+    }
+
+    const mcpProvider = registerProvider('androjack', {
         provideMcpServerDefinitions() {
             // Provide a static definition referencing our single configured server
             return [{
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@1.6.0'],
+                args: ['-y', 'androjack-mcp@1.6.1'],
                 env: { ...process.env } as Record<string, string>,
                 stderr: 'inherit',
                 label: 'AndroJack MCP: Verified Android Docs'
@@ -30,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             return {
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@1.6.0'],
+                args: ['-y', 'androjack-mcp@1.6.1'],
                 env: safeEnv,
                 // Allow standard error tracking
                 stderr: 'inherit',

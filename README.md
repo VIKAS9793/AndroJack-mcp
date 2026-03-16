@@ -1,6 +1,6 @@
 # AndroJack MCP for VS Code 🤖🛡️
 
-[![Version 1.6.1](https://img.shields.io/badge/version-1.6.1-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
+[![Version 1.6.2](https://img.shields.io/badge/version-1.6.2-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 
 **The VS Code Marketplace wrapper for the AndroJack MCP server.**
 
@@ -54,6 +54,10 @@ Have a question, found a bug, or have a feature request?
 **AndroJack MCP for VS Code** is the VS Code extension wrapper for the broader AndroJack MCP product.
 
 *   **Vikas Sahani** — [Product Lead](https://www.linkedin.com/in/vikas-sahani-727420358) (`vikassahani17@gmail.com`)
+<<<<<<< HEAD
+=======
+*   **Antigravity AI** — AI Engineering Lead
+>>>>>>> b904768 (release(vscode): bump wrapper to 1.6.2)
 
 ## 📄 License
 

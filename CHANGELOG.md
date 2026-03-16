@@ -2,6 +2,10 @@
 
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 1.6.2
+
+- Fix-forward Marketplace build: avoid activation failure when the VS Code MCP API is not available (feature-detect + skip registration).
+
 ## 1.6.1
 
 - **Sync:** Extension now launches the updated `androjack-mcp@1.6.1` release.
