@@ -2,6 +2,13 @@
 
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 1.6.1
+
+- **Sync:** Extension now launches the updated `androjack-mcp@1.6.1` release.
+- **Pinned Distribution:** installer output and configuration examples now use exact `@1.6.1` pinning.
+- **Shared Cache:** Implemented shared fetch cache wiring to improve rate-limit budget management.
+- **Registry Metadata:** Added official MCP registry metadata with namespaced `server.json`.
+
 ## 1.6.0
 
 - The extension now launches the reviewed `androjack-mcp@1.6.0` release for a more predictable setup experience.
