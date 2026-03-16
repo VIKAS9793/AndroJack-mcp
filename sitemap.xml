@@ -7,7 +7,7 @@
   <!-- Primary landing page -->
   <url>
     <loc>https://androjack-web.netlify.app/</loc>
-    <lastmod>2026-03-14</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,7 +15,7 @@
   <!-- Privacy Policy -->
   <url>
     <loc>https://androjack-web.netlify.app/privacy</loc>
-    <lastmod>2026-03-14</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -29,7 +29,7 @@ documentation-backed code suggestions — not hallucinated APIs.
 
 ### npm (MCP server)
 ```
-npm install -g androjack-mcp
+npm install -g androjack-mcp@1.6.1
 ```
 
 ### VS Code Extension
