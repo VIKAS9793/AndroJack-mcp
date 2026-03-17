@@ -34,7 +34,7 @@ npm install -g androjack-mcp@1.6.1
 
 ### VS Code Extension
 Search `AndroJack MCP` in the VS Code Extensions panel,
-or install via: `ext install vikas9793.androjack-vscode@1.6.1`
+or install via: `ext install vikas9793.androjack-vscode@1.6.2`
 
 ## Supported Tool Categories
 

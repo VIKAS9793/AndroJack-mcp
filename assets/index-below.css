@@ -263,3 +263,80 @@ footer a:hover { color: var(--text-main); }
         font-size: 0.9rem;
     }
 }
+
+/* Demo Section & Lite YouTube Embed */
+.demo-section {
+    padding: 6rem 0;
+    text-align: center;
+}
+.demo-banner {
+    background: linear-gradient(135deg, rgba(61, 220, 132, 0.05), rgba(168, 199, 250, 0.05));
+    border: 1px solid var(--glass-border);
+    border-radius: 32px;
+    padding: 3rem;
+    margin-top: 2rem;
+    overflow: hidden;
+}
+.demo-banner h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+}
+.lite-youtube {
+    background-color: #000;
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+.lite-youtube:hover {
+    transform: scale(1.01);
+}
+.lite-youtube::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 100%);
+    z-index: 1;
+}
+.play-button {
+    width: 80px;
+    height: 80px;
+    background: var(--android-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(61, 220, 132, 0.4);
+    transition: all 0.3s ease;
+}
+.lite-youtube:hover .play-button {
+    transform: translate(-50%, -50%) scale(1.1);
+    background: #fff;
+}
+.play-button svg {
+    width: 32px;
+    height: 32px;
+    fill: #00391C;
+    margin-left: 4px;
+    transition: fill 0.3s ease;
+}
+.lite-youtube:hover .play-button svg {
+    fill: var(--android-green);
+}
+.lite-youtube iframe {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border: 0;
+    z-index: 3;
+}
