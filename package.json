@@ -55,11 +55,11 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@clack/prompts": "^1.0.1",
+    "@clack/prompts": "^1.1.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "chalk": "^5.6.2",
     "cheerio": "^1.0.0",
-    "figlet": "^1.10.0",
+    "figlet": "^1.11.0",
     "node-fetch": "^3.3.2",
     "ora": "^9.3.0",
     "zod": "^3.25.0"
