@@ -2,6 +2,12 @@
 
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 1.6.3
+
+- Sync the wrapper to launch `androjack-mcp@1.6.3`.
+- Update Marketplace-facing version copy and release metadata to `1.6.3`.
+- Split branch automation into isolated validate and publish workflows, with publish gated behind `vscode-v*` tags or manual dispatch.
+
 ## 1.6.2
 
 - Fix-forward Marketplace build: avoid activation failure when the VS Code MCP API is not available (feature-detect + skip registration).

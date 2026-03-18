@@ -2,6 +2,8 @@
 
 Use `feature/vscode-extension` as the source branch for the VS Code extension release flow.
 
+For the `1.6.3` release, keep the VS Code wrapper version, the pinned MCP package version, and the Marketplace release notes aligned to `1.6.3`.
+
 ## Local release steps
 
 1. Publish the MCP server to npm first.
@@ -13,6 +15,8 @@ Use `feature/vscode-extension` as the source branch for the VS Code extension re
    - `npm run package:vsix`
 5. Validate that the packaged VSIX exposes the README to Marketplace and VS Code.
    - `npm run verify:vsix`
+6. Confirm the top section of `CHANGELOG.md` matches the version being packaged.
+   - For this release: `## 1.6.3`
 6. Replace the local install with the packaged VSIX.
    - `code --install-extension ./androjack-vscode-<version>.vsix --force`
 7. Open the extension details page in VS Code and confirm the README renders and the icon is visible.
@@ -22,9 +26,10 @@ Use `feature/vscode-extension` as the source branch for the VS Code extension re
 1. Keep the wrapper version aligned with the pinned MCP version for the release.
 2. Build and validate the release archive.
    - `npm run release:manual`
-3. Upload the generated `androjack-vscode-<version>.vsix` to the Marketplace using your manual publisher flow.
-4. Confirm the Marketplace version matches the local package version and the listing no longer shows the default puzzle-piece icon.
-5. Reinstall or update from the Marketplace if VS Code is still pinned to an older local install.
+3. Copy the top `CHANGELOG.md` entry into the Marketplace release notes field.
+4. Upload the generated `androjack-vscode-<version>.vsix` to the Marketplace using your manual publisher flow.
+5. Confirm the Marketplace version matches the local package version and the listing no longer shows the default puzzle-piece icon.
+6. Reinstall or update from the Marketplace if VS Code is still pinned to an older local install.
 
 ## Optional token-based publish
 
@@ -32,6 +37,7 @@ If you later switch back to CLI publishing:
 
 1. Export a Visual Studio Marketplace personal access token as `VSCE_PAT`.
 2. Run `npm run publish:marketplace`.
+3. If using GitHub tags, use the namespaced workflow trigger format: `vscode-v<version>`.
 
 ## Expected release artifacts
 

@@ -2,7 +2,7 @@
   "name": "androjack-vscode",
   "displayName": "AndroJack MCP for VS Code",
   "description": "VS Code Marketplace wrapper for the AndroJack MCP server with verified Android documentation grounding.",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "homepage": "https://androjack-web.netlify.app",
   "publisher": "VIKAS9793",
   "icon": "assets/marketplace-icon.png",

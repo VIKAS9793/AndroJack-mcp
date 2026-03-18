@@ -1,0 +1,58 @@
+name: VS Code Extension Validate
+
+on:
+  pull_request:
+    branches:
+      - feature/vscode-extension
+  push:
+    branches:
+      - feature/vscode-extension
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reject merge conflict markers
+        shell: bash
+        run: |
+          if git grep -nE '^(<<<<<<<|=======|>>>>>>>)' -- .; then
+            echo "Merge conflict markers found"
+            exit 1
+          fi
+
+      - name: Verify release consistency
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
+          grep -F "[![Version ${VERSION}]" README.md
+          grep -F "androjack-mcp@${VERSION}" README.md
+          grep -F "## ${VERSION}" CHANGELOG.md
+          grep -F "androjack-mcp@${VERSION}" src/extension.ts
+
+      - name: Build extension and test output
+        run: npm run build:test
+
+      - name: Run extension tests
+        run: xvfb-run -a npm test
+
+      - name: Package VSIX
+        run: npm run package:vsix
+
+      - name: Validate packaged README asset
+        run: npm run verify:vsix
