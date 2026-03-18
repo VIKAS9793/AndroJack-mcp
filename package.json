@@ -1,6 +1,6 @@
 {
   "name": "androjack-web",
-  "version": "1.6.1",
+  "version": "1.6.3",
   "description": "AndroJack MCP Web Landing Page",
   "homepage": "https://androjack-web.netlify.app",
   "main": "index.html",
