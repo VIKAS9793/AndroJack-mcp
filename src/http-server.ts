@@ -27,14 +27,100 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { randomUUID } from "node:crypto";
+import { ANDROJACK_VERSION } from "./version.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = "127.0.0.1";
 const MCP_PATH = "/mcp";
 const WELL_KNOWN_PATH = "/.well-known/mcp";
+const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
+const MAX_ACTIVE_SESSIONS = 64;
 
 // Per-session transports — Streamable HTTP is session-aware (MCP-Session-Id header)
 const sessions = new Map<string, StreamableHTTPServerTransport>();
+
+type HttpError = Error & { statusCode?: number };
+
+function createHttpError(statusCode: number, message: string): HttpError {
+  const error = new Error(message) as HttpError;
+  error.statusCode = statusCode;
+  return error;
+}
+
+function isWildcardHost(host: string): boolean {
+  return host === "0.0.0.0" || host === "::";
+}
+
+function isLoopbackHost(host: string): boolean {
+  const normalized = host.toLowerCase();
+  return normalized === "127.0.0.1" || normalized === "localhost" || normalized === "::1" || normalized === "[::1]";
+}
+
+function buildAllowedOrigins(host: string, port: number): Set<string> {
+  const allowedHosts = new Set<string>();
+  const addHost = (hostname: string) => {
+    allowedHosts.add(hostname.toLowerCase());
+  };
+
+  addHost(host);
+  if (isLoopbackHost(host) || isWildcardHost(host)) {
+    addHost("127.0.0.1");
+    addHost("localhost");
+    addHost("[::1]");
+  }
+
+  const origins = new Set<string>();
+  for (const allowedHost of allowedHosts) {
+    origins.add(`http://${allowedHost}:${port}`);
+    origins.add(`https://${allowedHost}:${port}`);
+  }
+
+  return origins;
+}
+
+function validateOriginHeader(originHeader: string | undefined, allowedOrigins: Set<string>): void {
+  if (!originHeader) {
+    return;
+  }
+
+  let parsedOrigin: URL;
+  try {
+    parsedOrigin = new URL(originHeader);
+  } catch {
+    throw createHttpError(403, "Invalid Origin header");
+  }
+
+  const normalizedOrigin = `${parsedOrigin.protocol}//${parsedOrigin.host}`.toLowerCase();
+  if (!allowedOrigins.has(normalizedOrigin)) {
+    throw createHttpError(403, `Origin "${originHeader}" is not allowed.`);
+  }
+}
+
+function validateHostHeader(hostHeader: string | undefined, bindHost: string): void {
+  if (!hostHeader || isWildcardHost(bindHost)) {
+    return;
+  }
+
+  let parsedHost: URL;
+  try {
+    parsedHost = new URL(`http://${hostHeader}`);
+  } catch {
+    throw createHttpError(400, "Invalid Host header");
+  }
+
+  const normalizedHost = parsedHost.hostname.toLowerCase();
+  const allowedHosts = new Set<string>([bindHost.toLowerCase()]);
+  if (isLoopbackHost(bindHost)) {
+    allowedHosts.add("127.0.0.1");
+    allowedHosts.add("localhost");
+    allowedHosts.add("::1");
+    allowedHosts.add("[::1]");
+  }
+
+  if (!allowedHosts.has(normalizedHost)) {
+    throw createHttpError(403, `Host "${hostHeader}" is not allowed.`);
+  }
+}
 
 /**
  * Starts the Streamable HTTP server and connects the provided MCP server to it.
@@ -43,9 +129,22 @@ const sessions = new Map<string, StreamableHTTPServerTransport>();
 export async function startHttpServer(server: McpServer): Promise<void> {
   const port = parseInt(process.env.PORT ?? String(DEFAULT_PORT), 10);
   const host = process.env.HOST ?? DEFAULT_HOST;
+  let advertisedPort = port;
+  let advertisedHost = host;
+  let allowedOrigins = buildAllowedOrigins(host, port);
 
   const httpServer = http.createServer(async (req, res) => {
-    const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+    try {
+      validateHostHeader(req.headers.host, host);
+      validateOriginHeader(req.headers.origin as string | undefined, allowedOrigins);
+    } catch (err) {
+      const statusCode = typeof (err as HttpError).statusCode === "number" ? (err as HttpError).statusCode! : 403;
+      res.writeHead(statusCode, { "Content-Type": "text/plain" });
+      res.end(err instanceof Error ? err.message : "Forbidden");
+      return;
+    }
+
+    const url = new URL(req.url ?? "/", "http://localhost");
 
     // ── .well-known/mcp — capability discovery (MCP 2025-11-25) ──────────
     if (url.pathname === WELL_KNOWN_PATH && req.method === "GET") {
@@ -53,11 +152,11 @@ export async function startHttpServer(server: McpServer): Promise<void> {
       res.end(
         JSON.stringify({
           name: "androjack-mcp",
-          version: "1.6.1",
+          version: ANDROJACK_VERSION,
           description:
             "Documentation-grounded Android engineering MCP server. " +
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
-          mcp_endpoint: `http://${host}:${port}${MCP_PATH}`,
+          mcp_endpoint: `http://${advertisedHost}:${advertisedPort}${MCP_PATH}`,
           spec_version: "2025-11-25",
           tools: 21,
           read_only: true,
@@ -102,6 +201,12 @@ export async function startHttpServer(server: McpServer): Promise<void> {
         transport = sessions.get(sessionId)!;
       } else if (!sessionId) {
         // New session — only valid if this is an Initialize request
+        if (sessions.size >= MAX_ACTIVE_SESSIONS) {
+          res.writeHead(503, { "Content-Type": "text/plain" });
+          res.end("Too many active MCP sessions");
+          return;
+        }
+
         const body = await readBody(req);
         let parsed: unknown;
         try {
@@ -148,8 +253,11 @@ export async function startHttpServer(server: McpServer): Promise<void> {
     } catch (err) {
       process.stderr.write(`AndroJack HTTP error: ${err}\n`);
       if (!res.headersSent) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Internal server error");
+        const statusCode = typeof (err as HttpError).statusCode === "number"
+          ? (err as HttpError).statusCode!
+          : 500;
+        res.writeHead(statusCode, { "Content-Type": "text/plain" });
+        res.end(err instanceof Error ? err.message : "Internal server error");
       }
     }
   });
@@ -159,9 +267,16 @@ export async function startHttpServer(server: McpServer): Promise<void> {
     httpServer.once("error", reject);
   });
 
+  const address = httpServer.address();
+  if (address && typeof address === "object") {
+    advertisedHost = address.family === "IPv6" ? `[${address.address}]` : address.address;
+    advertisedPort = address.port;
+    allowedOrigins = buildAllowedOrigins(host, advertisedPort);
+  }
+
   process.stderr.write(
-    `AndroJack MCP server running on http://${host}:${port}${MCP_PATH}\n` +
-    `Discovery:  http://${host}:${port}${WELL_KNOWN_PATH}\n`
+    `AndroJack MCP server running on http://${advertisedHost}:${advertisedPort}${MCP_PATH}\n` +
+    `Discovery:  http://${advertisedHost}:${advertisedPort}${WELL_KNOWN_PATH}\n`
   );
 
   // Graceful shutdown
@@ -179,7 +294,17 @@ export async function startHttpServer(server: McpServer): Promise<void> {
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (chunk: Buffer) => chunks.push(chunk));
+    let totalBytes = 0;
+
+    req.on("data", (chunk: Buffer) => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_REQUEST_BODY_BYTES) {
+        req.destroy(createHttpError(413, "Request body too large"));
+        return;
+      }
+
+      chunks.push(chunk);
+    });
     req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
     req.on("error", reject);
   });

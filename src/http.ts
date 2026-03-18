@@ -52,6 +52,10 @@ export function assertAllowedDomain(url: string): URL {
   }
 
   const hostname = parsed.hostname.toLowerCase();
+  if (parsed.protocol !== "https:") {
+    throw new Error(`Protocol "${parsed.protocol}" is not allowed. AndroJack only fetches over HTTPS.`);
+  }
+
   const allowed = ALLOWED_DOMAINS as readonly string[];
   const isAllowed = allowed.some(
     (d) => hostname === d || hostname.endsWith(`.${d}`)
@@ -78,6 +82,60 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function sanitizeUrlForLogs(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return "invalid-url";
+  }
+}
+
+async function readResponseText(response: Response, maxBytes: number): Promise<string> {
+  const contentLength = response.headers.get("content-length");
+  if (contentLength) {
+    const parsedLength = Number.parseInt(contentLength, 10);
+    if (Number.isFinite(parsedLength) && parsedLength > maxBytes) {
+      throw new Error(`Response body exceeds ${maxBytes} bytes.`);
+    }
+  }
+
+  if (!response.body) {
+    const text = await response.text();
+    if (Buffer.byteLength(text, "utf8") > maxBytes) {
+      throw new Error(`Response body exceeds ${maxBytes} bytes.`);
+    }
+    return text;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    totalBytes += value.byteLength;
+    if (totalBytes > maxBytes) {
+      await reader.cancel().catch(() => {});
+      throw new Error(`Response body exceeds ${maxBytes} bytes.`);
+    }
+
+    chunks.push(value);
+  }
+
+  const combined = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    combined.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder().decode(combined);
+}
+
 async function fetchWithRetry(
   url: string,
   init: RequestInit,
@@ -92,7 +150,12 @@ async function fetchWithRetry(
     if (!response.ok && RETRYABLE_STATUS.has(response.status) && attempt < MAX_RETRIES) {
       clearTimeout(timer);
       const backoff = RETRY_BASE_MS * 2 ** attempt;
-      logger.warn("http_retry", { url, status: response.status, attempt, backoffMs: backoff });
+      logger.warn("http_retry", {
+        url: sanitizeUrlForLogs(url),
+        status: response.status,
+        attempt,
+        backoffMs: backoff,
+      });
       await sleep(backoff);
       return fetchWithRetry(url, init, attempt + 1);
     }
@@ -104,7 +167,11 @@ async function fetchWithRetry(
 
     if (isTimeout && attempt < MAX_RETRIES) {
       const backoff = RETRY_BASE_MS * 2 ** attempt;
-      logger.warn("http_timeout_retry", { url, attempt, backoffMs: backoff });
+      logger.warn("http_timeout_retry", {
+        url: sanitizeUrlForLogs(url),
+        attempt,
+        backoffMs: backoff,
+      });
       await sleep(backoff);
       return fetchWithRetry(url, init, attempt + 1);
     }
@@ -141,10 +208,9 @@ export async function secureFetch(url: string): Promise<string> {
     throw new Error(`HTTP ${response.status} from ${parsed.hostname}: ${response.statusText}`);
   }
 
-  const text = await response.text();
-  const boundedText = text.length > MAX_BODY_BYTES ? text.slice(0, MAX_BODY_BYTES) : text;
-  docCache.set(cacheKey, boundedText, getFetchCacheTtlMs(parsed.hostname, "html"));
-  return boundedText;
+  const text = await readResponseText(response, MAX_BODY_BYTES);
+  docCache.set(cacheKey, text, getFetchCacheTtlMs(parsed.hostname, "html"));
+  return text;
 }
 
 export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
@@ -163,7 +229,7 @@ export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
   });
 
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  const payload = (await response.json()) as T;
+  const payload = JSON.parse(await readResponseText(response, MAX_BODY_BYTES)) as T;
   docCache.set(cacheKey, structuredClone(payload), getFetchCacheTtlMs(parsed.hostname, "json"));
   return payload;
 }

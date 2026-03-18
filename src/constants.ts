@@ -5,6 +5,8 @@
  */
 
 // ── Allowed Authoritative Domains ──────────────────────────────────────────
+import { ANDROJACK_VERSION } from "./version.js";
+
 export const ALLOWED_DOMAINS = [
   "developer.android.com",
   "source.android.com",
@@ -35,7 +37,7 @@ export const JETPACK_BOM_URL =
 // ── HTTP Client Config ──────────────────────────────────────────────────────
 export const HTTP_TIMEOUT_MS = 12_000;
 export const USER_AGENT =
-  "AndroJack-MCP/1.6.1 (Android AI Assistant; +https://androjack-web.netlify.app)";
+  `AndroJack-MCP/${ANDROJACK_VERSION} (Android AI Assistant; +https://androjack-web.netlify.app)`;
 
 // ── Built-in Component Status Registry ─────────────────────────────────────
 // Ground truth for deprecated / replaced APIs so the tool can answer

@@ -6,10 +6,10 @@
  * Supports both automated (--auto) and guided interactive installation.
  *
  * Usage:
- *   npx androjack-mcp@1.6.1 install           â†’ interactive guided mode
- *   npx androjack-mcp@1.6.1 install --auto    â†’ auto-detect and install to all found IDEs
- *   npx androjack-mcp@1.6.1 install --ide cursor   â†’ target a specific IDE
- *   npx androjack-mcp@1.6.1 install --list    â†’ list all supported IDEs and their status
+ *   npx androjack-mcp@1.6.3 install           â†’ interactive guided mode
+ *   npx androjack-mcp@1.6.3 install --auto    â†’ auto-detect and install to all found IDEs
+ *   npx androjack-mcp@1.6.3 install --ide cursor   â†’ target a specific IDE
+ *   npx androjack-mcp@1.6.3 install --list    â†’ list all supported IDEs and their status
  */
 
 import * as fs from "fs";
@@ -19,6 +19,8 @@ import figlet from "figlet";
 import chalk from "chalk";
 import ora from "ora";
 import * as clack from "@clack/prompts";
+import { isDirectExecution } from "./cli-entry.js";
+import { VERSIONED_PACKAGE } from "./version.js";
 
 // â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -43,7 +45,7 @@ interface InstallResult {
 
 const SERVER_CONFIG_STANDARD = {
   command: "npx",
-  args: ["-y", "androjack-mcp@1.6.1"],
+  args: ["-y", VERSIONED_PACKAGE],
   env: {},
   autoApprove: [],
   disabled: false,
@@ -52,8 +54,12 @@ const SERVER_CONFIG_STANDARD = {
 const SERVER_CONFIG_VSCODE = {
   type: "stdio",
   command: "npx",
-  args: ["-y", "androjack-mcp@1.6.1"],
+  args: ["-y", VERSIONED_PACKAGE],
 };
+
+const INSTALL_COMMAND = `npx ${VERSIONED_PACKAGE} install`;
+const AUTO_INSTALL_COMMAND = `${INSTALL_COMMAND} --auto`;
+const LIST_COMMAND = `${INSTALL_COMMAND} --list`;
 
 // â”€â”€ IDE Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -137,7 +143,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
       oneClickUrl: (() => {
         const name = encodeURIComponent("androjack");
         const config = encodeURIComponent(
-          JSON.stringify({ command: "npx", args: ["-y", "androjack-mcp@1.6.1"], disabled: false, autoApprove: [] })
+          JSON.stringify({ command: "npx", args: ["-y", VERSIONED_PACKAGE], disabled: false, autoApprove: [] })
         );
         return `https://kiro.dev/launch/mcp/add?name=${name}&config=${config}`;
       })(),
@@ -250,7 +256,7 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
 
 function detectInstalledIdes(targets: IdeTarget[]): IdeTarget[] {
   return targets.filter((target) => {
-    return target.configPaths.some((p) => fs.existsSync(path.dirname(path.dirname(p))));
+    return target.configPaths.some((configPath) => fs.existsSync(path.dirname(configPath)));
   });
 }
 
@@ -371,15 +377,16 @@ function legacyFail(msg: string): void {
 
 // â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-  const subcommand = args[0];
+function normalizeInstallerArgs(rawArgs: string[]): string[] {
+  return rawArgs[0] === "install" ? rawArgs.slice(1) : rawArgs;
+}
 
-  if (!subcommand || subcommand === "install") {
-    const targets = getConfigPaths(PLATFORM);
-    const autoFlag = args.includes("--auto");
-    const listFlag = args.includes("--list");
-    const ideFlag = args.find((a) => a.startsWith("--ide="))?.split("=")[1] ?? null;
+export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<void> {
+  const args = normalizeInstallerArgs(rawArgs);
+  const targets = getConfigPaths(PLATFORM);
+  const autoFlag = args.includes("--auto");
+  const listFlag = args.includes("--list");
+  const ideFlag = args.find((a) => a.startsWith("--ide="))?.split("=")[1] ?? null;
 
     // â”€â”€ --list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (listFlag) {
@@ -426,6 +433,7 @@ async function main(): Promise<void> {
 
       console.log(chalk.bold(`  Found: ${detected.map((t) => t.name).join(", ")}\n`));
 
+      const results: InstallResult[] = [];
       for (const target of detected) {
         const existing = alreadyInstalled(target);
         if (existing) {
@@ -436,6 +444,7 @@ async function main(): Promise<void> {
         const s = ora({ text: chalk.dim(`Installing for ${target.name}â€¦`), color: "cyan" }).start();
         await new Promise((r) => setTimeout(r, 400));
         const result = installTarget(target);
+        results.push(result);
         if (result.success) {
           s.succeed(chalk.green(`${target.name}`) + chalk.dim(` â†’ ${result.path}`));
           if (target.notes) console.log(chalk.dim(`       â†’ ${target.notes}`));
@@ -444,7 +453,7 @@ async function main(): Promise<void> {
         }
       }
 
-      const successes = detected.filter((t) => installTarget(t).success).length;
+      const successes = results.filter((result) => result.success).length;
       console.log(chalk.bold.green(`\n  Done. ${successes} installation(s) completed.`));
       return;
     }
@@ -465,7 +474,7 @@ async function main(): Promise<void> {
         chalk.dim(
           "  Tip: to get the full arrow-key UI, run this in an integrated terminal\n" +
           "  (VS Code Â· Cursor Â· Android Studio Â· IntelliJ Â· Windows Terminal).\n" +
-          "  Or run:  " + chalk.white("npx androjack-mcp@1.6.1 install --auto") + chalk.dim("  to skip the menu.\n")
+          "  Or run:  " + chalk.white(AUTO_INSTALL_COMMAND) + chalk.dim("  to skip the menu.\n")
         )
       );
 
@@ -599,7 +608,7 @@ async function main(): Promise<void> {
       clack.outro(
         chalk.bold.green(`âœ“ ${ok} installed`) +
         (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
-        chalk.dim("  Run  npx androjack-mcp@1.6.1 install --list  to verify.")
+        chalk.dim(`  Run  ${LIST_COMMAND}  to verify.`)
       );
       return;
     }
@@ -676,7 +685,7 @@ async function main(): Promise<void> {
       clack.outro(
         chalk.bold.green(`âœ“ ${ok} installed`) +
         (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
-        chalk.dim("  Run  npx androjack-mcp@1.6.1 install --list  to verify.")
+        chalk.dim(`  Run  ${LIST_COMMAND}  to verify.`)
       );
       return;
     }
@@ -701,10 +710,11 @@ async function main(): Promise<void> {
       clack.outro(chalk.dim("Paste the snippet into your IDE's MCP config file and restart the IDE."));
       return;
     }
-  }
 }
 
-main().catch((err) => {
-  console.error(chalk.red.bold("  Installer error:"), err);
-  process.exit(1);
-});
+if (isDirectExecution(import.meta.url)) {
+  main().catch((err) => {
+    console.error(chalk.red.bold("  Installer error:"), err);
+    process.exit(1);
+  });
+}

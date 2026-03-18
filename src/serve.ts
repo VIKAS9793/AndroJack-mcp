@@ -6,9 +6,9 @@
  * httpUrl-based MCP client.
  *
  * Usage:
- *   npx androjack-mcp@1.6.1 serve                 # localhost:3000
- *   npx androjack-mcp@1.6.1 serve --port 8080     # custom port
- *   npx androjack-mcp@1.6.1 serve --host 0.0.0.0  # expose on LAN (add your own auth)
+ *   npx androjack-mcp@1.6.3 serve                 # localhost:3000
+ *   npx androjack-mcp@1.6.3 serve --port 8080     # custom port
+ *   npx androjack-mcp@1.6.3 serve --host 0.0.0.0  # expose on LAN (add your own auth)
  *
  * Android Studio setup:
  *   File â†’ Settings â†’ Tools â†’ AI â†’ MCP Servers â†’ Enable MCP Servers
@@ -16,7 +16,6 @@
  */
 
 import chalk from "chalk";
-import gradient from "gradient-string";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -45,14 +44,28 @@ import { androidCodeValidator }    from "./tools/validator.js";
 
 import { startHttpServer }         from "./http-server.js";
 import { docCache }                from "./cache.js"; // Simple LRU export
+import { isDirectExecution }       from "./cli-entry.js";
+import { ANDROJACK_VERSION }       from "./version.js";
+
+const gradient = (_colors: string[]) => (value: string) => chalk.bold.hex("#3DDC84")(value);
 // â”€â”€ Parse CLI args â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function parseArgs(): { port: number; host: string; cacheTtlHours: number; noCache: boolean } {
-  const args    = process.argv.slice(2);
+function normalizeServeArgs(rawArgs: string[]): string[] {
+  return rawArgs[0] === "serve" ? rawArgs.slice(1) : rawArgs;
+}
+
+function parseArgs(args: string[]): {
+  port: number;
+  host: string;
+  cacheTtlHours: number;
+  noCache: boolean;
+  allowRemote: boolean;
+} {
   let port      = parseInt(process.env["PORT"] ?? "3000", 10);
   let host      = process.env["HOST"] ?? "127.0.0.1";
   let cacheTtl  = 24;
   let noCache   = false;
+  let allowRemote = process.env["ANDROJACK_ALLOW_REMOTE_HTTP"] === "1";
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
@@ -63,9 +76,26 @@ function parseArgs(): { port: number; host: string; cacheTtlHours: number; noCac
     if (a === "--cache-ttl" && args[i + 1]) { cacheTtl = parseInt(args[++i]!, 10); }
     if (a.startsWith("--cache-ttl="))       { cacheTtl = parseInt(a.split("=")[1]!, 10); }
     if (a === "--no-cache")                 { noCache  = true; }
+    if (a === "--allow-remote")             { allowRemote = true; }
   }
 
-  return { port, host, cacheTtlHours: cacheTtl, noCache };
+  return { port, host, cacheTtlHours: cacheTtl, noCache, allowRemote };
+}
+
+function isLoopbackHost(host: string): boolean {
+  const normalized = host.toLowerCase();
+  return normalized === "127.0.0.1" || normalized === "localhost" || normalized === "::1" || normalized === "[::1]";
+}
+
+function assertSafeBindHost(host: string, allowRemote: boolean): void {
+  if (isLoopbackHost(host) || allowRemote) {
+    return;
+  }
+
+  throw new Error(
+    `Refusing to bind HTTP transport to non-loopback host "${host}" without --allow-remote. ` +
+    `Keep AndroJack local by default, or pass --allow-remote only behind a trusted network boundary.`
+  );
 }
 
 // â”€â”€ Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -113,7 +143,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
 function buildServer(): McpServer {
   const server = new McpServer({
     name:    "androjack-mcp",
-    version: "1.6.1",
+    version: ANDROJACK_VERSION,
   });
 
   // Tool 1
@@ -471,8 +501,10 @@ Your value is not in knowing Android â€” it is in verifying Android before 
 
 // â”€â”€ Entry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-async function main(): Promise<void> {
-  const { port, host, cacheTtlHours, noCache } = parseArgs();
+export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<void> {
+  const args = normalizeServeArgs(rawArgs);
+  const { port, host, cacheTtlHours, noCache, allowRemote } = parseArgs(args);
+  assertSafeBindHost(host, allowRemote);
 
   // Configure cache
   if (noCache) {
@@ -505,7 +537,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`AndroJack serve error: ${err}\n`);
-  process.exit(1);
-});
+if (isDirectExecution(import.meta.url)) {
+  main().catch((err) => {
+    process.stderr.write(`AndroJack serve error: ${err}\n`);
+    process.exit(1);
+  });
+}

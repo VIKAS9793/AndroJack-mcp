@@ -10,7 +10,7 @@
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.6.1"],
+      "args": ["-y", "androjack-mcp@1.6.3"],
       "_note": "Uses npx — no global install needed. Downloads on first run."
     }
   }

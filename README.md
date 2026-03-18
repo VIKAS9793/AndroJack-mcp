@@ -20,19 +20,20 @@
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
 [![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 [![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Security Policy](https://img.shields.io/badge/security-policy-0A7AFF?style=flat-square&logo=github)](SECURITY.md)
 [![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
 
 ### 🚀 One-Click Install
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi4xIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjEiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.1%22%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi4zIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjMiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.3%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 **VS Code distribution:** AndroJack MCP is also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode). The `VS Code` badge above always reflects the currently published Marketplace version.
@@ -257,28 +258,49 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.6.1) ✨ Recommended
+### Option 1 — Interactive CLI (v1.6.3) ✨ Recommended
 ```bash
-npx androjack-mcp@1.6.1 install
+npx -y androjack-mcp@1.6.3 install
 ```
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
 
 ### Option 2 — Targeted installs
 ```bash
+# Preview detected IDEs and config paths
+npx -y androjack-mcp@1.6.3 install --list
+
 # Auto-detect all
-npx androjack-mcp@1.6.1 install --auto
+npx -y androjack-mcp@1.6.3 install --auto
 
 # Install to specific IDE
-npx androjack-mcp@1.6.1 install --ide=cursor
-npx androjack-mcp@1.6.1 install --ide=claude
-npx androjack-mcp@1.6.1 install --ide=vscode
-npx androjack-mcp@1.6.1 install --ide=jetbrains
+npx -y androjack-mcp@1.6.3 install --ide=cursor
+npx -y androjack-mcp@1.6.3 install --ide=claude
+npx -y androjack-mcp@1.6.3 install --ide=vscode
+npx -y androjack-mcp@1.6.3 install --ide=windsurf
+npx -y androjack-mcp@1.6.3 install --ide=jetbrains
+npx -y androjack-mcp@1.6.3 install --ide=kiro
+npx -y androjack-mcp@1.6.3 install --ide=antigravity
 ```
 
 ### Option 3 — Test without IDE
 ```bash
-npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.1
+npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.6.3
 ```
+
+## 🧩 Manual Config / Copy / Paste
+
+If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
+
+- Run `npx -y androjack-mcp@1.6.3 install --list` to preview detected IDEs and target config paths.
+- Ready-to-paste examples live in [`config/`](config/).
+- Use [`config/claude_desktop_config.json`](config/claude_desktop_config.json) for Claude Desktop.
+- Use [`config/cursor_mcp.json`](config/cursor_mcp.json) for Cursor.
+- Use [`config/vscode_mcp.json`](config/vscode_mcp.json) for VS Code / GitHub Copilot.
+- Use [`config/windsurf_mcp.json`](config/windsurf_mcp.json) for Windsurf.
+- Use [`config/jetbrains_mcp.json`](config/jetbrains_mcp.json) for Android Studio / IntelliJ.
+- Use [`config/kiro_mcp.json`](config/kiro_mcp.json) for AWS Kiro.
+- Use [`config/antigravity_mcp.json`](config/antigravity_mcp.json) for Google Antigravity.
+- Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.6.3`.
 
 ---
 
@@ -290,21 +312,26 @@ npx @modelcontextprotocol/inspector npx androjack-mcp@1.6.1
 | **Mechanism** | Context Retrieval | Context Enforcement |
 | **Scope** | Generalist — Firebase, Cloud, Maps | Android engineering specialist |
 | **Tools** | 3 retrieval tools | 21 specialized tools |
-| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.6.1` — zero auth |
+| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.6.3` — zero auth |
 | **Enforcement**| Passive — AI decides when to retrieve | Active — mandating calls by task type |
 
 ## 🔒 Security & Privacy
 *   **Domain allowlist**: Requests only to Google/Android/Kotlin official domains.
-*   **Transparent agent**: User-Agent: `AndroJack-MCP/1.6.1`.
+*   **HTTPS only**: Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs.
+*   **Local by default**: `serve` binds to loopback only unless you explicitly pass `--allow-remote`.
+*   **HTTP hardening**: Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions.
+*   **Transparent agent**: User-Agent: `AndroJack-MCP/1.6.3`.
 *   **Read-only**: All 21 tools are annotated `readOnlyHint: true`.
 *   **Zero credentials**: No API keys or tokens required for documentation fetching.
+*   **Security policy**: Disclosure process and supported versions live in [SECURITY.md](SECURITY.md).
 
 ## 📋 Changelog
-### v1.6.1 — Pinned Distribution, Shared Cache Wiring, and Registry Metadata
-- **New:** Exact `@1.6.1` pinning across all config examples and installer output.
-- **New:** Shared fetch cache wiring to stop consuming rate-limit budget on repeated lookups.
-- **New:** Official MCP registry metadata with namespaced `server.json`.
-- **Fix:** User-Agent now reports version 1.6.1.
+### v1.6.3 — CLI Routing Fixes and Local Transport Hardening
+- **Fix:** `npx androjack-mcp install`, `install --auto`, `install --ide=...`, `help`, and `--version` now route correctly instead of falling through to the stdio server.
+- **Fix:** `install --auto` no longer over-detects IDEs from parent directories and create configs in a clean workspace.
+- **Fix:** HTTP serve mode now fails closed on non-loopback binds unless `--allow-remote` is explicit.
+- **Security:** Streamable HTTP now validates `Origin` and `Host` headers and enforces request body and session limits.
+- **Security:** Outbound fetches now enforce HTTPS, cap response size, and redact sensitive URL parts from retry logs.
 
 ## 👥 Authorship & Ownership
 **Vikas Sahani** — Product Lead (vikassahani17@gmail.com)  

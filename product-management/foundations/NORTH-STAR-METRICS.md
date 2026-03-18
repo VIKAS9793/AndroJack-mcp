@@ -34,7 +34,7 @@ These are the levers. Improving these drives the North Star.
 | **Grounding Gate compliance rate** | % of code generation tasks where at least one doc-fetch tool was called before output | ≥ 95% | Gate bypassed = no grounding = North Star uncountable |
 | **Validator call rate** | % of code generation tasks where `android_code_validator` was called | ≥ 95% | Validation skipped = North Star uncountable |
 | **FAIL-fix-rerun rate** | % of FAIL verdicts where the agent fixed and re-ran (vs. returning FAIL code) | ≥ 99% | Gate effectiveness — FAIL code reaching user = product failure |
-| **Rule coverage breadth** | Number of rule classes in validator | 22 (v1.5.0) → 26 (v1.6.1) | More rules = more ground covered |
+| **Rule coverage breadth** | Number of rule classes in validator | 22 (v1.5.0) → 26 (v1.6.3) | More rules = more ground covered |
 | **Skill trigger accuracy** | % of Antigravity tasks where the correct SKILL.md loaded | ≥ 90% | Wrong skill or no skill = missed grounding |
 
 ---
@@ -80,14 +80,14 @@ These measure outcomes. We cannot directly control them, but input metrics predi
 
 ## Measurement Plan
 
-### Opt-In Telemetry (v1.6.1 target)
+### Opt-In Telemetry (v1.6.3 target)
 
 AndroJack v1.5.0 has no telemetry. All current metrics are measured via:
 - Community surveys (GitHub Discussions, X/Twitter, Discord)
 - Bug reports and GitHub Issues
 - Self-reported postmortems (like the Atomic Robot case study)
 
-v1.6.1 will offer **opt-in telemetry** with explicit consent:
+v1.6.3 will offer **opt-in telemetry** with explicit consent:
 - Rule ID hit frequency (which rules fire most often)
 - PASS/WARN/FAIL verdict distribution
 - Tool call latency by tool
@@ -100,7 +100,7 @@ v1.6.1 will offer **opt-in telemetry** with explicit consent:
 | North Star | Monthly | PM |
 | Input metrics | Weekly (during active development) | Engineering |
 | Output metrics | Quarterly (via community survey) | PM |
-| Health metrics | Continuous (automated alerting in v1.6.1) | Engineering |
+| Health metrics | Continuous (automated alerting in v1.6.3) | Engineering |
 
 ---
 
@@ -108,7 +108,7 @@ v1.6.1 will offer **opt-in telemetry** with explicit consent:
 
 | Metric | Current Measurement | Method |
 |---|---|---|
-| North Star | Unknown — no telemetry | Establish via opt-in in v1.6.1 |
+| North Star | Unknown — no telemetry | Establish via opt-in in v1.6.3 |
 | FAIL-fix-rerun rate | System prompt enforces it; compliance unverified | SKILL.md + Gate enforcement; verify via user reports |
 | Developer trust retention | Unknown | Establish via GitHub star trend, issue activity |
 | Deprecated API regression rate | Unknown | Community survey Q2 2026 |
