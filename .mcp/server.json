@@ -3,7 +3,7 @@
   "name": "io.github.VIKAS9793/androjack",
   "title": "AndroJack MCP",
   "description": "MCP server that validates AI-generated Android code against official SDK documentation.",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "repository": {
     "url": "https://github.com/VIKAS9793/androjack-mcp",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "androjack-mcp",
-      "version": "1.6.3",
+      "version": "1.6.4",
       "transport": {
         "type": "stdio"
       }

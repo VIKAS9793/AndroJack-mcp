@@ -66,7 +66,7 @@ an assumption to test, and a signal that tells us the bet was correct.
 
 ---
 
-## NEXT — v1.6.3 (Target: Q2 2026)
+## NEXT — v1.6.4 (Target: Q2 2026)
 
 ### 🔲 MISSING_CONTENT_DESCRIPTION Rule (Validator Rule 23)
 
@@ -198,10 +198,10 @@ These are explicit non-goals. We will not build them unless evidence changes the
 | Grounding Gate Step 8 | v1.5.0 | ✅ Shipped | JTBD-01 |
 | Antigravity Skills (agents.md + 11 SKILLs) | v1.5.0 | ✅ Shipped | JTBD-02, JTBD-03 |
 | PH Bug Ledger docs | v1.5.0 | ✅ Shipped | Trust / transparency |
-| MISSING_CONTENT_DESCRIPTION rule | v1.6.3 | 🔲 Scoped | JTBD-01 |
-| UPPERCASE_STRING_MUTATION rule | v1.6.3 | 🔲 Scoped | JTBD-01 |
-| Opt-in telemetry | v1.6.3 | 🔲 Scoped | Measurement |
-| Validator streaming feedback | v1.6.3 | 🔲 Scoped | JTBD-01 (UX) |
+| MISSING_CONTENT_DESCRIPTION rule | v1.6.4 | 🔲 Scoped | JTBD-01 |
+| UPPERCASE_STRING_MUTATION rule | v1.6.4 | 🔲 Scoped | JTBD-01 |
+| Opt-in telemetry | v1.6.4 | 🔲 Scoped | Measurement |
+| Validator streaming feedback | v1.6.4 | 🔲 Scoped | JTBD-01 (UX) |
 | AST-based absence detection | v2.0 | 🔭 Bet | JTBD-01 |
 | Android Studio HTTP transport | v2.0 | 🔭 Bet | JTBD-03 |
 | Play Store policy change monitor | v2.x | 🔭 Bet | JTBD-05 |

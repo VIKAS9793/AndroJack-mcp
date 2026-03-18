@@ -1,25 +1,16 @@
 /**
  * AndroJack MCP – Streamable HTTP Transport
  *
- * Runs the same MCP server over HTTP instead of stdio.
+ * Runs the MCP server over HTTP instead of stdio.
  * Spec: MCP 2025-11-25 Streamable HTTP transport.
+ *
+ * Security: each new initialize request creates a FRESH McpServer +
+ * StreamableHTTPServerTransport pair. Sessions are never shared —
+ * this prevents cross-session state leakage that existed in v1.6.3.
  *
  * Usage:
  *   node build/index.js --http              # default port 3000
  *   PORT=8080 node build/index.js --http    # custom port
- *
- * Config for Claude Desktop / Cursor (remote team instance):
- *   {
- *     "mcpServers": {
- *       "androjack": {
- *         "type": "streamable-http",
- *         "url": "http://localhost:3000/mcp"
- *       }
- *     }
- *   }
- *
- * Security note: bind to 127.0.0.1 by default (loopback only).
- * To expose on LAN, set HOST=0.0.0.0 and add your own auth layer.
  */
 
 import http from "node:http";
@@ -36,10 +27,26 @@ const WELL_KNOWN_PATH = "/.well-known/mcp";
 const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
 const MAX_ACTIVE_SESSIONS = 64;
 
-// Per-session transports — Streamable HTTP is session-aware (MCP-Session-Id header)
-const sessions = new Map<string, StreamableHTTPServerTransport>();
+// ── Types ──────────────────────────────────────────────────────────────────
 
 type HttpError = Error & { statusCode?: number };
+
+interface Session {
+  server: McpServer;
+  transport: StreamableHTTPServerTransport;
+}
+
+export interface HttpServerHandle {
+  close(): void;
+  address: { host: string; port: number };
+}
+
+export interface HttpServerOptions {
+  port?: number;
+  host?: string;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
 
 function createHttpError(statusCode: number, message: string): HttpError {
   const error = new Error(message) as HttpError;
@@ -122,16 +129,57 @@ function validateHostHeader(hostHeader: string | undefined, bindHost: string): v
   }
 }
 
+function readBody(req: http.IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let totalBytes = 0;
+
+    req.on("data", (chunk: Buffer) => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_REQUEST_BODY_BYTES) {
+        req.destroy(createHttpError(413, "Request body too large"));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+    req.on("error", reject);
+  });
+}
+
+// ── Main export ────────────────────────────────────────────────────────────
+
 /**
- * Starts the Streamable HTTP server and connects the provided MCP server to it.
- * Exported so index.ts can dynamically import it only when --http is passed.
+ * Starts the Streamable HTTP server.
+ *
+ * @param createServer - Factory called once per MCP initialize request.
+ *   Each call MUST return a new McpServer instance — never share instances
+ *   across sessions.
+ * @param opts - Optional port/host overrides (fall back to env vars / defaults).
+ * @returns A handle with close() and the bound address.
+ *
+ * Security controls (all preserved from v1.6.3):
+ *   - Loopback-only bind host by default
+ *   - Explicit --allow-remote required for non-loopback (enforced in serve.ts)
+ *   - Host header validation
+ *   - Origin header validation
+ *   - Body size cap (1 MiB)
+ *   - Active session cap (64)
+ *   - Per-session server isolation (NEW in v1.6.4)
  */
-export async function startHttpServer(server: McpServer): Promise<void> {
-  const port = parseInt(process.env.PORT ?? String(DEFAULT_PORT), 10);
-  const host = process.env.HOST ?? DEFAULT_HOST;
+export async function startHttpServer(
+  createServer: () => McpServer,
+  opts?: HttpServerOptions
+): Promise<HttpServerHandle> {
+  const port = opts?.port ?? parseInt(process.env["PORT"] ?? String(DEFAULT_PORT), 10);
+  const host = opts?.host ?? process.env["HOST"] ?? DEFAULT_HOST;
+
   let advertisedPort = port;
   let advertisedHost = host;
   let allowedOrigins = buildAllowedOrigins(host, port);
+
+  // Per-session state: each session owns its own server + transport pair
+  const sessions = new Map<string, Session>();
 
   const httpServer = http.createServer(async (req, res) => {
     try {
@@ -146,7 +194,7 @@ export async function startHttpServer(server: McpServer): Promise<void> {
 
     const url = new URL(req.url ?? "/", "http://localhost");
 
-    // ── .well-known/mcp — capability discovery (MCP 2025-11-25) ──────────
+    // ── .well-known/mcp — capability discovery ─────────────────────────────
     if (url.pathname === WELL_KNOWN_PATH && req.method === "GET") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
@@ -166,26 +214,27 @@ export async function startHttpServer(server: McpServer): Promise<void> {
       return;
     }
 
-    // ── /mcp — Streamable HTTP transport endpoint ─────────────────────────
+    // ── /mcp — Streamable HTTP transport endpoint ──────────────────────────
     if (url.pathname !== MCP_PATH) {
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end(`AndroJack MCP: endpoint is ${MCP_PATH}`);
       return;
     }
 
-    // Only POST and GET are valid for Streamable HTTP
     if (req.method !== "POST" && req.method !== "GET" && req.method !== "DELETE") {
       res.writeHead(405, { Allow: "GET, POST, DELETE" });
       res.end();
       return;
     }
 
-    // DELETE — client signals session teardown
+    // ── DELETE — client signals session teardown ───────────────────────────
     if (req.method === "DELETE") {
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
       if (sessionId && sessions.has(sessionId)) {
-        await sessions.get(sessionId)!.close();
+        const session = sessions.get(sessionId)!;
+        await session.transport.close();
         sessions.delete(sessionId);
+        process.stderr.write(`AndroJack HTTP: session deleted [${sessionId}]\n`);
       }
       res.writeHead(200);
       res.end();
@@ -194,13 +243,16 @@ export async function startHttpServer(server: McpServer): Promise<void> {
 
     try {
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
-      let transport: StreamableHTTPServerTransport;
 
       if (sessionId && sessions.has(sessionId)) {
-        // Resume existing session
-        transport = sessions.get(sessionId)!;
-      } else if (!sessionId) {
-        // New session — only valid if this is an Initialize request
+        // ── Resume existing session — reuse only this session's transport ──
+        const { transport } = sessions.get(sessionId)!;
+        await transport.handleRequest(req, res);
+        return;
+      }
+
+      if (!sessionId) {
+        // ── New session — only valid for MCP Initialize requests ───────────
         if (sessions.size >= MAX_ACTIVE_SESSIONS) {
           res.writeHead(503, { "Content-Type": "text/plain" });
           res.end("Too many active MCP sessions");
@@ -223,11 +275,13 @@ export async function startHttpServer(server: McpServer): Promise<void> {
           return;
         }
 
+        // ── Create a fresh server + transport pair for this session ────────
         const newSessionId = randomUUID();
-        transport = new StreamableHTTPServerTransport({
+        const mcpServer = createServer();  // <-- fresh instance per session
+        const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => newSessionId,
           onsessioninitialized: (id) => {
-            sessions.set(id, transport);
+            sessions.set(id, { server: mcpServer, transport });
             process.stderr.write(`AndroJack HTTP: session opened [${id}]\n`);
           },
         });
@@ -237,19 +291,17 @@ export async function startHttpServer(server: McpServer): Promise<void> {
           process.stderr.write(`AndroJack HTTP: session closed [${newSessionId}]\n`);
         };
 
-        // Connect the shared McpServer to this session's transport
-        await server.connect(transport);
+        // Connect this session's fresh server to its own transport
+        await mcpServer.connect(transport);
 
         // Handle the Initialize request on the new transport
         await transport.handleRequest(req, res, parsed);
         return;
-      } else {
-        res.writeHead(400, { "Content-Type": "text/plain" });
-        res.end("Unknown session ID");
-        return;
       }
 
-      await transport.handleRequest(req, res);
+      // Unknown session ID
+      res.writeHead(400, { "Content-Type": "text/plain" });
+      res.end("Unknown session ID");
     } catch (err) {
       process.stderr.write(`AndroJack HTTP error: ${err}\n`);
       if (!res.headersSent) {
@@ -283,29 +335,16 @@ export async function startHttpServer(server: McpServer): Promise<void> {
   for (const sig of ["SIGINT", "SIGTERM"] as const) {
     process.once(sig, async () => {
       process.stderr.write(`\nAndroJack HTTP: shutting down (${sig})…\n`);
-      for (const t of sessions.values()) await t.close().catch(() => { });
+      for (const { transport } of sessions.values()) await transport.close().catch(() => { });
       httpServer.close(() => process.exit(0));
     });
   }
-}
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let totalBytes = 0;
-
-    req.on("data", (chunk: Buffer) => {
-      totalBytes += chunk.length;
-      if (totalBytes > MAX_REQUEST_BODY_BYTES) {
-        req.destroy(createHttpError(413, "Request body too large"));
-        return;
-      }
-
-      chunks.push(chunk);
-    });
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
-  });
+  return {
+    close: () => {
+      for (const { transport } of sessions.values()) transport.close().catch(() => { });
+      httpServer.close();
+    },
+    address: { host: advertisedHost, port: advertisedPort },
+  };
 }

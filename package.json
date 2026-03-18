@@ -1,6 +1,6 @@
 {
   "name": "androjack-mcp",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "mcpName": "io.github.VIKAS9793/androjack",
   "files": [
     "build/",
@@ -41,7 +41,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node build/index.js",
-    "test": "npm run build && node --test test/cli-routing.test.mjs",
+    "test": "npm run build && node --test test/cli-routing.test.mjs test/http-session.test.mjs",
     "install-mcp": "node build/index.js install",
     "install-mcp:auto": "node build/index.js install --auto",
     "install-mcp:list": "node build/index.js install --list",
@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.1.0",
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "chalk": "^5.6.2",
     "cheerio": "^1.0.0",
     "figlet": "^1.11.0",

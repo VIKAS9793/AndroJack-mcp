@@ -6,10 +6,10 @@
  * Supports both automated (--auto) and guided interactive installation.
  *
  * Usage:
- *   npx androjack-mcp@1.6.3 install           â†’ interactive guided mode
- *   npx androjack-mcp@1.6.3 install --auto    â†’ auto-detect and install to all found IDEs
- *   npx androjack-mcp@1.6.3 install --ide cursor   â†’ target a specific IDE
- *   npx androjack-mcp@1.6.3 install --list    â†’ list all supported IDEs and their status
+ *   npx androjack-mcp@1.6.4 install           â†’ interactive guided mode
+ *   npx androjack-mcp@1.6.4 install --auto    â†’ auto-detect and install to all found IDEs
+ *   npx androjack-mcp@1.6.4 install --ide cursor   â†’ target a specific IDE
+ *   npx androjack-mcp@1.6.4 install --list    â†’ list all supported IDEs and their status
  */
 
 import * as fs from "fs";
@@ -32,6 +32,8 @@ interface IdeTarget {
   format: "standard" | "vscode";
   oneClickUrl?: string;
   notes?: string;
+  /** OS paths to check: if any exist → IDE is installed (but may not have MCP dir yet) */
+  ideInstalledPaths?: string[];
 }
 
 interface InstallResult {
@@ -138,6 +140,15 @@ function getConfigPaths(platform: string): IdeTarget[] {
         path.join(process.cwd(), ".kiro", "settings", "mcp.json"),   // project-level
         path.join(HOME, ".kiro", "settings", "mcp.json"),            // global
       ],
+      // Kiro creates ~/.kiro only after first launch + MCP plugin setup.
+      // Detect the Kiro app itself via its known install location.
+      ideInstalledPaths: [
+        ...(platform === "win32"
+          ? [path.join(process.env.LOCALAPPDATA ?? path.join(HOME, "AppData", "Local"), "Programs", "Kiro", "Kiro.exe")]
+          : platform === "darwin"
+            ? ["/Applications/Kiro.app"]
+            : [path.join(HOME, ".local", "share", "kiro")]),
+      ],
       configKey: "mcpServers",
       format: "standard",
       oneClickUrl: (() => {
@@ -181,6 +192,21 @@ function getConfigPaths(platform: string): IdeTarget[] {
             : [
               path.join(HOME, ".config", "JetBrains", "AndroidStudio2024.3", "mcp.json"),
               path.join(HOME, ".config", "JetBrains", "IdeaIC2024.3", "mcp.json"),
+            ]),
+      ],
+      // JetBrains config dir only exists after first launch with AI plugin installed.
+      // Detect IDE via its known application paths.
+      ideInstalledPaths: [
+        ...(platform === "darwin"
+          ? ["/Applications/Android Studio.app", "/Applications/IntelliJ IDEA.app", "/Applications/IntelliJ IDEA CE.app"]
+          : platform === "win32"
+            ? [
+              path.join(process.env.LOCALAPPDATA ?? path.join(HOME, "AppData", "Local"), "Programs", "Android Studio", "bin", "studio64.exe"),
+              path.join("C:\\", "Program Files", "Android", "Android Studio", "bin", "studio64.exe"),
+            ]
+            : [
+              path.join(HOME, ".local", "share", "JetBrains"),
+              "/opt/android-studio",
             ]),
       ],
       configKey: "mcpServers",
@@ -258,6 +284,19 @@ function detectInstalledIdes(targets: IdeTarget[]): IdeTarget[] {
   return targets.filter((target) => {
     return target.configPaths.some((configPath) => fs.existsSync(path.dirname(configPath)));
   });
+}
+
+/**
+ * Returns true when the IDE application is installed on this machine, but the
+ * MCP config directory hasn't been created yet (IDE was never launched or
+ * the AI/MCP plugin hasn't been set up). Used in v1.6.4 to surface a
+ * more helpful message than silently showing "not found".
+ */
+function isIdeApplicationInstalled(target: IdeTarget): boolean {
+  if (!target.ideInstalledPaths || detectInstalledIdes([target]).length > 0) {
+    return false; // already detected via config dir — no extra message needed
+  }
+  return target.ideInstalledPaths.some((p) => fs.existsSync(p));
 }
 
 function alreadyInstalled(target: IdeTarget): string | null {
@@ -345,18 +384,22 @@ function printStatusTable(targets: IdeTarget[]): void {
   for (const t of targets) {
     const installed = alreadyInstalled(t);
     const detected = detectInstalledIdes([t]).length > 0;
+    const ideInstalled = isIdeApplicationInstalled(t);
 
     let icon: string;
     let label: string;
 
     if (installed) {
-      icon = chalk.green("  âœ“");
-      label = chalk.green("already installed") + chalk.dim(` â†’ ${installed}`);
+      icon = chalk.green("  ✓");
+      label = chalk.green("already installed") + chalk.dim(` → ${installed}`);
     } else if (detected) {
-      icon = chalk.cyan("  â—‰");
+      icon = chalk.cyan("  ◉");
       label = chalk.cyan("detected, not configured");
+    } else if (ideInstalled) {
+      icon = chalk.yellow("  ◈");
+      label = chalk.yellow("detected (MCP not yet configured — open the IDE once to initialize)");
     } else {
-      icon = chalk.dim("  â—‹");
+      icon = chalk.dim("  ○");
       label = chalk.dim("not found");
     }
 
@@ -620,6 +663,7 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
         options: targets.map((t) => {
           const installed = alreadyInstalled(t);
           const detected = detectInstalledIdes([t]).length > 0;
+          const ideInstalled = isIdeApplicationInstalled(t);
           return {
             value: t.id,
             label: t.name,
@@ -627,7 +671,9 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
               ? chalk.green("already installed")
               : detected
                 ? chalk.cyan("detected")
-                : chalk.dim("not found"),
+                : ideInstalled
+                  ? chalk.yellow("IDE installed — run once to initialize MCP")
+                  : chalk.dim("not found"),
           };
         }),
         required: true,

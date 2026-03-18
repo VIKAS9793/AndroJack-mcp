@@ -65,3 +65,41 @@ jobs:
             process.exit(1);
           }
           NODE
+
+      - name: Assert SDK floor >= 1.27.1
+        shell: bash
+        run: |
+          node << 'NODE'
+          const { execSync } = require('node:child_process');
+          const tree = JSON.parse(execSync('npm ls @modelcontextprotocol/sdk --json', { encoding: 'utf8' }));
+          const versions = new Set();
+          function walk(name, node) {
+            if (!node || typeof node !== 'object') return;
+            if (name === '@modelcontextprotocol/sdk' && node.version) versions.add(node.version);
+            for (const [k, v] of Object.entries(node.dependencies || {})) walk(k, v);
+          }
+          walk(tree.name || 'root', tree);
+          if (versions.size === 0) throw new Error('SDK not found in dependency tree');
+          for (const v of versions) {
+            const [maj, min] = v.split('.').map(Number);
+            if (maj < 1 || (maj === 1 && min < 27)) {
+              console.error(`SDK version ${v} is below floor 1.27.1`);
+              process.exit(1);
+            }
+          }
+          console.log('SDK floor OK:', [...versions].join(', '));
+          NODE
+
+      - name: Assert no .connector-build artifacts tracked
+        shell: bash
+        run: |
+          tracked=$(git ls-files .connector-build)
+          if [ -n "$tracked" ]; then
+            echo "ERROR: .connector-build artifacts are still tracked in git:"
+            echo "$tracked"
+            exit 1
+          fi
+          echo ".connector-build hygiene OK"
+
+      - name: Run tests
+        run: npm test
