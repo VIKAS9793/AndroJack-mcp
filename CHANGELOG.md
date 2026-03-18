@@ -2,6 +2,11 @@
 
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 1.6.4
+
+- **Security Sync:** Extension now launches the hardened `androjack-mcp@1.6.4` release with per-session server isolation.
+- **Dependency Update:** Raised pinned MCP package version to `1.6.4` for all launch points.
+
 ## 1.6.3
 
 - Sync the wrapper to launch `androjack-mcp@1.6.3`.

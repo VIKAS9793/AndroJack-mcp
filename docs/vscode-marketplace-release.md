@@ -2,7 +2,7 @@
 
 Use `feature/vscode-extension` as the source branch for the VS Code extension release flow.
 
-For the `1.6.3` release, keep the VS Code wrapper version, the pinned MCP package version, and the Marketplace release notes aligned to `1.6.3`.
+For the `1.6.4` release, keep the VS Code wrapper version, the pinned MCP package version, and the Marketplace release notes aligned to `1.6.4`.
 
 ## Local release steps
 
@@ -16,7 +16,7 @@ For the `1.6.3` release, keep the VS Code wrapper version, the pinned MCP packag
 5. Validate that the packaged VSIX exposes the README to Marketplace and VS Code.
    - `npm run verify:vsix`
 6. Confirm the top section of `CHANGELOG.md` matches the version being packaged.
-   - For this release: `## 1.6.3`
+   - For this release: `## 1.6.4`
 6. Replace the local install with the packaged VSIX.
    - `code --install-extension ./androjack-vscode-<version>.vsix --force`
 7. Open the extension details page in VS Code and confirm the README renders and the icon is visible.
