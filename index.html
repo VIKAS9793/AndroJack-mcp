@@ -13,9 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="jz6TvIapWs3LK9imvigZfsgs5gm7haQflaumQC70o5M" />
     <!-- INDEXNOW_VERIFICATION_PLACEHOLDER -->
-    <title>AndroJack MCP | AI Validation Tool for Android Development</title>
+    <title>AndroJack — High-Reliability MCP Server for Android Development</title>
     <meta name="description"
-        content="AndroJack MCP is an AI-powered Android developer validation tool that improves reliability of AI-generated code through documentation-grounded verification and MCP protocol integration." />
+        content="Stop AI hallucinations in Android development. AndroJack is the premier MCP server for grounding AI assistants (Claude, Cursor) in official Android documentation." />
     <meta name="keywords"
         content="AndroJack MCP, Android AI tool, MCP server, AI developer tools, Android validation tool, documentation grounding, Android SDK verification" />
     <link rel="canonical" href="https://androjack-web.netlify.app/" />
@@ -465,6 +465,101 @@
         }
 
 
+
+        /* Quick Install Comp - Above the Fold Optimization */
+        .quick-install {
+            margin: 2.5rem 0;
+            width: 100%;
+            max-width: 540px;
+            background: #06090e; /* Deepest terminal black */
+            border: 1px solid var(--surface-highest);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.8s ease-out both;
+        }
+
+        .qi-header {
+            background: #161b22;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .qi-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .qi-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #30363d;
+        }
+
+        .qi-dot.red { background: #ff5f56; }
+        .qi-dot.yellow { background: #ffbd2e; }
+        .qi-dot.green { background: #27c93f; }
+
+        .qi-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .qi-body {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .qi-command {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.95rem;
+            color: var(--android-green);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+
+        .qi-command::-webkit-scrollbar { display: none; }
+
+        .qi-command .prompt { color: var(--mcp-purple); margin-right: 8px; user-select: none; }
+
+        .btn-copy {
+            background: var(--surface-highest);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0,0,0,1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-copy:hover {
+            background: var(--glass-border);
+            border-color: var(--text-muted);
+        }
+
+        .btn-copy.success {
+            background: rgba(61, 220, 132, 0.15);
+            color: var(--android-green);
+            border-color: var(--android-green);
+        }
+
         @media (max-width: 640px) {
             nav {
                 flex-direction: column;
@@ -545,6 +640,30 @@
                 Equip your AI assistant with live, verified Android knowledge. <br /> Install the MCP server from npm or
                 use the VS Code Marketplace wrapper for IDE-native onboarding.
             </p>
+
+            <div class="quick-install fade-in-up delay-1">
+                <div class="qi-header">
+                    <div class="qi-dots">
+                        <div class="qi-dot red"></div>
+                        <div class="qi-dot yellow"></div>
+                        <div class="qi-dot green"></div>
+                    </div>
+                    <span class="qi-label">Quick Install (npm)</span>
+                    <div style="width: 42px;"></div> <!-- Spacer -->
+                </div>
+                <div class="qi-body">
+                    <div class="qi-command">
+                        <span class="prompt">$</span>npx androjack-mcp@1.6.4 install
+                    </div>
+                    <button class="btn-copy" id="copy-btn" aria-label="Copy install command">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy</span>
+                    </button>
+                </div>
+            </div>
 
             <div class="cta-group fade-in-up delay-1">
                 <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank"
@@ -1148,8 +1267,34 @@
             });
         }
 
+        // Copy to Clipboard
+        function setupCopyToClipboard() {
+            const copyBtn = document.getElementById('copy-btn');
+            if (!copyBtn) return;
+
+            const command = "npx androjack-mcp@1.6.4 install";
+            const btnSpan = copyBtn.querySelector('span');
+            const originalText = btnSpan.textContent;
+
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(command);
+                    copyBtn.classList.add('success');
+                    btnSpan.textContent = "Copied!";
+                    
+                    setTimeout(() => {
+                        copyBtn.classList.remove('success');
+                        btnSpan.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+            setupCopyToClipboard();
             const player = document.getElementById('youtube-player');
             if (player) {
                 player.addEventListener('click', loadVideo);
