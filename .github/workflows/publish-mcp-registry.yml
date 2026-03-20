@@ -1,0 +1,54 @@
+name: Publish to MCP Registry
+
+on:
+  push:
+    tags:
+      - "v*"           # triggers on v1.6.4, v1.7.0, etc.
+
+jobs:
+  publish-mcp-registry:
+    name: Publish to MCP Registry
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # required for OIDC authentication
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        # strips the "v" prefix: v1.6.4 → 1.6.4
+
+      - name: Update server.json version
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          # Update both version fields in .mcp/server.json
+          jq --arg v "$VERSION" '
+            .server.version = $v |
+            .server.packages[0].version = $v
+          ' .mcp/server.json > .mcp/server.tmp.json
+          mv .mcp/server.tmp.json .mcp/server.json
+          echo ".mcp/server.json updated to $VERSION"
+          cat .mcp/server.json
+
+      - name: Download MCP Publisher
+        run: |
+          curl -fsSL \
+            "https://github.com/modelcontextprotocol/registry/releases/download/latest/mcp-publisher_linux_amd64.tar.gz" \
+            | tar xz mcp-publisher
+          chmod +x mcp-publisher
+
+      - name: Publish to MCP Registry (OIDC)
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish --server-path .mcp/server.json
+
+      - name: Verify registry entry
+        run: |
+          sleep 5   # allow registry propagation
+          curl -sf \
+            "https://registry.modelcontextprotocol.io/v0/servers/io.github.VIKAS9793%2Fandrojack" \
+            | jq '._meta["io.modelcontextprotocol.registry/official"]'
