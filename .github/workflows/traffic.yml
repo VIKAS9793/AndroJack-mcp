@@ -1,0 +1,46 @@
+name: Update Traffic Stats
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Every night at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Fetch Clone Count
+        id: fetch-clones
+        run: |
+          # Fetch Clones from GitHub Traffic API
+          # DOCS: https://docs.github.com/en/rest/metrics/traffic#get-repository-clones
+          CLONES_JSON=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            "https://api.github.com/repos/VIKAS9793/AndroJack-mcp/traffic/clones")
+          
+          # Extract total clones using jq
+          TOTAL_CLONES=$(echo $CLONES_JSON | jq '.count')
+          
+          if [ "$TOTAL_CLONES" == "null" ] || [ -z "$TOTAL_CLONES" ]; then
+            echo "Error fetching clones: $CLONES_JSON"
+            exit 1
+          fi
+          
+          echo "Total Clones: $TOTAL_CLONES"
+          echo "clones=$TOTAL_CLONES" >> $GITHUB_OUTPUT
+
+      - name: Update assets/clones.json
+        run: |
+          echo "{\"clones\": ${{ steps.fetch-clones.outputs.clones }}}" > assets/clones.json
+          
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/clones.json
+          git commit -m "docs: update clones metric [skip ci]" || echo "No changes to commit"
+          git push
