@@ -1090,23 +1090,68 @@
             }
         }
 
+        const VIDEO_ID = 'PqSKMZ--_zE';
+        let playerAPIReady = false;
+        let originalPlayerHTML = '';
+
+        // Load YouTube IFrame API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        window.onYouTubeIframeAPIReady = () => {
+            playerAPIReady = true;
+        };
+
+        function resetPlayer() {
+            const playerContainer = document.getElementById('youtube-player');
+            if (playerContainer && originalPlayerHTML) {
+                playerContainer.innerHTML = originalPlayerHTML;
+                playerContainer.style.cursor = 'pointer';
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === 0) { // YT.PlayerState.ENDED
+                resetPlayer();
+            }
+        }
+
+        function loadVideo() {
+            const playerContainer = document.getElementById('youtube-player');
+            if (!playerContainer) return;
+
+            if (!playerAPIReady) {
+                setTimeout(loadVideo, 100);
+                return;
+            }
+
+            if (!originalPlayerHTML) {
+                originalPlayerHTML = playerContainer.innerHTML;
+            }
+
+            playerContainer.innerHTML = '<div id="youtube-player-mount"></div>';
+            playerContainer.style.cursor = 'default';
+
+            new YT.Player('youtube-player-mount', {
+                videoId: VIDEO_ID,
+                playerVars: {
+                    'autoplay': 1,
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'host': 'https://www.youtube-nocookie.com'
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            // Lite YouTube Loader
             const player = document.getElementById('youtube-player');
             if (player) {
-                const loadVideo = () => {
-                    const iframe = document.createElement('iframe');
-                    iframe.setAttribute('src', 'https://www.youtube-nocookie.com/embed/PqSKMZ--_zE?autoplay=1&rel=0');
-                    iframe.setAttribute('title', 'Stop AI Code Hallucinations in Android | AndroJack MCP');
-                    iframe.setAttribute('frameborder', '0');
-                    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-                    iframe.setAttribute('allowfullscreen', 'true');
-                    player.innerHTML = '';
-                    player.appendChild(iframe);
-                    player.style.cursor = 'default';
-                };
-
                 player.addEventListener('click', loadVideo);
                 player.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
