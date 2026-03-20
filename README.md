@@ -1,17 +1,12 @@
 <div align="center">
 
+![AndroJack Banner](https://raw.githubusercontent.com/VIKAS9793/AndroJack-mcp/main/assets/AndroJack%20banner.png)
+
+# AndroJack — The Jack of All Android Trades
+
 <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
 <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" />
 <img src="https://img.shields.io/badge/MCP-Protocol-blueviolet?style=for-the-badge" />
-
-# 🤖 AndroJack — The Jack of All Android Trades
-
-![AndroJack Banner](https://raw.githubusercontent.com/VIKAS9793/AndroJack-mcp/main/assets/AndroJack%20banner.png)
-
-### 🎬 Discover AndroJack
-
-[![Official Product Page](https://img.shields.io/badge/Product-Landing%20Page-00C7B7?style=for-the-badge)](https://androjack-web.netlify.app/)
-[![Watch AndroJack in Action on YouTube](https://img.shields.io/badge/YouTube-Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/O2aFyObV-B0)
 
 ### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
 
@@ -20,33 +15,54 @@
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
 [![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
+[![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
-[![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
+[![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Security Policy](https://img.shields.io/badge/security-policy-0A7AFF?style=flat-square&logo=github)](SECURITY.md)
-[![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
 
-### 🚀 One-Click Install
+<br/>
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi4zIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjMiXX0=)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi40Il19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjQiXX0=)
 [![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.4%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
-**VS Code distribution:** AndroJack MCP is also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode). The `VS Code` badge above always reflects the currently published Marketplace version.
+<br/>
 
-**PM / APM docs:** Product strategy, JTBD, personas, roadmap, user stories, competitive analysis, and GTM materials now live under [product-management/README.md](product-management/README.md).
+[![Official Product Page](https://img.shields.io/badge/Product-Landing%20Page-00C7B7?style=for-the-badge)](https://androjack-web.netlify.app/)
+[![Watch AndroJack in Action on YouTube](https://img.shields.io/badge/YouTube-Watch%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/O2aFyObV-B0)
 
 <br/>
 
 **Also works with:** Windsurf · VS Code Copilot · Google Antigravity · JetBrains AI — see [Manual Config](#-manual-config--copy--paste) below ↓
 
-<br/>
+**VS Code distribution:** Also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode).
+
+**PM / APM docs:** Product strategy, JTBD, personas, roadmap, user stories, competitive analysis, and GTM materials live under [product-management/README.md](product-management/README.md).
 
 </div>
+
+---
+
+## Table of Contents
+
+- [The Crisis That Created This Tool](#-the-crisis-that-created-this-tool)
+- [What Actually Breaks In Practice](#-what-actually-breaks-in-practice--documented-evidence)
+- [What AndroJack Does](#-what-androjack-does)
+- [Honest Activation Model](#️-honest-activation-model--two-levels)
+- [What Can Still Break — Even at Level 3](#-what-can-still-break--even-at-level-3)
+- [Defence-in-Depth](#️-defence-in-depth-the-right-tool-for-each-bug-class)
+- [The Killer Argument](#-the-killer-argument)
+- [The 21 Tools](#-what-androjack-covers--21-tools)
+- [Quick Start](#-quick-start--zero-install-required)
+- [Manual Config](#-manual-config--copy--paste)
+- [Ecosystem Comparison](#-the-ecosystem-androjack-vs-other-mcps)
+- [Security & Privacy](#-security--privacy)
+- [Changelog](#-changelog)
 
 ---
 
@@ -54,9 +70,9 @@
 
 In 2025, the **Stack Overflow Developer Survey** asked 49,000 developers about their experience with AI coding tools. The results should alarm every Android engineer:
 
-*   **84% of developers** now use AI coding tools — up from 76% the year before.
-*   **Trust in AI accuracy collapsed** from 40% to just **29%** in a single year.
-*   **35% of all Stack Overflow visits in 2025** are now triggered by developers debugging and fixing AI-generated code.
+- **84% of developers** now use AI coding tools — up from 76% the year before.
+- **Trust in AI accuracy collapsed** from 40% to just **29%** in a single year.
+- **35% of all Stack Overflow visits in 2025** are now triggered by developers debugging and fixing AI-generated code.
 
 The gap between usage and trust is not a coincidence. It is the product of a structural problem: **AI models predict tokens, not APIs.** They were trained on a snapshot of the world and have no mechanism to know what changed at API 30, what shipped at Google I/O 2025, or what Google Play now rejects at review time.
 
@@ -64,39 +80,59 @@ For Android developers, this failure mode is uniquely dangerous. Android has the
 
 The result is not just bad code. It is **confidently bad code.**
 
+---
+
 ## ⚡ What Actually Breaks In Practice — Documented Evidence
 
-These are not hypothetical risks. They are documented failure modes from real developer projects.
+> These are not hypothetical risks. They are documented failure modes from real developer projects.
 
-### The Navigation 3 Hallucination (January 2026)
+<details>
+<summary><strong>The Navigation 3 Hallucination (January 2026)</strong></summary>
+
 A published case study from **Atomic Robot** documented a live Navigation 2 → Navigation 3 migration using both Gemini and Claude — with internet access enabled on both. The conclusion, verbatim:
 
-> "LLMs still hallucinate versions. Even with internet access, both agents wanted to use an outdated release candidate instead of the stable 1.0.0 release."
+> *"LLMs still hallucinate versions. Even with internet access, both agents wanted to use an outdated release candidate instead of the stable 1.0.0 release."*
 
 Navigation 3 went stable in November 2025 after seven years of the same library. It is a complete architectural rethink: back stacks are now plain Kotlin lists, the monolithic nav graph is gone, and `NavDisplay` replaces `NavController`. Google's own migration guide is so aware that AI tools get this wrong that it now contains special **"AI Agent:" annotations** — instructions embedded directly in the official docs for AI tools to follow. An AI tool that generates Nav2 code for a new Compose project in 2026 is not making a small mistake. It is creating an architectural incoherence that requires a full rewrite to fix.
 
-### The Compose Deprecation Treadmill
+</details>
+
+<details>
+<summary><strong>The Compose Deprecation Treadmill</strong></summary>
+
 Jetpack Compose ships a new BOM every month. Since most models' training cutoffs, these APIs changed:
 
 | API | Status | What goes wrong |
-| :--- | :--- | :--- |
+|:----|:-------|:----------------|
 | `ContextualFlowRow` / `ContextualFlowColumn` | Deprecated in Compose 1.8 | AI still generates them — compile warning today, removal tomorrow |
-| `TestCoroutineDispatcher` | Removed from coroutines-test 1.8+ | AI still generates it — causes non-deterministic test failures in CI |
+| `TestCoroutineDispatcher` | Removed from coroutines-test 1.8+ | AI still generates it — non-deterministic test failures in CI |
 | `FlowRow` overflow parameter | Deprecated in 1.8 | Subtle behavioral regression at runtime, silent in most linting setups |
 | `AnchoredDraggableState.confirmValueChange` | Deprecated | Incorrect drag behavior at anchor boundaries |
 | Navigation 2 in new projects | Superseded by Nav3 stable Nov 2025 | Architectural dead-end that requires a rewrite to fix |
 
-Every one of these compiles. Most run without errors. The bugs surface later in CI flakiness, UI regressions, or Play Store review failures — and the developer has no idea the AI was confidently wrong.
+Every one of these compiles. Most run without errors. The bugs surface later in CI flakiness, UI regressions, or Play Store review failures.
 
-### The Android 16 / API 36 Mandate (August 2026 deadline)
+</details>
+
+<details>
+<summary><strong>The Android 16 / API 36 Mandate (August 2026 deadline)</strong></summary>
+
 Android 16 made a platform-level change affecting every published app: on devices ≥600dp — tablets, foldables, ChromeOS — apps can **no longer lock screen orientation** or restrict resizability. Google Play requires API 36 targeting by August 2026.
 
 An AI tool generating `android:screenOrientation="portrait"` or `android:resizeableActivity="false"` today is generating code that will trigger App Compatibility warnings in Play Console, fail large-screen quality checks, and get apps demoted in Play Store search results.
 
 The business impact is not theoretical: **Foldable users spend 14× more on apps** than phone-only users. Tablet + phone users spend 9× more. FlipaClip saw 54% growth in tablet users within four months of going adaptive.
 
-### The KMP Silent Failure
+</details>
+
+<details>
+<summary><strong>The KMP Silent Failure</strong></summary>
+
 Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries published, Room added KMP support, companies now hire specifically for KMP skills. When a developer on a KMP project asks an AI tool to add database support, the AI generates Android-only Room code. It compiles. It runs perfectly on Android. **The iOS build fails.** The developer spends hours debugging before realizing the root cause: their AI tool does not know KMP exists.
+
+</details>
+
+---
 
 ## 🧩 What AndroJack Does
 
@@ -106,19 +142,25 @@ It does not make the AI smarter. It makes the AI **accountable to evidence.**
 
 Think of it as a pre-build linter for LLMs. While other tools retrieve documentation, AndroJack acts as a strict architectural gatekeeper.
 
-**Without AndroJack:** You ask → AI predicts from stale weights → Code (possibly wrong)
+```
+Without AndroJack:  You ask → AI predicts from stale weights → Code (possibly wrong)
 
-**With AndroJack:** You ask → AI calls tool → Tool fetches official source live → AI reads verified answer → Code (grounded)
+With AndroJack:     You ask → AI calls tool → Tool fetches official source live
+                             → AI reads verified answer → Code (grounded)
+```
+
+---
 
 ## ⚠️ Honest Activation Model — Two Levels
 
-This is the most important thing to understand before you install AndroJack:
+> [!IMPORTANT]
+> This is the most important thing to understand before you install AndroJack.
 
 | Level | What's Active | What the AI Does |
-| :--- | :--- | :--- |
-| **Level 1 — Tools only installed** | 21 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
-| **Level 2 — Tools + Grounding Gate prompt loaded** | 21 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
-| **Level 3 — Level 2 + android_code_validator** | Full loop: fetch → generate → validate → fix | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
+|:------|:--------------|:-----------------|
+| **Level 1 — Tools only** | 21 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
+| **Level 2 — Tools + Grounding Gate** | 21 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
+| **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
@@ -128,6 +170,8 @@ This is the most important thing to understand before you install AndroJack:
 
 → *For full grounding, always activate Level 2 + Level 3. See Getting the Full Guarantee below.*
 
+---
+
 ## 🪲 What Can Still Break — Even at Level 3
 
 > [!IMPORTANT]
@@ -136,7 +180,6 @@ This is the most important thing to understand before you install AndroJack:
 The following bugs were encountered in a real Android app built with AndroJack at Level 2 (v1.4.0). They are documented here honestly so you know exactly what to watch for — and where to reach for different tools.
 
 ### ✅ What Level 3 Catches
-These are the bugs AndroJack was designed to prevent. The rule engine fires on these:
 
 ```kotlin
 // ❌ REMOVED — android_code_validator fires: REMOVED_ASYNCTASK
@@ -152,25 +195,33 @@ ContextualFlowRow { Text("hello") }
 GlobalScope.launch { fetchData() }
 ```
 
-### ⚠️ What Level 3 Cannot Catch — And Why
+### ⚠️ What Level 3 Cannot Catch
+
 > [!WARNING]
 > The following bugs were found in a real project. They are valid, API-current Compose code that violates design system constraints, accessibility minimums, or architectural boundaries. Static text scanning cannot detect them.
 
-#### Bug PH-UI-001 — Segmented button text truncation
+<details>
+<summary><strong>Bug PH-UI-001 — Segmented button text truncation</strong></summary>
+
 ```kotlin
 // Compiles and runs. Level 3 sees no violation.
-// The bug: Text inside MultiChoiceSegmentedButtonRow truncates because a 
+// The bug: Text inside MultiChoiceSegmentedButtonRow truncates because a
 // fixed height modifier prevents the Roboto Flex variable font from expanding.
 MultiChoiceSegmentedButtonRow {
     SegmentedButton(/* fixed height modifier */) {
-        Text("Light") 
+        Text("Light")
     }
 }
 ```
+
 > [!NOTE]
 > This is an **absence** bug. The correct modifier is missing — no wrong one is present. Use visual testing or runtime inspection.
 
-#### Bug PH-UI-003 — Disabled button contrast failure
+</details>
+
+<details>
+<summary><strong>Bug PH-UI-003 — Disabled button contrast failure</strong></summary>
+
 ```kotlin
 // Correct Material 3 API. Level 3 sees no violation.
 // The bug: disabled state colours fail WCAG AA 4.5:1 contrast against surface.
@@ -178,10 +229,15 @@ Button(enabled = false, onClick = {}) {
     Text("INITIALIZE VAULT")
 }
 ```
+
 > [!NOTE]
 > This is a **runtime visual property** bug. Use paparazzi screenshot tests or Google's Accessibility Scanner.
 
-#### Bug PH-AR-004 — Raw stack trace rendered to end user
+</details>
+
+<details>
+<summary><strong>Bug PH-AR-004 — Raw stack trace rendered to end user</strong></summary>
+
 ```kotlin
 // A missing try/catch produces no pattern match.
 class VaultViewModel : ViewModel() {
@@ -193,13 +249,18 @@ class VaultViewModel : ViewModel() {
     }
 }
 ```
+
 > [!WARNING]
 > **UDF architecture violations** require Detekt with custom rules or unit tests verifying exception mapping.
+
+</details>
+
+---
 
 ## 🗂️ Defence-in-Depth: The Right Tool for Each Bug Class
 
 | Bug Class | Real Example | Right Tool |
-| :--- | :--- | :--- |
+|:----------|:-------------|:-----------|
 | Removed / deprecated API | `AsyncTask`, `TestCoroutineDispatcher` | ✅ AndroJack Level 3 |
 | Android 16 violations | `screenOrientation`, `resizeableActivity=false` | ✅ AndroJack Level 3 |
 | Architecture (flagged root) | `GlobalScope` leaking to UI | ✅ AndroJack Level 3 |
@@ -208,9 +269,11 @@ class VaultViewModel : ViewModel() {
 | Touch target violations | `PH-UX-008` | 🔧 Accessibility Scanner |
 | Architecture boundary (missing catch) | `PH-AR-004` (stack trace to UI) | 🔧 Detekt + ViewModel unit tests |
 
+---
+
 ## 🎯 The Killer Argument
 
-> "Can your `agents.md` file tell me the Gradle version that shipped last Tuesday?"
+> *"Can your `agents.md` file tell me the Gradle version that shipped last Tuesday?"*
 
 No markdown file can. No rules in `.cursorrules` can. No `SKILL.md` can.
 
@@ -219,7 +282,7 @@ No markdown file can. No rules in `.cursorrules` can. No `SKILL.md` can.
 That's the job AndroJack exists to do — and nothing else in the current ecosystem does it for Android specifically.
 
 | What you need | agents.md / SKILL.md | AndroJack MCP |
-| :--- | :--- | :--- |
+|:--------------|:---------------------|:--------------|
 | Format output a specific way | ✅ Perfect | Works too |
 | Follow team conventions | ✅ Perfect | Works too |
 | Latest Gradle version right now | ❌ Guesses from memory | ✅ Fetches live |
@@ -228,10 +291,12 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 **Prompt engineering controls how the AI responds. MCP controls what the AI knows.**
 
+---
+
 ## ✨ What AndroJack Covers — 21 Tools
 
 | # | Tool | What It Does | What Breaks Without It |
-| :--- | :--- | :--- | :--- |
+|:----|:-----|:-------------|:-----------------------|
 | 1 | `🔍 search` | Live search across official Android/Kotlin docs | AI reasons from memory — possibly wrong today |
 | 2 | `⚠️ component` | Deprecated/removed check on 40+ APIs | Compiles fine, breaks at runtime/review |
 | 3 | `📐 architecture` | Guides for 40+ topics — MVVM, Nav3, MVI... | AI gives 2022 advice; misses Nav3 |
@@ -241,30 +306,33 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 | 7 | `🎯 kotlin` | 10 patterns — coroutines, MVI, Compose state | `GlobalScope.launch`, `runBlocking` in UI |
 | 8 | `🎨 m3e` | Material 3 Expressive components & Motion | M2 MaterialTheme in M3E app |
 | 9 | `🔐 permissions` | 40+ permissions rules & contracts | `deprecated requestPermissions()` |
-| 10| `🧪 testing` | Unit/Compose UI testing official patterns | `Thread.sleep()` in tests; missing Hilt |
-| 11| `🏗️ build` | R8, libs.versions.toml, signing, AAB | implementation instead of ksp |
-| 12| `📱 large-screen` | WindowSizeClass, Adaptive Scaffolds | Phone-only layouts on foldables |
-| 13| `🚀 scalability` | Paging 3, WorkManager, modularization | Naive `loadAll()`; unstable keys in lists |
-| 14| `🧭 nav3` | Nav3 (Nov 2025) — Scenes, migration | AI generates Nav2 dead-ends |
-| 15| `✅ compliance` | API 36 / Android 16 / 16 KB page size | Apps fail Play Store August 2026 mandate |
-| 16| `🌐 kmp` | Room KMP, Ktor, source sets | Android-only code in KMP projects |
-| 17| `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano | Cloud-only AI when offline is required |
-| 18| `📋 policy` | Play Store age-gating, health, data safety | Apps rejected for unknown policy changes |
-| 19| `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
-| 20| `⌚ wear` | Tiles, Health, M3 Expressive for Wear OS | Handheld patterns on round displays |
-| 21| `🛡️ validator` | Level 3 loop-back validation gate | AI ships broken code without checking |
+| 10 | `🧪 testing` | Unit/Compose UI testing official patterns | `Thread.sleep()` in tests; missing Hilt |
+| 11 | `🏗️ build` | R8, libs.versions.toml, signing, AAB | `implementation` instead of `ksp` |
+| 12 | `📱 large-screen` | WindowSizeClass, Adaptive Scaffolds | Phone-only layouts on foldables |
+| 13 | `🚀 scalability` | Paging 3, WorkManager, modularization | Naive `loadAll()`; unstable keys in lists |
+| 14 | `🧭 nav3` | Nav3 (Nov 2025) — Scenes, migration | AI generates Nav2 dead-ends |
+| 15 | `✅ compliance` | API 36 / Android 16 / 16 KB page size | Apps fail Play Store August 2026 mandate |
+| 16 | `🌐 kmp` | Room KMP, Ktor, source sets | Android-only code in KMP projects |
+| 17 | `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano | Cloud-only AI when offline is required |
+| 18 | `📋 policy` | Play Store age-gating, health, data safety | Apps rejected for unknown policy changes |
+| 19 | `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
+| 20 | `⌚ wear` | Tiles, Health, M3 Expressive for Wear OS | Handheld patterns on round displays |
+| 21 | `🛡️ validator` | Level 3 loop-back validation gate | AI ships broken code without checking |
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
 
 ### Option 1 — Interactive CLI (v1.6.4) ✨ Recommended
+
 ```bash
 npx -y androjack-mcp@1.6.4 install
 ```
+
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
 
-### Option 2 — Targeted installs
+### Option 2 — Targeted Installs
+
 ```bash
 # Preview detected IDEs and config paths
 npx -y androjack-mcp@1.6.4 install --list
@@ -272,72 +340,11 @@ npx -y androjack-mcp@1.6.4 install --list
 # Auto-detect all
 npx -y androjack-mcp@1.6.4 install --auto
 
-# Install to specific IDE
+# Install to a specific IDE
 npx -y androjack-mcp@1.6.4 install --ide=cursor
 npx -y androjack-mcp@1.6.4 install --ide=claude
 npx -y androjack-mcp@1.6.4 install --ide=vscode
 npx -y androjack-mcp@1.6.4 install --ide=windsurf
 npx -y androjack-mcp@1.6.4 install --ide=jetbrains
 npx -y androjack-mcp@1.6.4 install --ide=kiro
-npx -y androjack-mcp@1.6.4 install --ide=antigravity
-```
-
-### Option 3 — Test without IDE
-```bash
-npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.6.4
-```
-
-## 🧩 Manual Config / Copy / Paste
-
-If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
-
-- Run `npx -y androjack-mcp@1.6.4 install --list` to preview detected IDEs and target config paths.
-- Ready-to-paste examples live in [`config/`](config/).
-- Use [`config/claude_desktop_config.json`](config/claude_desktop_config.json) for Claude Desktop.
-- Use [`config/cursor_mcp.json`](config/cursor_mcp.json) for Cursor.
-- Use [`config/vscode_mcp.json`](config/vscode_mcp.json) for VS Code / GitHub Copilot.
-- Use [`config/windsurf_mcp.json`](config/windsurf_mcp.json) for Windsurf.
-- Use [`config/jetbrains_mcp.json`](config/jetbrains_mcp.json) for Android Studio / IntelliJ.
-- Use [`config/kiro_mcp.json`](config/kiro_mcp.json) for AWS Kiro.
-- Use [`config/antigravity_mcp.json`](config/antigravity_mcp.json) for Google Antigravity.
-- Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.6.4`.
-
----
-
-## 📍 The Ecosystem: AndroJack vs. Other MCPs
-
-| Feature | Google Developer Knowledge MCP | AndroJack MCP |
-| :--- | :--- | :--- |
-| **Identity** | The Librarian (Information) | The Gatekeeper (Enforcement) |
-| **Mechanism** | Context Retrieval | Context Enforcement |
-| **Scope** | Generalist — Firebase, Cloud, Maps | Android engineering specialist |
-| **Tools** | 3 retrieval tools | 21 specialized tools |
-| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.6.4` — zero auth |
-| **Enforcement**| Passive — AI decides when to retrieve | Active — mandating calls by task type |
-
-## 🔒 Security & Privacy
-*   **Domain allowlist**: Requests only to Google/Android/Kotlin official domains.
-*   **HTTPS only**: Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs.
-*   **Local by default**: `serve` binds to loopback only unless you explicitly pass `--allow-remote`.
-*   **HTTP hardening**: Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions.
-*   **Transparent agent**: User-Agent: `AndroJack-MCP/1.6.4`.
-*   **Read-only**: All 21 tools are annotated `readOnlyHint: true`.
-*   **Zero credentials**: No API keys or tokens required for documentation fetching.
-*   **Security policy**: Disclosure process and supported versions live in [SECURITY.md](SECURITY.md).
-
-## 📋 Changelog
-### v1.6.4 — CLI Routing Fixes and Local Transport Hardening
-- **Fix:** `npx androjack-mcp install`, `install --auto`, `install --ide=...`, `help`, and `--version` now route correctly instead of falling through to the stdio server.
-- **Fix:** `install --auto` no longer over-detects IDEs from parent directories and create configs in a clean workspace.
-- **Fix:** HTTP serve mode now fails closed on non-loopback binds unless `--allow-remote` is explicit.
-- **Security:** Streamable HTTP now validates `Origin` and `Host` headers and enforces request body and session limits.
-- **Security:** Outbound fetches now enforce HTTPS, cap response size, and redact sensitive URL parts from retry logs.
-
-## 👥 Authorship & Ownership
-**Vikas Sahani** — Product Lead (vikassahani17@gmail.com)  
-**Claude AI** — AI Engineering Lead
-
----
-MIT License © 2026 Vikas Sahani | [SECURITY.md](SECURITY.md)
-
-*Built because 35% of Stack Overflow visits in 2025 are developers debugging AI-generated code. AndroJack exists so none of those visits are yours.*
+npx -y androjack-mcp@1.6.4 inst
