@@ -17,10 +17,20 @@ jobs:
       - name: Fetch Clone Count
         id: fetch-clones
         run: |
+          # Use Bearer for Fine-grained PATs
           # Fetch Clones from GitHub Traffic API
-          # DOCS: https://docs.github.com/en/rest/metrics/traffic#get-repository-clones
-          CLONES_JSON=$(curl -s -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
             "https://api.github.com/repos/VIKAS9793/AndroJack-mcp/traffic/clones")
+          
+          # Split response and status code
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          CLONES_JSON=$(echo "$RESPONSE" | head -n -1)
+          
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Error fetching clones (HTTP $HTTP_CODE): $CLONES_JSON"
+            echo "TIP: For Fine-grained tokens, you may need 'Administration' (Read-only) permissions."
+            exit 1
+          fi
           
           # Extract total clones using jq
           TOTAL_CLONES=$(echo $CLONES_JSON | jq '.count')
