@@ -10,3 +10,6 @@ tsconfig.json
 **/*.map
 **/*.ts
 node_modules/**
+
+.connector-build/
+*.vsix
