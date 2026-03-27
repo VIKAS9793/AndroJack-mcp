@@ -1199,7 +1199,7 @@
                 const version = extension?.versions?.[0]?.version;
 
                 setMetricNumber('vscode-downloads', installCount);
-                // Fallback to v1.6.4 if API lags or returns older version
+                // Fallback to v1.7.0 if API lags or returns older version
                 const displayVersion = (version && version >= '1.7.0') ? version : '1.7.0';
                 setMetricText('vscode-version', `v${displayVersion}`);
             } catch (error) {
