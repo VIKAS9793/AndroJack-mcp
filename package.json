@@ -2,7 +2,7 @@
   "name": "androjack-vscode",
   "displayName": "AndroJack MCP for VS Code",
   "description": "VS Code Marketplace wrapper for the AndroJack MCP server with verified Android documentation grounding.",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "homepage": "https://androjack-web.netlify.app",
   "publisher": "VIKAS9793",
   "icon": "assets/marketplace-icon.png",
@@ -59,7 +59,8 @@
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.27.3",
     "glob": "^13.0.6",
-    "mocha": "^11.3.0",
+    "minimatch": "^10.2.4",
+    "mocha": "^11.7.5",
     "serialize-javascript": "^7.0.4",
     "typescript": "^5.5.0"
   },

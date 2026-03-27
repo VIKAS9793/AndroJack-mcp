@@ -1,12 +1,12 @@
 # AndroJack MCP for VS Code 🤖🛡️
 
-[![Version 1.6.4](https://img.shields.io/badge/version-1.6.4-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
+[![Version 1.7.0](https://img.shields.io/badge/version-1.7.0-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 
 **The VS Code Marketplace wrapper for the AndroJack MCP server.**
 
 AndroJack MCP is a documentation-grounded Android engineering MCP server. This extension is the VS Code distribution layer for that same server, so AndroJack can be installed through both the npm registry and the VS Code Marketplace without splitting the product identity.
 
-Install the extension in VS Code, or use the npm package directly in other MCP clients. For this release, the wrapper launches `npx -y androjack-mcp@1.6.4` so Marketplace installs resolve to the exact reviewed MCP build. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
+Install the extension in VS Code, or use the npm package directly in other MCP clients. For this release, the wrapper launches `npx -y androjack-mcp@1.7.0` so Marketplace installs resolve to the exact reviewed MCP build. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
 
 ## 🌐 Official Website
 
@@ -33,7 +33,7 @@ Verify your app meets the August 2026 Google Play requirements for large screens
 Get grounded advice on Navigation 3, Material 3 Expressive, and multi-pane List-Detail layouts.
 
 ### 🛡️ Android Code Validator
-A "Grounding Gate" that reviews AI-generated code for 24+ common Android-specific violations before you commit.
+A "Grounding Gate" that reviews AI-generated code for 31+ common Android-specific violations before you commit.
 
 ## 📦 Getting Started
 1. Install this extension.
