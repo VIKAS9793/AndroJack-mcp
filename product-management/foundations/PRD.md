@@ -4,7 +4,7 @@
 | Field | Value |
 |---|---|
 | **Product** | AndroJack MCP |
-| **Version** | 1.5.0 |
+| **Version** | 1.7.0 |
 | **Status** | ✅ Shipped |
 | **PM** | North Star Hunter |
 | **Last Updated** | March 2026 |
@@ -54,7 +54,7 @@ enforcement layer, no code validation, and no structured gate.
 
 ### Primary Goal
 
-Reduce AI-generated Android regressions to zero for the 22 rule classes covered by the
+Reduce AI-generated Android regressions to zero for the 31 rule classes covered by the
 `android_code_validator` (Tool 21).
 
 ### Secondary Goals
@@ -135,8 +135,8 @@ Developer asks to migrate legacy code. AndroJack:
 ### F-03 — Source Citations
 - Every code block MUST include an inline comment citing the official documentation URL from which it was derived.
 
-### F-04 — 22 Validation Rules
-- The validator MUST detect and report all 22 rules across 3 severity levels.
+### F-04 — 31 Validation Rules
+- The validator MUST detect and report all 31 rules across 3 severity levels.
 - Rule output MUST include: rule ID, severity, line number, violating snippet, replacement, documentation URL.
 
 ### F-05 — Negative Constraints
@@ -169,14 +169,14 @@ Developer asks to migrate legacy code. AndroJack:
 
 | Criterion | Status |
 |---|---|
-| 22 rules implemented and unit-tested | ✅ |
+| 31 rules implemented and unit-tested | ✅ |
 | Tool 21 registered on both transports | ✅ |
 | Grounding Gate includes Step 8 (validate output) | ✅ |
 | Negative constraints section in system prompt | ✅ |
 | agents.md + 11 SKILL.md files shipped | ✅ |
-| README tool count consistent (21 everywhere) | ✅ |
-| No stale "20 tools" references in README | ✅ |
-| Version 1.5.0 in package.json, index.ts, serve.ts | ✅ |
+| README tool count consistent (22 everywhere) | ✅ |
+| No stale "21 tools" references in README | ✅ |
+| Version 1.7.0 in package.json, index.ts, serve.ts | ✅ |
 
 ---
 
@@ -196,7 +196,7 @@ Developer asks to migrate legacy code. AndroJack:
 
 | # | Question | Owner | Due |
 |---|---|---|---|
-| OQ-01 | Should v1.6.4 include AST-based rules for structural absence bugs? | PM | Q2 2026 |
+| OQ-01 | Should v1.8.0 include AST-based rules for structural absence bugs? | PM | Q3 2026 |
 | OQ-02 | Does `android_code_validator` need a MISSING_CONTENT_DESCRIPTION rule? | Engineering | Q2 2026 |
 | OQ-03 | What is the right opt-in mechanism for MCPcat telemetry? | PM | Q3 2026 |
 | OQ-04 | How should we handle Play Store policy changes (monthly cycle)? | Engineering | Ongoing |

@@ -209,11 +209,65 @@ In Google Play Console:
 Source: https://developer.android.com/docs/quality-guidelines/large-screen-app-quality
 `;
 
+  const billingOpenness = `
+# Google Play — Billing Openness & Alternative Payment Options (March 2026)
+Source: https://support.google.com/googleplay/android-developer/answer/9816329
+
+## What Changed (March 4, 2026)
+
+Google announced significant updates to Play billing policy:
+
+- **Alternative billing options** are now available for apps in eligible countries
+- **Registered alternative app stores** can distribute Android apps with their own billing
+- **Lower fees** for certain developer categories and programs
+- **User Choice Billing** expanded to more markets
+
+## Alternative Billing — Implementation
+
+Apps in eligible markets can offer users a choice between Google Play billing
+and a developer-managed billing alternative.
+
+\`\`\`kotlin
+// User Choice Billing — show the billing choice dialog
+// Requires BillingClient 5.0+ and Play Store 31.6+
+
+val billingClient = BillingClient.newBuilder(context)
+  .setListener(purchasesUpdatedListener)
+  .enableUserChoiceBilling(userChoiceBillingListener)
+  .build()
+
+// The listener fires when user selects alternative billing
+val userChoiceBillingListener = UserChoiceBillingListener { userChoiceDetails ->
+  // User chose alternative billing — redirect to your payment flow
+  openAlternativePaymentFlow(userChoiceDetails.externalTransactionToken)
+}
+\`\`\`
+
+## Fee Structure (2026)
+
+| Category | Standard fee | With User Choice Billing |
+|----------|-------------|------------------------|
+| Most apps | 15–30% | 4% service fee if user picks alternative |
+| Books/news/music/video | 10–15% | Category-specific |
+| Utilities/productivity | 15% | 4% on alternative billing transactions |
+
+## What Stays the Same
+
+- Google Play billing is still required as one of the options presented to users
+- You cannot skip the Play billing option entirely
+- Digital goods (in-app purchases, subscriptions) still require Play billing integration
+
+Source: https://support.google.com/googleplay/android-developer/answer/9816329
+`;
+
   if (t.includes("minor") || t.includes("restrict") || t.includes("age") || t.includes("dating") || t.includes("gambling")) {
     return restrictMinorAccess;
   }
-  if (t.includes("subscri") || t.includes("billing") || t.includes("payment")) {
+  if (t.includes("subscri") || t.includes("payment")) {
     return subscriptions;
+  }
+  if (t.includes("billing") || t.includes("alternative billing") || t.includes("alternative payment") || t.includes("billing openness")) {
+    return billingOpenness;
   }
   if (t.includes("permission") || t.includes("data safety") || t.includes("sms") || t.includes("call log")) {
     return permissions;
@@ -224,6 +278,7 @@ Source: https://developer.android.com/docs/quality-guidelines/large-screen-app-q
 
   return overview + "\n\n---\n\n" +
     "**Query topics:** 'restrict minor access' (dating/gambling apps), 'subscriptions' (billing transparency), " +
+    "'billing openness' (alternative billing options, March 2026), " +
     "'permissions' (restricted permissions + data safety), 'large screen quality' (Play Store badge + revenue impact)\n\n" +
     "Source: https://support.google.com/googleplay/android-developer/";
 }

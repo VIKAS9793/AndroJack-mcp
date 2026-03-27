@@ -113,6 +113,27 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   Room: {
     status: "stable",
     docUrl: "https://developer.android.com/training/data-storage/room",
+    notes: "Room 2.7.x is stable and the recommended version for production. " +
+      "Room 3.0-alpha01 (March 2026) is a major breaking version — it drops SupportSQLite APIs " +
+      "and replaces them with SQLiteDriver/SQLiteConnection from androidx.sqlite. " +
+      "Do NOT use Room 3.0-alpha in production apps. Stay on Room 2.7.x until stable.",
+  },
+  SupportSQLiteDatabase: {
+    status: "deprecated",
+    since: "Room 3.0-alpha01 (March 2026)",
+    replacement: "SQLiteConnection from androidx.sqlite (androidx.sqlite:sqlite-bundled)",
+    docUrl: "https://developer.android.com/jetpack/androidx/releases/room",
+    notes: "Removed in Room 3.0. RoomDatabase.Callback.onCreate(db: SupportSQLiteDatabase) " +
+      "is replaced by onCreate(db: SQLiteConnection). Only relevant when migrating to Room 3.0+. " +
+      "Room 2.7.x still uses SupportSQLiteDatabase — no action needed until you upgrade.",
+  },
+  SupportSQLiteOpenHelper: {
+    status: "deprecated",
+    since: "Room 3.0-alpha01 (March 2026)",
+    replacement: "SQLiteDriver API from androidx.sqlite",
+    docUrl: "https://developer.android.com/jetpack/androidx/releases/room",
+    notes: "Removed in Room 3.0. Custom SupportSQLiteOpenHelper implementations " +
+      "must migrate to the SQLiteDriver contract. Only relevant for Room 3.0+ migrations.",
   },
   WorkManager: {
     status: "stable",

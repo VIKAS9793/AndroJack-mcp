@@ -2,7 +2,7 @@
  * AndroJack MCP – HTTP Session Isolation Tests
  *
  * Verifies that each new MCP initialize request creates a FRESH
- * McpServer instance (fixes v1.6.3 session-reuse vulnerability).
+ * McpServer instance (fixes session-reuse vulnerability found in v1.6.3).
  *
  * Run: npm test   (or: node --test test/http-session.test.mjs)
  */

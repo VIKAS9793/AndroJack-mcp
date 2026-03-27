@@ -329,11 +329,121 @@ const PLAY_QUALITY = `
 **Checklist tool:** https://developer.android.com/docs/quality-guidelines/large-screen-app-quality
 `;
 
+// ── WindowManager 1.5.0 — Large and Extra-large breakpoints (NEW March 2026) ──
+
+const WINDOW_SIZE_CLASS_EXTENDED = `
+## WindowManager 1.5.0 — New Width Breakpoints (March 2026)
+Source: https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
+
+### What Changed in WindowManager 1.5.0
+
+Two new width size classes were added:
+
+| Class | Width Range | Typical Device |
+|-------|------------|----------------|
+| Compact | < 600dp | Phone portrait |
+| Medium | 600–840dp | Phone landscape, small tablet |
+| Expanded | 840–1200dp | Tablet, large foldable unfolded |
+| **Large** (NEW) | **1200–1600dp** | **Desktop, external monitor** |
+| **Extra-large** (NEW) | **1600dp+** | **27"+ monitor, large display** |
+
+### Why This Matters
+
+On a 27-inch monitor, a two-pane layout looks stretched. WindowManager 1.5.0
+signals when to add a third or fourth pane. AI tools trained before this
+release will only generate Compact/Medium/Expanded patterns — missing the
+high-density desktop layouts.
+
+### Updated Dependencies
+
+\`\`\`toml
+# libs.versions.toml
+[versions]
+window = "1.5.0"   # WindowManager 1.5.0+
+
+[libraries]
+window = { group = "androidx.window", name = "window", version.ref = "window" }
+adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version = "1.1.0" }
+\`\`\`
+
+### Updated WindowSizeClass Switch
+
+\`\`\`kotlin
+// Source: developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
+@Composable
+fun AdaptiveLayout() {
+  val adaptiveInfo = currentWindowAdaptiveInfo()
+  val widthClass = adaptiveInfo.windowSizeClass.windowWidthSizeClass
+
+  when {
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.EXTRA_LARGE) -> {
+      // 1600dp+ — four-pane layout for very large displays
+      FourPaneLayout()
+    }
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.LARGE) -> {
+      // 1200–1600dp — three-pane layout (list + detail + tool panel)
+      ThreePaneLayout()
+    }
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.EXPANDED) -> {
+      // 840–1200dp — two-pane layout
+      TwoPaneLayout()
+    }
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.MEDIUM) -> {
+      // 600–840dp — navigation rail
+      NavigationRailLayout()
+    }
+    else -> {
+      // < 600dp — single pane with bottom nav
+      SinglePaneLayout()
+    }
+  }
+}
+\`\`\`
+
+### SupportingPaneScaffold for Three-Pane
+
+\`\`\`kotlin
+// Three-pane with primary + detail + supporting panel
+@Composable
+fun ThreePaneDocEditor() {
+  SupportingPaneScaffold(
+    directive = rememberSupportingPaneScaffoldNavigator().scaffoldDirective,
+    value = rememberSupportingPaneScaffoldNavigator().scaffoldValue,
+    mainPane   = { DocumentContent() },       // always visible
+    detailPane = { DocumentOutline() },        // visible on Expanded+
+    supportingPane = { FormattingPanel() },    // visible on Large+
+  )
+}
+\`\`\`
+
+### Adaptive Grid — Columns by All Five Classes
+
+\`\`\`kotlin
+@Composable
+fun AdaptiveFeed(items: List<Item>) {
+  val widthClass = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass
+  val columns = when {
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.EXTRA_LARGE) -> 5
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.LARGE)       -> 4
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.EXPANDED)    -> 3
+    widthClass.isAtLeastBreakpoint(WindowWidthSizeClass.MEDIUM)      -> 2
+    else -> 1  // Compact
+  }
+  LazyVerticalGrid(columns = GridCells.Fixed(columns)) {
+    items(items) { FeedCard(it) }
+  }
+}
+\`\`\`
+
+Source: https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
+`;
+
 // ── Topic routing ──────────────────────────────────────────────────────────────
 
 const TOPICS: LargeScreenTopic[] = [
   { keywords: ["overview", "intro", "what is", "large screen", "adaptive", "why"], content: OVERVIEW },
   { keywords: ["windowsizeclass", "window size", "breakpoint", "compact", "medium", "expanded", "class"], content: WINDOW_SIZE_CLASS },
+  { keywords: ["large breakpoint", "extra-large", "extra large", "1200", "1600", "five class", "desktop breakpoint", "windowmanager 1.5", "three pane", "four pane"], content: WINDOW_SIZE_CLASS_EXTENDED },
   { keywords: ["navigation", "rail", "drawer", "bottom nav", "navigationsuitescaffold", "adaptive nav"], content: NAVIGATION_PATTERNS },
   { keywords: ["two pane", "twopane", "list detail", "split", "listdetailpane", "detail pane"], content: TWO_PANE },
   { keywords: ["fold", "foldable", "hinge", "unfold", "half", "windowinfotracker", "foldingfeature"], content: FOLDABLES },

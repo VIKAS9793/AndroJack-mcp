@@ -623,6 +623,44 @@ The rule engine catches **deprecated APIs**, **removed APIs**, **dangerous patte
 
 ---
 
+### UC-16 — Is my code safe to run on Android 17 / API 37?
+
+**The problem:** Android 17 reached platform stability March 26, 2026. Three code patterns that work today will break on API 37 targets: `static final` reflection, unguarded LAN socket connections, and SMS broadcast receivers for OTP.
+
+**The tool:** `android_api17_compliance`
+
+**Source:** `src/tools/android17-compliance.ts`
+
+**Example prompt:**
+```
+What breaks when I target Android 17?
+```
+
+**Validator rules that catch these automatically (`src/rules/android-rules.ts`):**
+
+```typescript
+// Rule fires on reflection patterns that mutate static final fields
+{
+  id:       "API37_STATIC_FINAL_REFLECTION",
+  severity: "error",
+  pattern:  /field\.isAccessible\s*=\s*true[\s\S]{0,200}field\.set\s*\(/g,
+  message:  "Modifying static final fields via reflection throws IllegalAccessException on API 37+.",
+  replacement: "Use constructor injection or dependency injection instead of mutating static finals.",
+}
+```
+
+**Actual response includes:**
+
+1. Static final reflection — `IllegalAccessException` on API 37, JNI crash
+2. `ACCESS_LOCAL_NETWORK` — new dangerous permission for any LAN socket connection
+3. SMS OTP delay — 3-hour withholding; migrate to `SmsRetriever.startSmsUserConsent()`
+4. Extended large-screen mandate — games exemption removed at API 37
+5. NPU feature declaration for on-device AI
+6. Handoff API for cross-device session continuity
+7. Full migration checklist with per-item checkboxes
+
+---
+
 ## Appendix — Tool to Source File Mapping
 
 | Tool name | Source file |
@@ -648,7 +686,8 @@ The rule engine catches **deprecated APIs**, **removed APIs**, **dangerous patte
 | `android_xr_guide` | `src/tools/xr.ts` |
 | `android_wearos_guide` | `src/tools/wear.ts` |
 | `android_code_validator` | `src/tools/validator.ts` + `src/rules/android-rules.ts` |
-| Rule engine | `src/rules/android-rules.ts` (24 rules) |
+| `android_api17_compliance` | `src/tools/android17-compliance.ts` |
+| Rule engine | `src/rules/android-rules.ts` (31 rules) |
 | Response cache | `src/cache.ts` (LRU, per-hostname TTL) |
 
 ---

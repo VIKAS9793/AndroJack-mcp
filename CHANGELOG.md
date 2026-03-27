@@ -1,5 +1,69 @@
 # Changelog
 
+## [1.7.0] – 2026-03-27
+
+### Added
+- **Tool 22: `android_api17_compliance`** — Android 17 / API 37 compliance reference.
+  Covers four new breaking changes: (1) static `final` field reflection blocked — apps
+  targeting API 37 that modify `static final` fields via reflection receive
+  `IllegalAccessException`; JNI modification causes a crash. (2) `ACCESS_LOCAL_NETWORK`
+  permission — any LAN communication (socket connections to 192.168.x.x / 10.x.x.x,
+  mDNS/NSD, SSDP) requires runtime permission on API 37+. (3) SMS OTP protection —
+  programmatic SMS access delayed 3 hours; migrate to `SmsRetriever.startSmsUserConsent()`.
+  (4) Extended large-screen mandate — the games exemption (`android:appCategory="game"`)
+  no longer applies on API 37+ targets. Also covers Handoff API (cross-device continuity)
+  and NPU feature declaration for on-device AI. Includes full migration checklist.
+  Source: https://developer.android.com/about/versions/17/behavior-changes-17
+
+- **7 new validator rules** (`src/rules/android-rules.ts`) — rule count 24 → 31:
+  - `API37_STATIC_FINAL_REFLECTION` (error) — detects reflection patterns that break on API 37
+  - `ACCESS_LOCAL_NETWORK_MISSING` (warning) — detects LAN socket patterns without the permission
+  - `SMS_OTP_BROADCAST_RECEIVER` (warning) — detects legacy `SMS_RECEIVED` OTP pattern
+  - `ROOM_30_SUPPORT_SQLITE_DATABASE` (error) — detects `SupportSQLiteDatabase` removed in Room 3.0
+  - `ROOM_30_SUPPORT_SQLITE_OPEN_HELPER` (error) — detects `SupportSQLiteOpenHelper` removed in Room 3.0
+  - `WINDOW_SIZE_CLASS_DEPRECATED_CALCULATE` (warning) — detects deprecated `calculateWindowSizeClass(activity)`
+  - `KAPT_IN_KMP_COMMON` (error) — detects `kapt()` in `commonMain` where it cannot run
+
+- **WindowManager 1.5.0 breakpoints** (`src/tools/large-screen.ts`) — two new width
+  size classes: Large (1200–1600dp) and Extra-large (1600dp+). Added three-pane and
+  four-pane layout patterns for desktop/large display environments. All five breakpoints
+  now documented with `SupportingPaneScaffold` usage.
+  Source: https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
+
+- **Room 3.0-alpha breaking changes** (`src/tools/kmp.ts`, `src/constants.ts`) —
+  `SupportSQLiteOpenHelper`, `SupportSQLiteDatabase`, and `SupportSQLiteStatement` removed.
+  Migration path to `SQLiteDriver` / `SQLiteConnection` APIs documented. Warning: Room 3.0
+  is alpha — do not migrate production apps until stable.
+  Source: https://android-developers.googleblog.com/2026/03/room-30-modernizing-room.html
+
+- **`ACCESS_LOCAL_NETWORK` permission** (`src/tools/permissions.ts`) — new Android 17
+  permission entry with runtime check pattern and `Build.VERSION.SDK_INT >= 37` guard.
+
+- **Contact Picker API note** (`src/tools/permissions.ts`) — `READ_CONTACTS` entry
+  updated: `ACTION_PICK_CONTACTS` is now the recommended alternative for most use cases,
+  avoiding the need for full contacts access.
+
+- **Play billing openness** (`src/tools/play-policy.ts`) — March 4, 2026 policy update:
+  alternative billing options, User Choice Billing implementation, updated fee structure,
+  registered alternative app store program.
+
+- **Android Studio Panda 2 stable** (`src/tools/build-publish.ts`) — current stable IDE
+  release (March 3, 2026, version 2025.3.2) documented alongside Otter 3 Feature Drop
+  history.
+
+### Changed
+- `src/tools/api36-compliance.ts` — Android 17 / API 37 queries now routed to
+  `android_api17_compliance` tool with a redirect message.
+- `src/server-factory.ts` — Tool 22 (`android_api17_compliance`) registered.
+  Grounding Gate prompt updated to reference API 37 compliance.
+- `src/version.ts` — `1.6.4` → `1.7.0`
+
+### Fixed
+- `src/tools/play-policy.ts` — `billingOpenness` constant referenced in routing but
+  never declared — caused `TS2304` compile error at build time.
+
+---
+
 ## [1.6.4] – 2026-03-18
 
 ### Security

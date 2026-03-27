@@ -149,12 +149,27 @@ const PERMISSIONS: Record<string, PermEntry> = {
     type: "normal", runtimeRequest: false,
     docUrl: "https://developer.android.com/reference/android/Manifest.permission#ACCESS_WIFI_STATE",
   },
+  // ── NEW Android 17 / API 37 ────────────────────────────────────────────────
+  ACCESS_LOCAL_NETWORK: {
+    fullName: "android.permission.ACCESS_LOCAL_NETWORK",
+    type: "dangerous", runtimeRequest: true,
+    addedApi: 37,
+    group: "Nearby devices",
+    docUrl: "https://developer.android.com/about/versions/17/behavior-changes-17#local-network",
+    notes: "NEW in Android 17 (API 37). Required for any app that communicates over the LAN — " +
+      "this includes socket connections to 192.168.x.x / 10.x.x.x ranges, mDNS/NSD discovery, " +
+      "SSDP/UPnP, and direct peer-to-peer over Wi-Fi. " +
+      "Apps targeting API 37 that access LAN without this permission will receive a SecurityException. " +
+      "Part of the NEARBY_DEVICES permission group. Requires runtime request on API 37+ devices. " +
+      "Falls back gracefully on pre-API 37 devices — wrap the request in a Build.VERSION.SDK_INT >= 37 check.",
+  },
 
   // ── Contacts ───────────────────────────────────────────────────────────────
   READ_CONTACTS: {
     fullName: "android.permission.READ_CONTACTS",
     type: "dangerous", runtimeRequest: true, group: "Contacts",
     docUrl: "https://developer.android.com/training/contacts-provider",
+    notes: "Android 17 (API 37): Consider Contact Picker API instead — ACTION_PICK_CONTACTS lets users share specific contacts without granting full READ_CONTACTS access. See: https://developer.android.com/about/versions/17/features#contact-picker",
   },
   WRITE_CONTACTS: {
     fullName: "android.permission.WRITE_CONTACTS",
@@ -186,6 +201,10 @@ const PERMISSIONS: Record<string, PermEntry> = {
     type: "dangerous", runtimeRequest: true, group: "SMS",
     playRestriction: "Default SMS apps only. Heavily restricted.",
     docUrl: "https://developer.android.com/reference/android/Manifest.permission#READ_SMS",
+    notes: "Android 17 (API 37): Apps targeting API 37 experience a 3-hour delay in " +
+      "programmatic OTP message access. Migrate to SmsRetriever.startSmsUserConsent() or " +
+      "SmsCodeRetriever — these APIs are not delayed and present a user-approval dialog. " +
+      "Source: https://developer.android.com/about/versions/17/behavior-changes-17#sms-otp",
   },
 
   // ── Background / Battery ───────────────────────────────────────────────────

@@ -16,20 +16,20 @@
 [![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
 [![GitHub clones](https://img.shields.io/badge/dynamic/json?color=34A853&label=clones&query=clones&url=https%3A%2F%2Fraw.githubusercontent.com%2FVIKAS9793%2FAndroJack-mcp%2Fmain%2Fassets%2Fclones.json&logo=github)](https://github.com/VIKAS9793/AndroJack-mcp/graphs/traffic)
-[![Tools](https://img.shields.io/badge/tools-21-orange?style=flat-square)](#-the-21-tools)
+[![Tools](https://img.shields.io/badge/tools-22-orange?style=flat-square)](#-the-22-tools)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
-[![Android API](https://img.shields.io/badge/Android-API%2021--36-34A853?style=flat-square&logo=android)](https://developer.android.com)
+[![Android API](https://img.shields.io/badge/Android-API%2021--37-34A853?style=flat-square&logo=android)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Security Policy](https://img.shields.io/badge/security-policy-0A7AFF?style=flat-square&logo=github)](SECURITY.md)
 
 <br/>
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNi40Il19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS42LjQiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.6.4%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNy4wIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS43LjAiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.7.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 <br/>
@@ -58,7 +58,7 @@
 - [What Can Still Break — Even at Level 3](#-what-can-still-break--even-at-level-3)
 - [Defence-in-Depth](#️-defence-in-depth-the-right-tool-for-each-bug-class)
 - [The Killer Argument](#-the-killer-argument)
-- [The 21 Tools](#-what-androjack-covers--21-tools)
+- [The 22 Tools](#-what-androjack-covers--22-tools)
 - [Quick Start](#-quick-start--zero-install-required)
 - [Manual Config](#-manual-config--copy--paste)
 - [Ecosystem Comparison](#-the-ecosystem-androjack-vs-other-mcps)
@@ -137,7 +137,7 @@ Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries publ
 
 ## 🧩 What AndroJack Does
 
-AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant **21 specialized tools** that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
+AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant **22 specialized tools** that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
 
 It does not make the AI smarter. It makes the AI **accountable to evidence.**
 
@@ -159,15 +159,15 @@ With AndroJack:     You ask → AI calls tool → Tool fetches official source l
 
 | Level | What's Active | What the AI Does |
 |:------|:--------------|:-----------------|
-| **Level 1 — Tools only** | 21 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
-| **Level 2 — Tools + Grounding Gate** | 21 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
+| **Level 1 — Tools only** | 22 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
+| **Level 2 — Tools + Grounding Gate** | 22 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
 | **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
 **Level 2 is active.** The `androjack_grounding_gate` system prompt maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
 
-**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 24 rules covering removed APIs, deprecated patterns, and Android 16 compliance. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
+**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 31 rules covering removed APIs, deprecated patterns, Android 16 and Android 17 compliance. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
 
 → *For full grounding, always activate Level 2 + Level 3. See Getting the Full Guarantee below.*
 
@@ -264,6 +264,7 @@ class VaultViewModel : ViewModel() {
 |:----------|:-------------|:-----------|
 | Removed / deprecated API | `AsyncTask`, `TestCoroutineDispatcher` | ✅ AndroJack Level 3 |
 | Android 16 violations | `screenOrientation`, `resizeableActivity=false` | ✅ AndroJack Level 3 |
+| Android 17 violations | `static final` reflection, LAN without permission | ✅ AndroJack Level 3 |
 | Architecture (flagged root) | `GlobalScope` leaking to UI | ✅ AndroJack Level 3 |
 | Absent modifier / missing constraint | `PH-UI-009` (innerPadding) | 🔧 Android Lint / IDE inspector |
 | Runtime contrast / colour failures | `PH-UI-003` (WCAG) | 🔧 paparazzi + Accessibility Scanner |
@@ -294,7 +295,7 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 ---
 
-## ✨ What AndroJack Covers — 21 Tools
+## ✨ What AndroJack Covers — 22 Tools
 
 | # | Tool | What It Does | What Breaks Without It |
 |:----|:-----|:-------------|:-----------------------|
@@ -309,25 +310,26 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 | 9 | `🔐 permissions` | 40+ permissions rules & contracts | `deprecated requestPermissions()` |
 | 10 | `🧪 testing` | Unit/Compose UI testing official patterns | `Thread.sleep()` in tests; missing Hilt |
 | 11 | `🏗️ build` | R8, libs.versions.toml, signing, AAB | `implementation` instead of `ksp` |
-| 12 | `📱 large-screen` | WindowSizeClass, Adaptive Scaffolds | Phone-only layouts on foldables |
+| 12 | `📱 large-screen` | WindowSizeClass (5 breakpoints incl. Large/XL), Adaptive Scaffolds | Phone-only layouts on foldables and desktops |
 | 13 | `🚀 scalability` | Paging 3, WorkManager, modularization | Naive `loadAll()`; unstable keys in lists |
 | 14 | `🧭 nav3` | Nav3 (Nov 2025) — Scenes, migration | AI generates Nav2 dead-ends |
 | 15 | `✅ compliance` | API 36 / Android 16 / 16 KB page size | Apps fail Play Store August 2026 mandate |
-| 16 | `🌐 kmp` | Room KMP, Ktor, source sets | Android-only code in KMP projects |
+| 16 | `🌐 kmp` | Room KMP, Ktor, source sets, Room 3.0 alpha | Android-only code in KMP projects |
 | 17 | `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano | Cloud-only AI when offline is required |
-| 18 | `📋 policy` | Play Store age-gating, health, data safety | Apps rejected for unknown policy changes |
+| 18 | `📋 policy` | Play Store age-gating, billing openness, data safety | Apps rejected for unknown policy changes |
 | 19 | `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
 | 20 | `⌚ wear` | Tiles, Health, M3 Expressive for Wear OS | Handheld patterns on round displays |
-| 21 | `🛡️ validator` | Level 3 loop-back validation gate | AI ships broken code without checking |
+| 21 | `🛡️ validator` | Level 3 loop-back validation gate — 31 rules | AI ships broken code without checking |
+| 22 | `🆕 api17` | Android 17 / API 37 — static final, LAN, OTP, Handoff | Apps crash or fail Play Store on API 37 |
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.6.4) ✨ Recommended
+### Option 1 — Interactive CLI (v1.7.0) ✨ Recommended
 
 ```bash
-npx -y androjack-mcp@1.6.4 install
+npx -y androjack-mcp@1.7.0 install
 ```
 
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
@@ -336,25 +338,25 @@ Launches a full animated terminal wizard with auto-detection for **VS Code, Curs
 
 ```bash
 # Preview detected IDEs and config paths
-npx -y androjack-mcp@1.6.4 install --list
+npx -y androjack-mcp@1.7.0 install --list
 
 # Auto-detect all
-npx -y androjack-mcp@1.6.4 install --auto
+npx -y androjack-mcp@1.7.0 install --auto
 
 # Install to a specific IDE
-npx -y androjack-mcp@1.6.4 install --ide=cursor
-npx -y androjack-mcp@1.6.4 install --ide=claude
-npx -y androjack-mcp@1.6.4 install --ide=vscode
-npx -y androjack-mcp@1.6.4 install --ide=windsurf
-npx -y androjack-mcp@1.6.4 install --ide=jetbrains
-npx -y androjack-mcp@1.6.4 install --ide=kiro
-npx -y androjack-mcp@1.6.4 install --ide=antigravity
+npx -y androjack-mcp@1.7.0 install --ide=cursor
+npx -y androjack-mcp@1.7.0 install --ide=claude
+npx -y androjack-mcp@1.7.0 install --ide=vscode
+npx -y androjack-mcp@1.7.0 install --ide=windsurf
+npx -y androjack-mcp@1.7.0 install --ide=jetbrains
+npx -y androjack-mcp@1.7.0 install --ide=kiro
+npx -y androjack-mcp@1.7.0 install --ide=antigravity
 ```
 
 ### Option 3 — Test Without an IDE
 
 ```bash
-npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.6.4
+npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.0
 ```
 
 ---
@@ -363,7 +365,7 @@ npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.6.4
 
 If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
 
-- Run `npx -y androjack-mcp@1.6.4 install --list` to preview detected IDEs and target config paths.
+- Run `npx -y androjack-mcp@1.7.0 install --list` to preview detected IDEs and target config paths.
 - Ready-to-paste examples live in [`config/`](config/).
 
 | IDE / Client | Config file |
@@ -376,7 +378,7 @@ If you prefer to wire the server manually, or want to inspect the exact JSON bef
 | AWS Kiro | [`config/kiro_mcp.json`](config/kiro_mcp.json) |
 | Google Antigravity | [`config/antigravity_mcp.json`](config/antigravity_mcp.json) |
 
-Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.6.4`.
+Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.7.0`.
 
 ---
 
@@ -387,8 +389,8 @@ Every example keeps AndroJack local by default and runs the published package vi
 | **Identity** | The Librarian (Information) | The Gatekeeper (Enforcement) |
 | **Mechanism** | Context Retrieval | Context Enforcement |
 | **Scope** | Generalist — Firebase, Cloud, Maps | Android engineering specialist |
-| **Tools** | 3 retrieval tools | 21 specialized tools |
-| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.6.4` — zero auth |
+| **Tools** | 3 retrieval tools | 22 specialized tools |
+| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.7.0` — zero auth |
 | **Enforcement** | Passive — AI decides when to retrieve | Active — mandating calls by task type |
 
 ---
@@ -401,8 +403,8 @@ Every example keeps AndroJack local by default and runs the published package vi
 | **HTTPS only** | Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs |
 | **Local by default** | `serve` binds to loopback only unless you explicitly pass `--allow-remote` |
 | **HTTP hardening** | Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions |
-| **Transparent agent** | `User-Agent: AndroJack-MCP/1.6.4` |
-| **Read-only** | All 21 tools annotated `readOnlyHint: true` |
+| **Transparent agent** | `User-Agent: AndroJack-MCP/1.7.0` |
+| **Read-only** | All 22 tools annotated `readOnlyHint: true` |
 | **Zero credentials** | No API keys or tokens required for documentation fetching |
 | **Security policy** | Disclosure process and supported versions in [SECURITY.md](SECURITY.md) |
 
@@ -410,13 +412,14 @@ Every example keeps AndroJack local by default and runs the published package vi
 
 ## 📋 Changelog
 
-### v1.6.4 — CLI Routing Fixes and Local Transport Hardening
+### v1.7.0 — Android 17 / API 37 Coverage + WindowManager 1.5.0
 
-- **Fix:** `npx androjack-mcp install`, `install --auto`, `install --ide=...`, `help`, and `--version` now route correctly instead of falling through to the stdio server.
-- **Fix:** `install --auto` no longer over-detects IDEs from parent directories and creates configs in a clean workspace.
-- **Fix:** HTTP serve mode now fails closed on non-loopback binds unless `--allow-remote` is explicit.
-- **Security:** Streamable HTTP now validates `Origin` and `Host` headers and enforces request body and session limits.
-- **Security:** Outbound fetches now enforce HTTPS, cap response size, and redact sensitive URL parts from retry logs.
+- **Tool 22: `android_api17_compliance`** — Android 17 platform stable (March 26, 2026). Covers `static final` reflection block, `ACCESS_LOCAL_NETWORK` permission, SMS OTP 3-hour delay, extended large-screen mandate, Handoff API, NPU feature declaration.
+- **31 validator rules** (was 24) — 7 new rules including `API37_STATIC_FINAL_REFLECTION`, Room 3.0 removal rules, deprecated `calculateWindowSizeClass()`.
+- **WindowManager 1.5.0** — Large (1200dp) and Extra-large (1600dp) breakpoints added to `android_large_screen_guide`. Three-pane and four-pane layout patterns included.
+- **Room 3.0 alpha** — `SupportSQLiteOpenHelper` and `SupportSQLiteDatabase` removal documented in `android_kmp_guide` and component registry.
+- **Play billing openness** — March 4, 2026 policy update in `android_play_policy_advisor`.
+- **Fix** — `billingOpenness` compile error in `play-policy.ts` resolved.
 
 ---
 

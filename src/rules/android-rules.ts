@@ -307,6 +307,31 @@ export const ANDROID_RULES: AndroidRule[] = [
     replacement: "Use OnBackPressedCallback (registered via onBackPressedDispatcher) or BackHandler in Compose.",
     docUrl:      "https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture",
   },
+
+  // ── Android 17 / API 37 rules ─────────────────────────────────────────────
+
+  {
+    id:          "API37_STATIC_FINAL_REFLECTION",
+    severity:    "error",
+    languages:   ["kotlin"],
+    pattern:     /\.isAccessible\s*=\s*true/g,
+    message:     "field.isAccessible = true on a static final field throws IllegalAccessException on Android 17 (API 37+) targets. JNI mutation of static final fields causes a crash.",
+    replacement: "Replace reflected static final mutation with constructor injection or a provider/factory pattern. In tests, use dependency injection instead of field mutation.",
+    docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#static-final-reflection",
+    notes:       "Only breaks when used on static final fields. isAccessible=true on non-final fields still works. Audit all reflection usage before targeting API 37.",
+    minSdkAbove: 35,  // Only flag for apps targeting API 37+
+  },
+
+  {
+    id:          "API37_SMS_RECEIVER_OTP",
+    severity:    "warning",
+    languages:   ["kotlin"],
+    pattern:     /SMS_RECEIVED|android\.provider\.Telephony\.SMS_RECEIVED/g,
+    message:     "SMS_RECEIVED broadcast access to OTP messages is delayed 3 hours for apps targeting Android 17 (API 37+).",
+    replacement: "Use SmsRetriever.startSmsUserConsent() or SmsCodeRetriever from Play Services. These have no delay and are the recommended OTP pattern.",
+    docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#sms-otp",
+    minSdkAbove: 35,
+  },
 ];
 
 // ── Rule Engine ───────────────────────────────────────────────────────────────

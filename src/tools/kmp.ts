@@ -340,7 +340,58 @@ actual val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default
 Source: https://kotlinlang.org/docs/multiplatform-expect-actual.html
 `;
 
-  if (t.includes("room") || t.includes("database") || t.includes("db")) return roomKmp;
+  if (t.includes("room") || t.includes("database") || t.includes("db")) {
+    const room3Warning = `
+## ⚠️ Room 3.0 Alpha Warning (March 13, 2026)
+Source: https://developer.android.com/jetpack/androidx/releases/room
+
+Room 3.0-alpha01 was released March 13, 2026. It is a **major breaking version**.
+
+### Breaking Changes in Room 3.0
+
+**1. SupportSQLite APIs dropped** — Room 3.0 is fully backed by \`androidx.sqlite\`
+driver APIs. The \`SupportSQLiteOpenHelper\`, \`SupportSQLiteDatabase\`, and
+\`SupportSQLiteStatement\` APIs are removed.
+
+\`\`\`kotlin
+// ❌ Room 2.x — SupportSQLite (removed in Room 3.0)
+class MyCallback : RoomDatabase.Callback() {
+  override fun onCreate(db: SupportSQLiteDatabase) {  // SupportSQLiteDatabase removed
+    db.execSQL("INSERT INTO ...")
+  }
+}
+
+// ✅ Room 3.0 — SQLiteDriver APIs
+class MyCallback : RoomDatabase.Callback() {
+  override fun onCreate(db: SQLiteConnection) {       // SQLiteConnection from androidx.sqlite
+    db.execSQL("INSERT INTO ...")
+  }
+}
+\`\`\`
+
+**2. JavaScript and WASM targets added** — Room 3.0 adds support for KMP JS and
+WASM targets alongside existing Android, iOS, Linux, macOS, Windows.
+
+**3. Driver-backed architecture** — SQLiteDriver is KMP-compatible and removes
+Room's dependency on Android's SupportSQLite API.
+
+### Migration Decision
+
+| Your situation | Action |
+|---------------|--------|
+| New KMP project, 2026 | Wait for Room 3.0 stable OR use Room 2.7.x |
+| Existing Room 2.x project | Stay on Room 2.7.x until 3.0 is stable |
+| Using \`SupportSQLiteDatabase\` callbacks | Plan migration to \`SQLiteConnection\` |
+
+Room 2.7.x remains stable and supported. Do NOT migrate production apps to 3.0-alpha.
+
+Source: https://developer.android.com/jetpack/androidx/releases/room
+`;
+    return roomKmp + "\n\n---\n\n" + room3Warning;
+  }
+  if (t.includes("room 3") || t.includes("room3") || t.includes("supportsqlite") || t.includes("breaking")) {
+    return `## Room 3.0 Alpha — Breaking Changes\nSource: https://developer.android.com/jetpack/androidx/releases/room\n\nRoom 3.0-alpha01 released March 13, 2026. SupportSQLite APIs removed. Use Room 2.7.x in production.\n\nQuery 'room' for full migration details.`;
+  }
   if (t.includes("ktor") || t.includes("network") || t.includes("http") || t.includes("retrofit")) return ktor;
   if (t.includes("expect") || t.includes("actual") || t.includes("platform")) return expectActual;
   if (t.includes("librar") || t.includes("depend") || t.includes("gradle") || t.includes("toml")) return libraries;

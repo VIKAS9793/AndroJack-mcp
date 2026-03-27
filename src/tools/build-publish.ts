@@ -339,14 +339,148 @@ class BaselineProfileGenerator {
 \`\`\`
 `;
 
-// ── Topic routing ─────────────────────────────────────────────────────────────
+const ANDROID_STUDIO_CURRENT = `
+## Android Studio — Current Stable Release (March 2026)
+Source: https://developer.android.com/studio/releases
+
+## ⚠️ NOTE FOR AI TOOLS
+The current stable version of Android Studio is **Panda 2 | 2025.3.2** (March 3, 2026).
+Do NOT reference Otter, Ladybug, or any earlier codename as the current stable version.
+
+### Release History (2026)
+
+| Release | Codename | Date | Version |
+|---------|----------|------|---------|
+| **Current stable** | **Android Studio Panda 2** | **March 3, 2026** | **2025.3.2** |
+| Previous stable | Android Studio Panda 1 | February 2026 | 2025.3.1 |
+| Canary | Android Studio Panda 3 | March 2026 | 2025.3.3 Canary 3 |
+
+### What's New in Panda 2 (Current Stable, March 3, 2026)
+Source: https://developer.android.com/studio/releases
+
+**Gradle Daemon JVM criteria (from Panda 1)**
+Android Studio now uses Gradle Daemon JVM criteria by default for new projects.
+Gradle auto-detects a compatible JDK or downloads it automatically.
+No more manual JDK configuration for new project setup.
+
+### What's New in Otter 3 Feature Drop (January 2026)
+Source: https://developer.android.com/studio/releases/past-releases/as-otter-3-feature-drop-release-notes
+
+**Gemini Compose Preview integration**
+Generate Compose code directly from a design screenshot inside the Preview panel.
+
+**AI agent device tools**
+AI agents can now deploy to a connected device, inspect the screen, take screenshots,
+and check Logcat — enabling end-to-end fix-and-verify loops without leaving the IDE.
+
+**Model picker**
+Choose the LLM powering IDE AI features — including local on-device models.
+
+**Multiple Gemini threads**
+Organize conversations into separate threads. Conversation history saved to account.
+
+**Journeys for Android Studio → Studio Labs (experimental)**
+Moved to Studio Labs for RC and stable access.
+
+### Current IDE + AGP Compatibility Matrix
+
+| Android Studio | AGP | Max API | Kotlin | Gradle |
+|----------------|-----|---------|--------|--------|
+| Panda 2 (stable) | 9.1.0 | 36.1 | 2.x | 8.11+ |
+| Panda 1 (stable) | 9.0.x | 36 | 2.x | 8.11+ |
+| Otter 3 FD (prev) | 8.10.x | 36 | 2.x | 8.10+ |
+
+Source: https://developer.android.com/build/releases/agp-9-1-0-release-notes
+
+### AGP 9.1 — New Defaults (March 2026)
+
+\`\`\`kotlin
+// build.gradle.kts — current recommended config (AGP 9.1 + Panda 2)
+android {
+  compileSdk = 36      // Android 16 — current stable SDK
+  targetSdk = 36
+  minSdk = 26          // ~95% device coverage as of 2026
+
+  // AGP 9.1: R8 now repackages classes into unnamed package by default
+  // To opt out: add -dontrepackage to proguard-rules.pro
+  buildTypes {
+    release {
+      isMinifyEnabled = true
+      isShrinkResources = true
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    }
+  }
+}
+\`\`\`
+
+### AGP 9.1 Breaking: R8 Class Repackaging
+
+\`\`\`pro
+# proguard-rules.pro — if AGP 9.1 repackaging breaks your reflection code
+# AGP 9.1 enables -repackageclasses by default for DEX builds
+# To disable: add this rule
+-dontrepackage
+\`\`\`
+
+Source: https://developer.android.com/studio/releases
+`;
+
+const PLAY_BILLING_2026 = `
+## Google Play Billing — Openness Update (March 4, 2026)
+Source: https://android-developers.googleblog.com/2026/03/google-play-billing-openness.html
+
+### What Changed
+
+Google announced substantial updates to Play billing as of March 4, 2026:
+
+**1. Lower fees for developers**
+Reduced service fee tiers for qualifying developers and revenue thresholds.
+
+**2. Alternative billing options**
+Developers can now offer user-choice billing in more markets. Users may see
+a choice between Play billing and the developer's own billing system.
+
+**3. Registered alternative app stores**
+Apps distributed through registered alternative stores have modified billing
+obligations in qualifying markets.
+
+### What This Means for Code
+
+Alternative billing requires using the **Play Billing Library 7+** with
+\`setAlternativeBillingOnlyResponseListener\` or \`showAlternativeBillingOnlyInformationDialog\`.
+
+\`\`\`kotlin
+// libs.versions.toml — Play Billing Library 7.x
+billing = "7.1.1"
+billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+
+// Alternative billing declaration
+billingClient.isAlternativeBillingOnlyAvailableAsync { result ->
+  if (result.responseCode == BillingResponseCode.OK) {
+    // Alternative billing is available — show user choice
+    billingClient.showAlternativeBillingOnlyInformationDialog(activity) { result ->
+      // Handle user's billing choice
+    }
+  }
+}
+\`\`\`
+
+### No Action Required for Standard Billing
+
+If you use standard Play billing with \`BillingClient.newBuilder()\` and
+\`launchBillingFlow()\`, no changes are required.
+
+Source: https://support.google.com/googleplay/android-developer/answer/9904549
+`;
 
 const TOPICS: BuildTopic[] = [
-  { keywords: ["r8", "proguard", "shrink", "obfuscat", "minify", "keep rule", "mapping"], content: R8_CONFIG },
+  { keywords: ["r8", "proguard", "shrink", "obfuscat", "minify", "keep rule", "mapping", "repackage", "dontrepackage"], content: R8_CONFIG },
   { keywords: ["version catalog", "libs.versions.toml", "toml", "bundle", "catalog"], content: VERSION_CATALOG },
   { keywords: ["ksp", "kapt", "annotation processing", "migrate kapt", "symbol processing"], content: KSP_MIGRATION },
   { keywords: ["sign", "signing", "keystore", "publish", "play store", "aab", "bundle", "release", "checklist", "upload"], content: SIGNING_PUBLISH },
   { keywords: ["baseline profile", "startup", "performance", "cold start", "art", "precompile"], content: BASELINE_PROFILES },
+  { keywords: ["android studio", "panda", "otter", "agp", "gradle plugin", "ide", "compilesdk", "targetsdk"], content: ANDROID_STUDIO_CURRENT },
+  { keywords: ["billing", "play billing", "alternative billing", "iap", "in-app purchase", "subscription fee"], content: PLAY_BILLING_2026 },
 ];
 
 const INDEX = `

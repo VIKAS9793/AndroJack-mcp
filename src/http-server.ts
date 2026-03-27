@@ -165,7 +165,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
  *   - Origin header validation
  *   - Body size cap (1 MiB)
  *   - Active session cap (64)
- *   - Per-session server isolation (NEW in v1.6.4)
+ *   - Per-session server isolation (introduced in v1.6.4, refactored in v1.7.0)
  */
 export async function startHttpServer(
   createServer: () => McpServer,

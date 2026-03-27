@@ -38,6 +38,7 @@ import { androidPlayPolicyAdvisor } from "./tools/play-policy.js";
 import { androidXrGuide } from "./tools/xr.js";
 import { androidWearOsGuide } from "./tools/wear.js";
 import { androidCodeValidator } from "./tools/validator.js";
+import { android17Compliance } from "./tools/android17-compliance.js";
 
 /**
  * Creates and returns a fully-configured McpServer with all 21 tools
@@ -632,6 +633,37 @@ export function createAndroJackServer(): McpServer {
         type: "text",
         text: await androidCodeValidator(code, language, minSdk, targetSdk),
       }],
+    })
+  );
+
+  // ── Tool 22: Android 17 / API 37 Compliance ───────────────────────────────
+  server.registerTool(
+    "android_api17_compliance",
+    {
+      title: "Android 17 / API 37 Compliance",
+      description:
+        "Android 17 (API 37) reached platform stability March 26, 2026. " +
+        "Contains breaking changes NOT covered by android_api36_compliance: " +
+        "(1) Static final field reflection via Java reflection or JNI now throws IllegalAccessException/crash on API 37+ targets — " +
+        "affects test code, some DI frameworks, and any code using field.isAccessible=true on final fields. " +
+        "(2) ACCESS_LOCAL_NETWORK permission required for any LAN communication (192.168.x.x, mDNS, SSDP, direct sockets). " +
+        "(3) SMS OTP programmatic access delayed 3 hours — migrate to SmsRetriever.startSmsUserConsent(). " +
+        "(4) Extended large-screen mandate at API 37 — games exemption no longer applies on ≥600dp. " +
+        "(5) NPU feature declaration required for direct NPU access. " +
+        "(6) Handoff API for cross-device activity continuity. " +
+        "Topics: 'overview' (all breaking changes), 'checklist' (migration audit), " +
+        "'static final' (reflection block), 'local network' (ACCESS_LOCAL_NETWORK), " +
+        "'sms otp' (3-hour delay), 'npu' (NPU feature), 'handoff' (cross-device).",
+      inputSchema: {
+        topic: z.string().max(200).optional()
+          .describe(
+            "Topic: 'overview', 'checklist', 'static final', 'local network', 'sms otp', 'npu', 'handoff'"
+          ),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ topic }) => ({
+      content: [{ type: "text", text: await android17Compliance(topic ?? "overview") }],
     })
   );
 

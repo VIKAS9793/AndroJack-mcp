@@ -282,8 +282,25 @@ Source: https://developer.android.com/guide/navigation/custom-back/predictive-ba
     return predictiveBack;
   }
 
+  // ── Android 17 / API 37 redirect ─────────────────────────────────────────
+  if (
+    t.includes("17") || t.includes("api 37") || t.includes("api37") ||
+    t.includes("static final") || t.includes("local network") ||
+    t.includes("access_local") || t.includes("sms otp") ||
+    t.includes("handoff") || t.includes("npu")
+  ) {
+    return (
+      "## Android 17 / API 37 — Use the android_api37_compliance tool\n\n" +
+      "Android 17 reached platform stability on March 26, 2026. For API 37-specific " +
+      "breaking changes (static final reflection, ACCESS_LOCAL_NETWORK, SMS OTP delay, " +
+      "Handoff API, NPU feature declaration), call **android_api17_compliance** directly.\n\n" +
+      "Source: https://developer.android.com/about/versions/17"
+    );
+  }
+
   return overview + "\n\n---\n\n" +
     "**Query topics:** 'layouts' (canonical adaptive patterns), 'checklist' (Play Store quality tiers), " +
     "'predictive back' (API 36 back gesture requirement), 'page size' (16 KB native alignment)\n\n" +
+    "For Android 17 / API 37 compliance, use the **android_api17_compliance** tool.\n\n" +
     "Source: https://developer.android.com/about/versions/16";
 }
