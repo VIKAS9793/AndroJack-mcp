@@ -24,7 +24,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://androjack-web.netlify.app/" />
     <meta property="og:title" content="AndroJack MCP — AI Android Dev Verification" />
-    <meta property="og:description" content="21-tool MCP server grounding AI-assisted
+    <meta property="og:description" content="22-tool MCP server grounding AI-assisted
                                               Android development in official docs." />
     <meta property="og:image" content="https://androjack-web.netlify.app/assets/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -34,7 +34,7 @@
     <!-- ══ Twitter / X Card ════════════════════════════════════ -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="AndroJack MCP — AI Android Dev Verification" />
-    <meta name="twitter:description" content="21-tool MCP server grounding AI-assisted
+    <meta name="twitter:description" content="22-tool MCP server grounding AI-assisted
                                                Android development in official docs." />
     <meta name="twitter:image" content="https://androjack-web.netlify.app/assets/og-image.png" />
 
@@ -50,7 +50,7 @@
       "description": "AI validation tool for Android development that verifies AI-generated code against official documentation to reduce hallucinations and build failures.",
       "url": "https://androjack-web.netlify.app",
       "downloadUrl": "https://www.npmjs.com/package/androjack-mcp",
-      "softwareVersion": "1.6.4",
+      "softwareVersion": "1.7.0",
       "author": {
         "@type": "Person",
         "name": "Vikas"
@@ -653,7 +653,7 @@
                 </div>
                 <div class="qi-body">
                     <div class="qi-command">
-                        <span class="prompt">$</span>npx androjack-mcp@1.6.4 install
+                        <span class="prompt">$</span>npx androjack-mcp@1.7.0 install
                     </div>
                     <button class="btn-copy" id="copy-btn" aria-label="Copy install command">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -705,11 +705,11 @@
                     <div class="command-list">
                         <div class="quick-command">
                             <span class="command-label">npm install</span>
-                            <code><span class="prompt">$</span> npx androjack-mcp@1.6.4 install</code>
+                            <code><span class="prompt">$</span> npx androjack-mcp@1.7.0 install</code>
                         </div>
                         <div class="quick-command">
                             <span class="command-label">VS Code</span>
-                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode@1.6.4</code>
+                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode@1.7.0</code>
                         </div>
                     </div>
                 </div>
@@ -730,7 +730,7 @@
                                 <p>Best for Claude Desktop, Cursor, Windsurf, Kiro, and direct MCP installs.</p>
                             </div>
                         </div>
-                        <div class="distribution-command">npx androjack-mcp@1.6.4 install</div>
+                        <div class="distribution-command">npx androjack-mcp@1.7.0 install</div>
                         <div class="distribution-actions">
                             <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank"
                                 class="btn btn-primary">Open npm Package</a>
@@ -753,7 +753,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode@1.6.4
+                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode@1.7.0
                         </div>
                         <div class="distribution-actions">
                             <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode"
@@ -1053,7 +1053,7 @@
                         <li><strong>Backend or Web Apps:</strong> Completely useless for your Express.js server, React
                             website, or Python scripts.</li>
                         <li><strong>Simple UI Tweaks:</strong> If you are just changing a text color in an isolated
-                            view, loading 21 AI tools is overkill.</li>
+                            view, loading 22 AI tools is overkill.</li>
                         <li><strong>Basic Syntax Help:</strong> LLMs are already great at basic Kotlin syntax. AndroJack
                             is for system-level SDK architecture, not teaching "for loops."</li>
                     </ul>
@@ -1200,7 +1200,7 @@
 
                 setMetricNumber('vscode-downloads', installCount);
                 // Fallback to v1.6.4 if API lags or returns older version
-                const displayVersion = (version && version >= '1.6.4') ? version : '1.6.4';
+                const displayVersion = (version && version >= '1.7.0') ? version : '1.7.0';
                 setMetricText('vscode-version', `v${displayVersion}`);
             } catch (error) {
                 console.error('Failed to fetch VS Code Marketplace metrics:', error);
@@ -1272,7 +1272,7 @@
             const copyBtn = document.getElementById('copy-btn');
             if (!copyBtn) return;
 
-            const command = "npx androjack-mcp@1.6.4 install";
+            const command = "npx androjack-mcp@1.7.0 install";
             const btnSpan = copyBtn.querySelector('span');
             const originalText = btnSpan.textContent;
 
