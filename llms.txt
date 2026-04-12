@@ -1,6 +1,6 @@
 # AndroJack MCP
 
-> AndroJack MCP is a 22-tool Model Context Protocol (MCP) server
+> AndroJack MCP is a hardened 22-tool Model Context Protocol (MCP) server
 > that provides documentation-grounded verification for AI-assisted
 > Android development. It prevents AI hallucinations by grounding
 > responses in official Android, Jetpack, Kotlin, and Firebase docs.
@@ -29,12 +29,12 @@ documentation-backed code suggestions — not hallucinated APIs.
 
 ### npm (MCP server)
 ```
-npm install -g androjack-mcp@1.7.0
+npm install -g androjack-mcp@1.7.1
 ```
 
 ### VS Code Extension
 Search `AndroJack MCP` in the VS Code Extensions panel,
-or install via: `ext install vikas9793.androjack-vscode@1.7.0`
+or install via: `ext install vikas9793.androjack-vscode@1.7.1`
 
 ## Supported Tool Categories
 
