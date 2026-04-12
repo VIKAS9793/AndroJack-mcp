@@ -1,7 +1,7 @@
 # ============================================================
 # AndroJack MCP — robots.txt
-# Updated: 2026-03-27
-# Spec version: 1.0.0
+# Updated: 2026-04-12
+# Spec version: 1.1.0
 # ============================================================
 
 # ── Default: allow all standard crawlers ─────────────────────
