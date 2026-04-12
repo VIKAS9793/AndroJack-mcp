@@ -2,7 +2,7 @@
   "name": "androjack-vscode",
   "displayName": "AndroJack MCP for VS Code",
   "description": "VS Code Marketplace wrapper for the AndroJack MCP server with verified Android documentation grounding.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "homepage": "https://androjack-web.netlify.app",
   "publisher": "VIKAS9793",
   "icon": "assets/marketplace-icon.png",
@@ -14,6 +14,8 @@
     "vscode": "^1.90.0"
   },
   "categories": [
+    "AI",
+    "Linters",
     "Machine Learning",
     "Programming Languages"
   ],

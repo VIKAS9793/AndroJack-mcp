@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Provide a static definition referencing our single configured server
             return [{
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@1.7.0'],
+                args: ['-y', 'androjack-mcp@1.7.1'],
                 env: { ...process.env } as Record<string, string>,
                 stderr: 'inherit',
                 label: 'AndroJack MCP: Verified Android Docs'
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             return {
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@1.7.0'],
+                args: ['-y', 'androjack-mcp@1.7.1'],
                 env: safeEnv,
                 // Allow standard error tracking
                 stderr: 'inherit',

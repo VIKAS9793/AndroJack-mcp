@@ -1,11 +1,13 @@
 User-facing release notes for **AndroJack MCP for VS Code**.
 
-## 1.7.0
+## 1.7.1
 
-- **v1.7.0 Sync:** Extension now launches the hardened `androjack-mcp@1.7.0` release.
-- **Android 17 / API 37:** Added support for the new `android_api17_compliance` tool.
-- **Rule Engine Expansion:** Internal validator now covers 31 rules (up from 24).
-- **Dependency Hardening:** Updated internal mocha and glob dependencies to address security vulnerabilities.
+- **v1.7.1 Hardening Sync:** Extension now launches the clinical-grade `androjack-mcp@1.7.1` release.
+- **Verification Suite:** Core server now backed by 54-test coverage (Rules, Cache, Parser, Security).
+- **Discovery Fix:** Updated capability reporting to accurately reflect Tool 22 (`android_api17_compliance`).
+- **Compose Alignment:** Improved rule detection for trailing lambda call styles.
+
+## 1.7.0
 
 
 ## 1.6.4

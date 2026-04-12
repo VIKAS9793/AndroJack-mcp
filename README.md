@@ -1,12 +1,12 @@
 # AndroJack MCP for VS Code 🤖🛡️
 
-[![Version 1.7.0](https://img.shields.io/badge/version-1.7.0-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
+[![Version 1.7.1](https://img.shields.io/badge/version-1.7.1-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 
 **The VS Code Marketplace wrapper for the AndroJack MCP server.**
 
 AndroJack MCP is a documentation-grounded Android engineering MCP server. This extension is the VS Code distribution layer for that same server, so AndroJack can be installed through both the npm registry and the VS Code Marketplace without splitting the product identity.
 
-Install the extension in VS Code, or use the npm package directly in other MCP clients. For this release, the wrapper launches `npx -y androjack-mcp@1.7.0` so Marketplace installs resolve to the exact reviewed MCP build. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
+Install the extension in VS Code, or use the npm package directly in other MCP clients. For this release, the wrapper launches `npx -y androjack-mcp@1.7.1` so Marketplace installs resolve to the clinical-grade MCP build. The core product remains the same: one AndroJack MCP server, distributed through multiple channels.
 
 ## 🌐 Official Website
 
