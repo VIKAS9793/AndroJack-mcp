@@ -27,9 +27,9 @@
 <br/>
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNy4wIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS43LjAiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.7.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNy4xIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS43LjEiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.7.1%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 <br/>
@@ -326,10 +326,10 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.7.0) ✨ Recommended
+### Option 1 — Interactive CLI (v1.7.1) ✨ Recommended
 
 ```bash
-npx -y androjack-mcp@1.7.0 install
+npx -y androjack-mcp@1.7.1 install
 ```
 
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
@@ -338,25 +338,25 @@ Launches a full animated terminal wizard with auto-detection for **VS Code, Curs
 
 ```bash
 # Preview detected IDEs and config paths
-npx -y androjack-mcp@1.7.0 install --list
+npx -y androjack-mcp@1.7.1 install --list
 
 # Auto-detect all
-npx -y androjack-mcp@1.7.0 install --auto
+npx -y androjack-mcp@1.7.1 install --auto
 
 # Install to a specific IDE
-npx -y androjack-mcp@1.7.0 install --ide=cursor
-npx -y androjack-mcp@1.7.0 install --ide=claude
-npx -y androjack-mcp@1.7.0 install --ide=vscode
-npx -y androjack-mcp@1.7.0 install --ide=windsurf
-npx -y androjack-mcp@1.7.0 install --ide=jetbrains
-npx -y androjack-mcp@1.7.0 install --ide=kiro
-npx -y androjack-mcp@1.7.0 install --ide=antigravity
+npx -y androjack-mcp@1.7.1 install --ide=cursor
+npx -y androjack-mcp@1.7.1 install --ide=claude
+npx -y androjack-mcp@1.7.1 install --ide=vscode
+npx -y androjack-mcp@1.7.1 install --ide=windsurf
+npx -y androjack-mcp@1.7.1 install --ide=jetbrains
+npx -y androjack-mcp@1.7.1 install --ide=kiro
+npx -y androjack-mcp@1.7.1 install --ide=antigravity
 ```
 
 ### Option 3 — Test Without an IDE
 
 ```bash
-npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.0
+npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.1
 ```
 
 ---
@@ -365,7 +365,7 @@ npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.0
 
 If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
 
-- Run `npx -y androjack-mcp@1.7.0 install --list` to preview detected IDEs and target config paths.
+- Run `npx -y androjack-mcp@1.7.1 install --list` to preview detected IDEs and target config paths.
 - Ready-to-paste examples live in [`config/`](config/).
 
 | IDE / Client | Config file |
@@ -378,7 +378,7 @@ If you prefer to wire the server manually, or want to inspect the exact JSON bef
 | AWS Kiro | [`config/kiro_mcp.json`](config/kiro_mcp.json) |
 | Google Antigravity | [`config/antigravity_mcp.json`](config/antigravity_mcp.json) |
 
-Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.7.0`.
+Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.7.1`.
 
 ---
 
@@ -390,7 +390,7 @@ Every example keeps AndroJack local by default and runs the published package vi
 | **Mechanism** | Context Retrieval | Context Enforcement |
 | **Scope** | Generalist — Firebase, Cloud, Maps | Android engineering specialist |
 | **Tools** | 3 retrieval tools | 22 specialized tools |
-| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.7.0` — zero auth |
+| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.7.1` — zero auth |
 | **Enforcement** | Passive — AI decides when to retrieve | Active — mandating calls by task type |
 
 ---
@@ -403,7 +403,7 @@ Every example keeps AndroJack local by default and runs the published package vi
 | **HTTPS only** | Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs |
 | **Local by default** | `serve` binds to loopback only unless you explicitly pass `--allow-remote` |
 | **HTTP hardening** | Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions |
-| **Transparent agent** | `User-Agent: AndroJack-MCP/1.7.0` |
+| **Transparent agent** | `User-Agent: AndroJack-MCP/1.7.1` |
 | **Read-only** | All 22 tools annotated `readOnlyHint: true` |
 | **Zero credentials** | No API keys or tokens required for documentation fetching |
 | **Security policy** | Disclosure process and supported versions in [SECURITY.md](SECURITY.md) |
@@ -412,14 +412,21 @@ Every example keeps AndroJack local by default and runs the published package vi
 
 ## 📋 Changelog
 
-### v1.7.0 — Android 17 / API 37 Coverage + WindowManager 1.5.0
+### v1.7.1 — Engineering Hardening & Community Parity
 
-- **Tool 22: `android_api17_compliance`** — Android 17 platform stable (March 26, 2026). Covers `static final` reflection block, `ACCESS_LOCAL_NETWORK` permission, SMS OTP 3-hour delay, extended large-screen mandate, Handoff API, NPU feature declaration.
-- **31 validator rules** (was 24) — 7 new rules including `API37_STATIC_FINAL_REFLECTION`, Room 3.0 removal rules, deprecated `calculateWindowSizeClass()`.
-- **WindowManager 1.5.0** — Large (1200dp) and Extra-large (1600dp) breakpoints added to `android_large_screen_guide`. Three-pane and four-pane layout patterns included.
-- **Room 3.0 alpha** — `SupportSQLiteOpenHelper` and `SupportSQLiteDatabase` removal documented in `android_kmp_guide` and component registry.
-- **Play billing openness** — March 4, 2026 policy update in `android_play_policy_advisor`.
-- **Fix** — `billingOpenness` compile error in `play-policy.ts` resolved.
+- **54-Test Coverage** — Implemented comprehensive unit and contract tests for validator rules, HTML parser, LRU cache, and HTTP security layer.
+- **Discovery Parity** — Fixed `/.well-known/mcp` endpoint to correctly report `tools: 22`.
+- **Dependency Sanitization** — Removed `node-fetch` (migrated to native `fetch`) and pruned stale overrides for a cleaner supply chain.
+- **Rule Hardening** — Improved Compose component detection for `NavHost` and `BottomAppBar`.
+- **URL Remediation** — Fixed broken documentation anchors for Android 17 `ACCESS_LOCAL_NETWORK` and `handoff`.
+
+### v1.7.0 — Android 17 / API 37 Support
+
+- **Tool 22: `android_api17_compliance`** — Full reference for Android 17 platform stability (March 26, 2026).
+- **31 validator rules** — Expanded from 24 to 31 with dedicated Android 17 and Room 3.0 removal checks.
+- **WindowManager 1.5.0** — Added Large (1200dp) and Extra-large (1600dp) breakpoints and layout patterns.
+- **Room 3.0 alpha** — Support for modern SQLiteDriver migration paths.
+
 
 ---
 

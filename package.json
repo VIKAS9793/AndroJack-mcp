@@ -1,6 +1,6 @@
 {
   "name": "androjack-mcp",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "mcpName": "io.github.VIKAS9793/androjack",
   "files": [
     "build/",
@@ -41,7 +41,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node build/index.js",
-    "test": "npm run build && node --test test/cli-routing.test.mjs test/http-session.test.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
     "install-mcp": "node build/index.js install",
     "install-mcp:auto": "node build/index.js install --auto",
     "install-mcp:list": "node build/index.js install --list",
@@ -61,7 +61,6 @@
     "chalk": "^5.6.2",
     "cheerio": "^1.0.0",
     "figlet": "^1.11.0",
-    "node-fetch": "^3.3.2",
     "ora": "^9.3.0",
     "zod": "^3.25.0"
   },
@@ -70,10 +69,7 @@
     "@types/node": "^22.19.17",
     "typescript": "^5.5.0"
   },
-  "overrides": {
-    "hono": "4.12.7",
-    "@hono/node-server": "1.19.11"
-  },
+  "overrides": {},
   "engines": {
     "node": ">=18.0.0"
   }

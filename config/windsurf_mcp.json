@@ -12,7 +12,7 @@
   "mcpServers": {
     "androjack": {
       "command": "npx",
-      "args": ["-y", "androjack-mcp@1.7.0"]
+      "args": ["-y", "androjack-mcp@1.7.1"]
     }
   }
 }

@@ -4,7 +4,7 @@
 | Field | Value |
 |---|---|
 | **Product** | AndroJack MCP |
-| **Version** | 1.7.0 |
+| **Version** | 1.7.1 |
 | **Status** | ✅ Shipped |
 | **PM** | North Star Hunter |
 | **Last Updated** | March 2026 |
@@ -176,7 +176,7 @@ Developer asks to migrate legacy code. AndroJack:
 | agents.md + 11 SKILL.md files shipped | ✅ |
 | README tool count consistent (22 everywhere) | ✅ |
 | No stale "21 tools" references in README | ✅ |
-| Version 1.7.0 in package.json, index.ts, serve.ts | ✅ |
+| Version 1.7.1 in package.json, index.ts, serve.ts | ✅ |
 
 ---
 

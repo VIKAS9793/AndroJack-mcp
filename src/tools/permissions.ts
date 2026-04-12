@@ -155,7 +155,7 @@ const PERMISSIONS: Record<string, PermEntry> = {
     type: "dangerous", runtimeRequest: true,
     addedApi: 37,
     group: "Nearby devices",
-    docUrl: "https://developer.android.com/about/versions/17/behavior-changes-17#local-network",
+    docUrl: "https://developer.android.com/privacy-and-security/local-network-permission",
     notes: "NEW in Android 17 (API 37). Required for any app that communicates over the LAN — " +
       "this includes socket connections to 192.168.x.x / 10.x.x.x ranges, mDNS/NSD discovery, " +
       "SSDP/UPnP, and direct peer-to-peer over Wi-Fi. " +
@@ -408,10 +408,10 @@ function formatEntry(key: string, entry: PermEntry): string {
     entry.type === "removed"
       ? `> ❌ GROUNDING GATE: Do NOT use this permission. Use: ${entry.replacement ?? "see docs"}.`
       : entry.type === "special"
-      ? `> 🟠 GROUNDING GATE: Special permission — sends user to Settings. Ensure genuine use case before requesting.`
-      : entry.runtimeRequest
-      ? `> 🔴 GROUNDING GATE: Runtime permission — use ActivityResultContracts.RequestPermission().`
-      : `> 🟢 GROUNDING GATE: Normal permission — declare in AndroidManifest.xml, no runtime request needed.`,
+        ? `> 🟠 GROUNDING GATE: Special permission — sends user to Settings. Ensure genuine use case before requesting.`
+        : entry.runtimeRequest
+          ? `> 🔴 GROUNDING GATE: Runtime permission — use ActivityResultContracts.RequestPermission().`
+          : `> 🟢 GROUNDING GATE: Normal permission — declare in AndroidManifest.xml, no runtime request needed.`,
   ].filter(Boolean).join("\n");
 }
 

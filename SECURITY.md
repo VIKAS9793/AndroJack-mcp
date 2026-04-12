@@ -6,6 +6,7 @@ The following versions of androjack-mcp are currently being supported with secur
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 1.7.x   | :white_check_mark: |
 | 1.6.x   | :white_check_mark: |
 | < 1.6   | :x:                |
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.7.1] – 2026-04-12
+
+### Added
+- **Comprehensive Test Suite** — Implemented 54 unit and contract tests covering all core systems:
+  - `rules.test.mjs`: Verified all 31 validator rules (positive/negative cases).
+  - `parser.test.mjs`: Sanity tests for HTML documentation text extraction.
+  - `cache.test.mjs`: Verified LRU eviction and TTL expiry logic.
+  - `http.test.mjs`: Security validation for the domain allowlist and HTTPS-only policy.
+  - `tool-outputs.test.mjs`: Contract tests for tool return formats.
+
+### Changed
+- **Community Parity** — Updated the `/.well-known/mcp` capability discovery endpoint to correctly report `tools: 22` (previously 21), ensuring compatibility with automated ecosystem scanners.
+- **Supply Chain Hygiene** — Removed `node-fetch` (migrated to native `fetch`) and pruned stale `hono` overrides from `package.json` for a leaner dependency tree.
+- **Validator Rule Hardening** — Broadened detection patterns for `NavHost` and `BottomAppBar` to support both parenthesis `(...)` and trailing lambda `{ ... }` call styles in Kotlin/Compose code.
+
+### Fixed
+- **Android 17 Documentation URLs** — Resolved critical documentation links pointing to non-existent anchors.
+  - Corrected `ACCESS_LOCAL_NETWORK` docUrl in `android17-compliance.ts` and `permissions.ts` to point to the dedicated permission page (`/privacy-and-security/local-network-permission`) instead of a broken anchor on the behavior changes page.
+  - Verified `handoff` anchors point to the valid features page.
+
+
+---
+
 ## [1.7.0] – 2026-03-27
 
 ### Added

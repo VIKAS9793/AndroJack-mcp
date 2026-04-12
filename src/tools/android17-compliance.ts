@@ -73,7 +73,7 @@ if (Build.VERSION.SDK_INT >= 37) {
 }
 \`\`\`
 
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#local-network
+Source: https://developer.android.com/privacy-and-security/local-network-permission
 
 ## ❌ Breaking Change 3 — SMS OTP Protection (3-Hour Delay)
 

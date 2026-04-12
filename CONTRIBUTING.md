@@ -20,6 +20,14 @@ Have an idea for a new tool or feature? Open an issue with the "enhancement" lab
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request.
 
+## 🛠️ Validator Rule Contributions
+To add or modify a validator rule in `src/rules/android-rules.ts`, you **must**:
+1. Add a corresponding test in `test/rules.test.mjs`.
+2. Confirm the rule fires on a minimal positive example (code containing the violation).
+3. Confirm the rule **does not** fire on a known-clean file or negative example.
+
+Without these tests, rule contributions cannot be verified for stability and will be rejected.
+
 ## 🛠️ Local Development Setup
 See the [README.md](https://github.com/VIKAS9793/androjack-mcp/blob/main/README.md) for local setup instructions.
 

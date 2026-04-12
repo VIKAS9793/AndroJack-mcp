@@ -165,7 +165,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
  *   - Origin header validation
  *   - Body size cap (1 MiB)
  *   - Active session cap (64)
- *   - Per-session server isolation (introduced in v1.6.4, refactored in v1.7.0)
+ *   - Per-session server isolation (introduced in v1.6.4, refactored in v1.7.1)
  */
 export async function startHttpServer(
   createServer: () => McpServer,
@@ -206,7 +206,7 @@ export async function startHttpServer(
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
           mcp_endpoint: `http://${advertisedHost}:${advertisedPort}${MCP_PATH}`,
           spec_version: "2025-11-25",
-          tools: 21,
+          tools: 22,
           read_only: true,
           auth_required: false,
         })

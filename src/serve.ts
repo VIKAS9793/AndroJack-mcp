@@ -6,9 +6,9 @@
  * httpUrl-based MCP client.
  *
  * Usage:
- *   npx androjack-mcp@1.7.0 serve                 # localhost:3000
- *   npx androjack-mcp@1.7.0 serve --port 8080     # custom port
- *   npx androjack-mcp@1.7.0 serve --host 0.0.0.0  # expose on LAN (add your own auth)
+ *   npx androjack-mcp@1.7.1 serve                 # localhost:3000
+ *   npx androjack-mcp@1.7.1 serve --port 8080     # custom port
+ *   npx androjack-mcp@1.7.1 serve --host 0.0.0.0  # expose on LAN (add your own auth)
  *
  * Android Studio setup:
  *   File → Settings → Tools → AI → MCP Servers → Enable MCP Servers

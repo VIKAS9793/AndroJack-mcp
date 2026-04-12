@@ -101,5 +101,8 @@ jobs:
           fi
           echo ".connector-build hygiene OK"
 
-      - name: Run tests
-        run: npm test
+      - name: Rigorous Testing (54-test suite)
+        run: |
+          echo "Verifying test files..."
+          ls -l test/rules.test.mjs test/parser.test.mjs test/cache.test.mjs test/http.test.mjs test/tool-outputs.test.mjs
+          npm test
