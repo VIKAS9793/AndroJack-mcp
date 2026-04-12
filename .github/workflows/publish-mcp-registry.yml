@@ -27,8 +27,8 @@ jobs:
           VERSION=${{ steps.version.outputs.VERSION }}
           # Update both version fields in .mcp/server.json
           jq --arg v "$VERSION" '
-            .server.version = $v |
-            .server.packages[0].version = $v
+            .version = $v |
+            .packages[0].version = $v
           ' .mcp/server.json > .mcp/server.tmp.json
           mv .mcp/server.tmp.json .mcp/server.json
           echo ".mcp/server.json updated to $VERSION"
