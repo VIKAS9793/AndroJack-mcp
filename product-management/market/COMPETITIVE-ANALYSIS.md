@@ -122,7 +122,7 @@ grounding or enforcement layer.
 | Training data recency | Lags platform by 12–18 months | Fetches live documentation |
 | Android 16 awareness | ❌ Training dependent | ✅ `android_api36_compliance` |
 | Nav3 awareness | ❌ Generates Nav2 | ✅ `android_navigation3_guide` |
-| Validator | ❌ None | ✅ Tool 21, 22 rules |
+| Validator | ❌ None | ✅ Tool 21, 28 rules |
 | Play Store policy | ❌ Training dependent | ✅ `android_play_policy_advisor` |
 
 #### Strategic Assessment
@@ -150,6 +150,48 @@ Infrastructure tools. Not competitors. Often used alongside AndroJack.
 
 ---
 
+### Competitor 05 — Google Android Skills / Android CLI (launched April 16, 2026)
+
+**Status:** First-party, actively growing  
+**Position:** Google's own instructional-context system for agentic Android development
+
+#### What It Does
+
+A first-party Android CLI, `android/skills` GitHub repository, and Android
+Knowledge Base. Internal Google experiments reported token usage reduced by
+more than 70% and tasks completed 3x faster versus standard toolsets. Works
+with Claude Code, Cursor, and Codex — not Gemini-exclusive.
+
+#### Strengths
+
+- First-party — direct pipeline to Google's own documentation and Firebase/Play sources
+- Zero-latency, no allowlist friction (it's Google's own infrastructure)
+- Backed by Google's distribution and default-trust advantage
+
+#### Where It Differs From AndroJack
+
+Android Skills are **instructional context an agent reads before generating
+code** — the same category as a `SKILL.md` file. They are not an enforcement
+gate. There is no equivalent to `android_code_validator` — no mechanism that
+checks generated code against a rule set and blocks a FAIL verdict before the
+user sees it.
+
+#### Strategic Assessment
+
+**This is the most consequential competitive development to date.** Competing
+head-on on retrieval (developer.android.com content, Firebase docs) is a
+losing position — Google's own pipeline to its own docs will always be faster
+and more complete than an allowlisted third-party fetch.
+
+The durable position is **not** "we also have Android knowledge." It is: **we
+are the enforcement gate that runs after any agent — including one using
+Android Skills — generates code.** Skills inform generation; AndroJack's
+validator checks the result. These compose, they do not compete, if
+positioned correctly. See `README.md` § Ecosystem comparison for the
+external-facing version of this framing.
+
+---
+
 ## Positioning Matrix
 
 ```
@@ -157,7 +199,7 @@ Infrastructure tools. Not competitors. Often used alongside AndroJack.
                                │
                         ┌──────┴──────┐
                Android   │  AndroJack  │
-               Specific  │   v1.5.0    │
+               Specific  │   v2.0.0    │
                          └─────────────┘
                                │
       ◄────────────────────────┼────────────────────────►
@@ -167,6 +209,9 @@ Infrastructure tools. Not competitors. Often used alongside AndroJack.
               │ Google Dev          Lint/Detekt   │
               │ Knowledge MCP       (compile time) │
               │ (preview)                         │
+              │                                    │
+              │ Android Skills (Google, first-party)│
+              │ — instructional, not enforcement    │
               └───────────────────────────────────┘
                                │
                           LOW ENFORCEMENT
@@ -179,7 +224,7 @@ Infrastructure tools. Not competitors. Often used alongside AndroJack.
 The three moats that are hard to replicate:
 
 **1. Specialisation Depth**
-21 tools, all Android. The Google MCP has 3 tools across 5 products. Specialisation
+23 tools, all Android. The Google MCP has 3 tools across 5 products. Specialisation
 allows opinionated enforcement that a generalist tool cannot justify.
 
 **2. Enforcement Architecture**

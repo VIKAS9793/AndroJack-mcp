@@ -13,10 +13,10 @@
 <br/>
 
 [![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
-[![VS Code](https://img.shields.io/visual-studio-marketplace/v/VIKAS9793.androjack-vscode?color=0A7AFF&style=flat-square&logo=visual-studio-code&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-0A7AFF?style=flat-square&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
 [![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
-[![GitHub clones](https://img.shields.io/badge/dynamic/json?color=34A853&label=clones&query=clones&url=https%3A%2F%2Fraw.githubusercontent.com%2FVIKAS9793%2FAndroJack-mcp%2Fmain%2Fassets%2Fclones.json&logo=github)](https://github.com/VIKAS9793/AndroJack-mcp/graphs/traffic)
-[![Tools](https://img.shields.io/badge/tools-22-orange?style=flat-square)](#-the-22-tools)
+[![npm downloads](https://img.shields.io/npm/dm/androjack-mcp?style=flat-square&logo=npm&color=0A7AFF)](https://www.npmjs.com/package/androjack-mcp)
+[![Tools](https://img.shields.io/badge/tools-23-orange?style=flat-square)](#-what-androjack-covers--23-tools)
 [![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
@@ -27,9 +27,9 @@
 <br/>
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDEuNy4xIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMS43LjEiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%401.7.1%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDIuMC4wIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMi4wLjAiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%402.0.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 <br/>
@@ -58,7 +58,7 @@
 - [What Can Still Break — Even at Level 3](#-what-can-still-break--even-at-level-3)
 - [Defence-in-Depth](#️-defence-in-depth-the-right-tool-for-each-bug-class)
 - [The Killer Argument](#-the-killer-argument)
-- [The 22 Tools](#-what-androjack-covers--22-tools)
+- [The 23 Tools](#-what-androjack-covers--23-tools)
 - [Quick Start](#-quick-start--zero-install-required)
 - [Manual Config](#-manual-config--copy--paste)
 - [Ecosystem Comparison](#-the-ecosystem-androjack-vs-other-mcps)
@@ -137,7 +137,7 @@ Kotlin Multiplatform went mainstream in 2025 — over 900 new KMP libraries publ
 
 ## 🧩 What AndroJack Does
 
-AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant **22 specialized tools** that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
+AndroJack is a **documentation-grounded Android engineering MCP server**. It gives your AI coding assistant **23 specialized tools** that fetch live, verified answers from official Android and Kotlin sources — instead of predicting from stale training data.
 
 It does not make the AI smarter. It makes the AI **accountable to evidence.**
 
@@ -159,15 +159,15 @@ With AndroJack:     You ask → AI calls tool → Tool fetches official source l
 
 | Level | What's Active | What the AI Does |
 |:------|:--------------|:-----------------|
-| **Level 1 — Tools only** | 22 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
-| **Level 2 — Tools + Grounding Gate** | 22 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
-| **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 24 rules. Errors must be fixed before the user sees the code. |
+| **Level 1 — Tools only** | 23 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
+| **Level 2 — Tools + Grounding Gate** | 23 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
+| **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 28 rules. Errors must be fixed before the user sees the code. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
 **Level 2 is active.** The `androjack_grounding_gate` system prompt maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
 
-**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 31 rules covering removed APIs, deprecated patterns, Android 16 and Android 17 compliance. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
+**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 28 rules covering removed APIs, deprecated patterns, Android 16/17 compliance, and Compose-First migration signals. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
 
 → *For full grounding, always activate Level 2 + Level 3. See Getting the Full Guarantee below.*
 
@@ -295,7 +295,7 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 ---
 
-## ✨ What AndroJack Covers — 22 Tools
+## ✨ What AndroJack Covers — 23 Tools
 
 | # | Tool | What It Does | What Breaks Without It |
 |:----|:-----|:-------------|:-----------------------|
@@ -319,17 +319,18 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 | 18 | `📋 policy` | Play Store age-gating, billing openness, data safety | Apps rejected for unknown policy changes |
 | 19 | `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
 | 20 | `⌚ wear` | Tiles, Health, M3 Expressive for Wear OS | Handheld patterns on round displays |
-| 21 | `🛡️ validator` | Level 3 loop-back validation gate — 31 rules | AI ships broken code without checking |
+| 21 | `🛡️ validator` | Level 3 loop-back validation gate — 28 rules | AI ships broken code without checking |
 | 22 | `🆕 api17` | Android 17 / API 37 — static final, LAN, OTP, Handoff | Apps crash or fail Play Store on API 37 |
+| 23 | `🪪 dev-verification` | Developer Verification Program — timeline, registration, CI/CD | Apps blocked from install on certified devices from Sept 30, 2026 |
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v1.7.1) ✨ Recommended
+### Option 1 — Interactive CLI (v2.0.0) ✨ Recommended
 
 ```bash
-npx -y androjack-mcp@1.7.1 install
+npx -y androjack-mcp@2.0.0 install
 ```
 
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
@@ -338,25 +339,25 @@ Launches a full animated terminal wizard with auto-detection for **VS Code, Curs
 
 ```bash
 # Preview detected IDEs and config paths
-npx -y androjack-mcp@1.7.1 install --list
+npx -y androjack-mcp@2.0.0 install --list
 
 # Auto-detect all
-npx -y androjack-mcp@1.7.1 install --auto
+npx -y androjack-mcp@2.0.0 install --auto
 
 # Install to a specific IDE
-npx -y androjack-mcp@1.7.1 install --ide=cursor
-npx -y androjack-mcp@1.7.1 install --ide=claude
-npx -y androjack-mcp@1.7.1 install --ide=vscode
-npx -y androjack-mcp@1.7.1 install --ide=windsurf
-npx -y androjack-mcp@1.7.1 install --ide=jetbrains
-npx -y androjack-mcp@1.7.1 install --ide=kiro
-npx -y androjack-mcp@1.7.1 install --ide=antigravity
+npx -y androjack-mcp@2.0.0 install --ide=cursor
+npx -y androjack-mcp@2.0.0 install --ide=claude
+npx -y androjack-mcp@2.0.0 install --ide=vscode
+npx -y androjack-mcp@2.0.0 install --ide=windsurf
+npx -y androjack-mcp@2.0.0 install --ide=jetbrains
+npx -y androjack-mcp@2.0.0 install --ide=kiro
+npx -y androjack-mcp@2.0.0 install --ide=antigravity
 ```
 
 ### Option 3 — Test Without an IDE
 
 ```bash
-npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.1
+npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@2.0.0
 ```
 
 ---
@@ -365,7 +366,7 @@ npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@1.7.1
 
 If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
 
-- Run `npx -y androjack-mcp@1.7.1 install --list` to preview detected IDEs and target config paths.
+- Run `npx -y androjack-mcp@2.0.0 install --list` to preview detected IDEs and target config paths.
 - Ready-to-paste examples live in [`config/`](config/).
 
 | IDE / Client | Config file |
@@ -378,20 +379,23 @@ If you prefer to wire the server manually, or want to inspect the exact JSON bef
 | AWS Kiro | [`config/kiro_mcp.json`](config/kiro_mcp.json) |
 | Google Antigravity | [`config/antigravity_mcp.json`](config/antigravity_mcp.json) |
 
-Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@1.7.1`.
+Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@2.0.0`.
 
 ---
 
 ## 📍 The Ecosystem: AndroJack vs. Other MCPs
 
-| Feature | Google Developer Knowledge MCP | AndroJack MCP |
-|:--------|:-------------------------------|:--------------|
-| **Identity** | The Librarian (Information) | The Gatekeeper (Enforcement) |
-| **Mechanism** | Context Retrieval | Context Enforcement |
-| **Scope** | Generalist — Firebase, Cloud, Maps | Android engineering specialist |
-| **Tools** | 3 retrieval tools | 22 specialized tools |
-| **Setup** | Google Cloud project + API key required | `npx androjack-mcp@1.7.1` — zero auth |
-| **Enforcement** | Passive — AI decides when to retrieve | Active — mandating calls by task type |
+| Feature | Google Developer Knowledge MCP | Google Android Skills (Apr 2026) | AndroJack MCP |
+|:--------|:-------------------------------|:----------------------------------|:--------------|
+| **Identity** | The Librarian (Information) | The Instructor (Pre-generation context) | The Gatekeeper (Enforcement) |
+| **Mechanism** | Context Retrieval | Skill files read before code generation | Context Enforcement + post-generation validation |
+| **Scope** | Generalist — Firebase, Cloud, Maps | Android-specific, first-party | Android engineering specialist |
+| **Tools** | 3 retrieval tools | Skill-file based, growing | 23 specialized tools |
+| **Setup** | Google Cloud project + API key required | `android skills add` — first-party CLI | `npx androjack-mcp@2.0.0` — zero auth |
+| **Enforcement** | Passive — AI decides when to retrieve | Passive — instructional context only | Active — mandating calls by task type + `android_code_validator` loop-back gate |
+| **Relationship to AndroJack** | Overlapping retrieval scope | **Complementary, not competing** — Skills inform generation; AndroJack's validator checks the result before it reaches you | — |
+
+> Android Skills and AndroJack solve different halves of the same problem. Skills give an agent context *before* it writes code. AndroJack's `android_code_validator` is the gate that runs *after* — checking the generated code against 28 rules before you ever see it. Use both if your agent supports Agent Skills.
 
 ---
 
@@ -403,14 +407,28 @@ Every example keeps AndroJack local by default and runs the published package vi
 | **HTTPS only** | Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs |
 | **Local by default** | `serve` binds to loopback only unless you explicitly pass `--allow-remote` |
 | **HTTP hardening** | Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions |
-| **Transparent agent** | `User-Agent: AndroJack-MCP/1.7.1` |
-| **Read-only** | All 22 tools annotated `readOnlyHint: true` |
+| **Transparent agent** | `User-Agent: AndroJack-MCP/2.0.0` |
+| **Read-only** | All 23 tools annotated `readOnlyHint: true` |
 | **Zero credentials** | No API keys or tokens required for documentation fetching |
 | **Security policy** | Disclosure process and supported versions in [SECURITY.md](SECURITY.md) |
 
 ---
 
 ## 📋 Changelog
+
+### v2.0.0 — Security Hardening, Compose-First, Developer Verification
+
+- **Content sanitizer for indirect prompt injection** — `src/content-sanitizer.ts` neutralizes structural injection patterns (fake role markers, instruction-reset framing) in any externally-fetched text before it reaches the calling agent's context. `android_debugger` results from `issuetracker.google.com` — the only allowlisted domain indexing free-text, user-submitted content — are wrapped in an explicit untrusted-data boundary.
+- **Dependency vulnerabilities patched** — resolved 7 vulnerabilities (3 high) in transitive `undici`/`qs` via a `cheerio` update. Zero breaking changes, 0 vulnerabilities in the shipped tree.
+- **Tool 23: `android_developer_verification`** — Google's developer verification program enforces from September 30, 2026 (Brazil, Indonesia, Singapore, Thailand first; global 2027). Covers registration paths, timeline, enterprise exemptions, and CI/CD bulk-registration APIs.
+- **Compose-First platform shift reflected** — as of May 19, 2026, Android UI development is officially Compose First; View-based patterns (Fragments, RecyclerView, ViewPager) are flagged as maintenance-mode wherever queried, sourced directly from Google's own announcement rather than left silently outdated.
+- **Compose 1.11 v2 Testing Framework** — full migration guide for the new default `StandardTestDispatcher` behavior, plus a validator rule (`UNCONFINED_DISPATCHER_COMPOSE_TEST`) that flags the old assumption.
+- **Navigation 3 Scene Decorators (1.1)** — persistent chrome (bottom bars, rails, dialogs) without per-screen awareness.
+- **Android Studio codename corrected** — was two full codenames stale ("Panda 2"). Now correctly reflects **Quail (2026.1.x)** as current stable, AGP 9.2.0.
+- **Android Skills positioning** — documents Google's first-party Android Skills/CLI (April 2026) and positions AndroJack's validator as the complementary post-generation enforcement gate, not a competing retrieval layer.
+- **28 validator rules** (was 26) — added `UNCONFINED_DISPATCHER_COMPOSE_TEST` and `NEW_FRAGMENT_CLASS_COMPOSE_FIRST`.
+- **Fabricated version numbers removed** — a prior session's dependency version catalog example asserted several unverified version numbers. Replaced with only-confirmed values plus explicit `CHECK_LIVE_VIA_gradle_dependency_checker` placeholders.
+- **Full version sync** — closed a gap where `src/version.ts` had been bumped without propagating to `package.json`, all IDE config files, and manifest files — now enforced as a release checklist item.
 
 ### v1.7.1 — Engineering Hardening & Community Parity
 

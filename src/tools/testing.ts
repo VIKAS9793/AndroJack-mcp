@@ -279,6 +279,70 @@ onNodeWithTag("submitButton").performClick()
 \`\`\`
 `;
 
+// ── Compose 1.11 v2 Testing Framework (April 22, 2026 — now the default) ──
+const COMPOSE_V2_TESTING = `
+## Compose Testing v2 API — Now the Default (Compose 1.11.0, April 22 2026)
+Source: https://android-developers.googleblog.com/2026/04/jetpack-compose-april-2026-updates.html
+
+## What Changed
+
+Following an opt-in period in Compose 1.10, the **v2 testing APIs are now the
+default** as of Compose 1.11.0, and the v1 APIs are deprecated. This is a
+**behavioral** change, not just an API rename — code that compiled and passed
+before may now hang or behave differently.
+
+## The Core Change: Default Test Dispatcher
+
+| | v1 (deprecated, Compose < 1.11) | v2 (default, Compose 1.11+) |
+|---|---|---|
+| Default dispatcher | \`UnconfinedTestDispatcher\` | \`StandardTestDispatcher\` |
+| Coroutine execution | Immediate — runs as soon as launched | Queued — waits for the virtual clock to advance |
+| Risk if unmigrated | N/A (was the default) | Tests that assumed immediate execution now hang or assert too early |
+
+\`\`\`kotlin
+// ❌ v1 assumption — relied on UnconfinedTestDispatcher's immediate execution.
+// Under Compose 1.11's v2 default, this coroutine is QUEUED, not executed
+// immediately. The assertion below may run before the launched coroutine
+// completes, causing an intermittent or permanent test failure.
+@Test
+fun loadsUserOnStart() = runTest {
+    composeTestRule.setContent { UserScreen(viewModel) }
+    viewModel.loadUser()  // launches a coroutine internally
+    // v1 world: coroutine already ran by this line (Unconfined = immediate)
+    composeTestRule.onNodeWithText("Alice").assertIsDisplayed()  // may now fail
+}
+
+// ✅ v2 pattern — advance the virtual clock explicitly before asserting.
+@Test
+fun loadsUserOnStart() = runTest {
+    composeTestRule.setContent { UserScreen(viewModel) }
+    viewModel.loadUser()
+    composeTestRule.awaitIdle()          // let Compose settle
+    advanceUntilIdle()                    // advance the virtual clock explicitly
+    composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
+}
+\`\`\`
+
+## Migration Checklist
+
+- [ ] Do not assume launched coroutines execute immediately inside a test — call \`advanceUntilIdle()\` or \`testScheduler.advanceUntilIdle()\` before assertions that depend on coroutine completion
+- [ ] Use \`composeTestRule.awaitIdle()\` after any state-changing action, before assertions
+- [ ] Flaky tests that started failing after upgrading to Compose BOM 2026.04.01+ are the first place to check for this exact issue
+- [ ] \`Modifier.onFirstVisible()\` is deprecated in this same release — migrate to \`Modifier.onVisibilityChanged()\`
+- [ ] Compose 1.12 (next release) will require \`compileSdk 37\` and AGP 9 — plan ahead if you have a large test suite
+
+## Why This Change Was Made
+
+The v1 \`UnconfinedTestDispatcher\` default masked real race conditions by
+running coroutines immediately, hiding bugs that only appear under real
+production timing. The v2 \`StandardTestDispatcher\` default is stricter and
+closer to production behavior — tests that pass under v2 are more trustworthy,
+but existing test suites written for v1 assumptions require the migration
+above.
+
+Source: https://android-developers.googleblog.com/2026/04/jetpack-compose-april-2026-updates.html
+`;
+
 const ESPRESSO = `
 ## Espresso — View + Compose interop
 
@@ -416,6 +480,7 @@ const TOPICS: TestingTopic[] = [
   { keywords: ["setup", "dependency", "dependencies", "gradle", "getting started", "config", "runner"], content: SETUP },
   { keywords: ["unit test", "viewmodel test", "repository test", "mockk", "turbine", "coroutine test", "flow test", "room test", "dao test", "main dispatcher", "standardtest"], content: UNIT_TESTS },
   { keywords: ["compose test", "composetestrul", "ui test", "semantics", "finder", "assertis", "performclick", "testtag", "compose ui", "waituntil"], content: COMPOSE_TESTING },
+  { keywords: ["v2 testing", "v2 api", "unconfinedtestdispatcher", "compose 1.11", "testing migration", "flaky test", "advanceuntilidle", "test dispatcher default"], content: COMPOSE_V2_TESTING },
   { keywords: ["espresso", "view test", "onview", "activityscenario", "interop", "hybrid"], content: ESPRESSO },
   { keywords: ["hilt test", "hilt inject", "hiltandroidtest", "bindvalue", "fake", "hilt testing"], content: HILT_TESTING },
   { keywords: ["pyramid", "strategy", "how many", "coverage", "structure", "overview", "what to test", "ratio"], content: TEST_PYRAMID },
@@ -428,6 +493,7 @@ const INDEX = `
 - \`setup\` — Gradle dependencies for all test types
 - \`unit tests\` — ViewModel, Repository, Room DAO, MainDispatcherRule (StandardTestDispatcher)
 - \`compose testing\` — ComposeTestRule, finders, actions, assertions, waitUntil
+- \`v2 testing\` ✨ — Compose 1.11 v2 testing default (StandardTestDispatcher), migration guide
 - \`espresso\` — View-based tests + Compose interop
 - \`hilt testing\` — Custom test runner, @HiltAndroidTest, @BindValue fakes
 - \`pyramid\` — Test strategy, ratios, key rules

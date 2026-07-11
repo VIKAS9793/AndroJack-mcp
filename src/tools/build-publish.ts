@@ -116,21 +116,36 @@ const VERSION_CATALOG = `
 
 Source: developer.android.com/build/migrate-to-catalogs
 
+> ⚠️ **Version note:** Only the versions below are verified against official
+> release notes as of this tool's last update. For any dependency not shown
+> here, or to confirm a version is still current, call
+> \`gradle_dependency_checker\` — it queries Google Maven / Maven Central live
+> rather than relying on a hardcoded number that can go stale.
+
 ### File location: gradle/libs.versions.toml
 \`\`\`toml
 [versions]
-agp = "8.10.0"
-kotlin = "2.1.20"
-compose-bom = "2025.05.00"
-hilt = "2.52"
-room = "2.7.1"
-lifecycle = "2.8.7"
-navigation = "2.8.9"
-retrofit = "2.11.0"
-okhttp = "4.12.0"
-coroutines = "1.9.0"
-mockk = "1.13.12"
-turbine = "1.2.0"
+# Verified: developer.android.com/build/releases/agp-9-2-0-release-notes (April 2026)
+agp = "9.2.0"
+# Verified: AGP 9.x bundles this Kotlin Gradle Plugin version by default —
+# blog.jetbrains.com/kotlin/2026/01/update-your-projects-for-agp9
+kotlin = "2.2.10"
+# Verified: android-developers.googleblog.com/2026/04/jetpack-compose-april-2026-updates.html
+compose-bom = "2026.04.01"
+# Verified: Compose April '26 release notes — Alpha → Beta promotion
+hilt = "1.4.0-beta01"
+lifecycle = "2.11.0-beta01"
+# Verified: developer.android.com/guide/navigation/navigation-3/scenes (1.1, May 2026)
+navigation3 = "1.1.0"
+# room, retrofit, okhttp, coroutines, mockk, turbine: NOT independently
+# verified this cycle. Call gradle_dependency_checker("<name>") for the live
+# current version before pinning any of these — do not hardcode a guess.
+room = "CHECK_LIVE_VIA_gradle_dependency_checker"
+retrofit = "CHECK_LIVE_VIA_gradle_dependency_checker"
+okhttp = "CHECK_LIVE_VIA_gradle_dependency_checker"
+coroutines = "CHECK_LIVE_VIA_gradle_dependency_checker"
+mockk = "CHECK_LIVE_VIA_gradle_dependency_checker"
+turbine = "CHECK_LIVE_VIA_gradle_dependency_checker"
 
 [libraries]
 # Compose
@@ -157,8 +172,10 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
-# Navigation
-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+# Navigation — Navigation 3 is the current stable library (Nav2 in maintenance).
+# See android_navigation3_guide for Scenes API and Scene Decorators (1.1).
+navigation3-compose = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
 
 # Network
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
@@ -340,68 +357,70 @@ class BaselineProfileGenerator {
 `;
 
 const ANDROID_STUDIO_CURRENT = `
-## Android Studio — Current Stable Release (March 2026)
+## Android Studio — Current Stable Release
 Source: https://developer.android.com/studio/releases
 
 ## ⚠️ NOTE FOR AI TOOLS
-The current stable version of Android Studio is **Panda 2 | 2025.3.2** (March 3, 2026).
-Do NOT reference Otter, Ladybug, or any earlier codename as the current stable version.
+The current stable Android Studio line is **Quail (2026.1.x)**. Do NOT
+reference Panda, Otter, Narwhal, or any earlier codename as current — Android
+Studio moved through Panda → Quail during 2026. Always confirm the exact
+patch number with \`android_official_search\` before citing one, since patch
+releases ship frequently within a stable line.
 
 ### Release History (2026)
 
-| Release | Codename | Date | Version |
-|---------|----------|------|---------|
-| **Current stable** | **Android Studio Panda 2** | **March 3, 2026** | **2025.3.2** |
-| Previous stable | Android Studio Panda 1 | February 2026 | 2025.3.1 |
-| Canary | Android Studio Panda 3 | March 2026 | 2025.3.3 Canary 3 |
+| Release | Codename | Status |
+|---------|----------|--------|
+| **Current stable line** | **Android Studio Quail (2026.1.x)** | Stable, patch releases ongoing |
+| Next line | Android Studio Quail 2 | RC — nearing stable |
+| Preview | Android Studio Quail 3 | Canary |
+| Superseded | Android Studio Panda (2025.3.x) | No longer current |
 
-### What's New in Panda 2 (Current Stable, March 3, 2026)
-Source: https://developer.android.com/studio/releases
+### Current IDE + AGP Compatibility
 
-**Gradle Daemon JVM criteria (from Panda 1)**
-Android Studio now uses Gradle Daemon JVM criteria by default for new projects.
-Gradle auto-detects a compatible JDK or downloads it automatically.
-No more manual JDK configuration for new project setup.
+| Android Studio | AGP | Max API | Kotlin (bundled KGP) |
+|----------------|-----|---------|----------------------|
+| Quail (stable) | 9.2.0 | 37.0 | 2.2.10 |
+| Panda (superseded) | 9.1.x | 36.1–37.0 | 2.2.x |
 
-### What's New in Otter 3 Feature Drop (January 2026)
-Source: https://developer.android.com/studio/releases/past-releases/as-otter-3-feature-drop-release-notes
+Source: https://developer.android.com/build/releases/agp-9-2-0-release-notes
 
-**Gemini Compose Preview integration**
-Generate Compose code directly from a design screenshot inside the Preview panel.
+### Android Skills & Android CLI (New — April 16, 2026)
 
-**AI agent device tools**
-AI agents can now deploy to a connected device, inspect the screen, take screenshots,
-and check Logcat — enabling end-to-end fix-and-verify loops without leaving the IDE.
+Google launched a first-party **Android CLI**, an **Android Skills** GitHub
+repository, and an **Android Knowledge Base** for agentic Android development.
+Internal experiments showed token usage reduced by more than 70% and tasks
+completed 3x faster versus standard toolsets.
 
-**Model picker**
-Choose the LLM powering IDE AI features — including local on-device models.
+\`\`\`bash
+# Install first-party Android skills into your agent's skill directory
+android skills add --skill r8-analyzer
+android skills add --skill nav2-to-nav3-migration
+android skills add --skill agp-9-upgrade
 
-**Multiple Gemini threads**
-Organize conversations into separate threads. Conversation history saved to account.
+# Query the live Android Knowledge Base from any agent/CLI
+android docs "compose grid layout"
+\`\`\`
 
-**Journeys for Android Studio → Studio Labs (experimental)**
-Moved to Studio Labs for RC and stable access.
+This is complementary to AndroJack, not a replacement for it: Android Skills
+are instructional context an agent reads before generating code. AndroJack's
+\`android_code_validator\` is an enforcement gate that runs after code is
+generated — the two compose well together. If your agent supports the open
+Agent Skills standard, use Android Skills for setup/scaffolding guidance and
+AndroJack's validator as the pre-return check on the result.
 
-### Current IDE + AGP Compatibility Matrix
+Source: https://developer.android.com/tools/agents/android-skills
 
-| Android Studio | AGP | Max API | Kotlin | Gradle |
-|----------------|-----|---------|--------|--------|
-| Panda 2 (stable) | 9.1.0 | 36.1 | 2.x | 8.11+ |
-| Panda 1 (stable) | 9.0.x | 36 | 2.x | 8.11+ |
-| Otter 3 FD (prev) | 8.10.x | 36 | 2.x | 8.10+ |
-
-Source: https://developer.android.com/build/releases/agp-9-1-0-release-notes
-
-### AGP 9.1 — New Defaults (March 2026)
+### AGP 9.2 — Notable Changes
 
 \`\`\`kotlin
-// build.gradle.kts — current recommended config (AGP 9.1 + Panda 2)
+// build.gradle.kts — current recommended config (AGP 9.2, Kotlin built-in)
 android {
-  compileSdk = 36      // Android 16 — current stable SDK
-  targetSdk = 36
-  minSdk = 26          // ~95% device coverage as of 2026
+  compileSdk = 37      // Android 17 stable line
+  targetSdk = 37
+  minSdk = 26          // Adjust to your actual device coverage target
 
-  // AGP 9.1: R8 now repackages classes into unnamed package by default
+  // AGP 9.0+: R8 repackages classes into the unnamed package by default.
   // To opt out: add -dontrepackage to proguard-rules.pro
   buildTypes {
     release {
@@ -413,16 +432,26 @@ android {
 }
 \`\`\`
 
-### AGP 9.1 Breaking: R8 Class Repackaging
-
 \`\`\`pro
-# proguard-rules.pro — if AGP 9.1 repackaging breaks your reflection code
-# AGP 9.1 enables -repackageclasses by default for DEX builds
-# To disable: add this rule
+# proguard-rules.pro — if R8 class repackaging breaks reflection-dependent code
 -dontrepackage
 \`\`\`
 
-Source: https://developer.android.com/studio/releases
+### AGP 10.0 — Upcoming Breaking Changes (mid-2026)
+
+The comfortable migration window for several AGP 9.x deprecations **closes
+with AGP 10.0**, expected mid-2026:
+
+- The \`android.newDsl=false\` / \`android.builtInKotlin=false\` opt-outs are
+  **permanently removed** — projects must be on the new DSL and built-in
+  Kotlin support before upgrading.
+- Type parameters are removed from \`CommonExtension\`; block methods move to
+  concrete extension types — affects custom Gradle plugin authors.
+- Projects still using \`kapt\` should migrate to KSP now — AGP 9.2.0 already
+  enforces the KSP migration path for new projects, and kapt is in
+  maintenance mode.
+
+Source: https://developer.android.com/build/releases/agp-9-0-0-release-notes
 `;
 
 const PLAY_BILLING_2026 = `

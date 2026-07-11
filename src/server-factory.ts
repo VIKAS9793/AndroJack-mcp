@@ -2,7 +2,7 @@
 /**
  * AndroJack MCP – Server Factory
  *
- * Single canonical source of truth for all 21 tool registrations
+ * Single canonical source of truth for all 23 tool registrations
  * and the androjack_grounding_gate prompt.
  *
  * Both the stdio entrypoint (stdio.ts) and the HTTP CLI (serve.ts)
@@ -39,9 +39,10 @@ import { androidXrGuide } from "./tools/xr.js";
 import { androidWearOsGuide } from "./tools/wear.js";
 import { androidCodeValidator } from "./tools/validator.js";
 import { android17Compliance } from "./tools/android17-compliance.js";
+import { androidDeveloperVerification } from "./tools/developer-verification.js";
 
 /**
- * Creates and returns a fully-configured McpServer with all 21 tools
+ * Creates and returns a fully-configured McpServer with all 23 tools
  * and the androjack_grounding_gate prompt registered.
  *
  * Each call returns a NEW McpServer instance — do not share instances
@@ -608,7 +609,7 @@ export function createAndroJackServer(): McpServer {
       description:
         "CALL THIS AFTER GENERATING EVERY ANDROID CODE BLOCK. " +
         "This is the Level 3 loop-back gate: validates AI-generated Kotlin, XML, and Gradle code " +
-        "against 24 Android-specific rules before the user sees it. " +
+        "against 28 Android-specific rules before the user sees it. " +
         "Detects removed APIs (AsyncTask, TestCoroutineDispatcher), deprecated patterns " +
         "(ContextualFlowRow, NavController in new code, SharedPreferences), Android 16 violations " +
         "(orientation locks, resizeableActivity=false), and structural issues (GlobalScope.launch, runBlocking in UI). " +
@@ -664,6 +665,36 @@ export function createAndroJackServer(): McpServer {
     },
     async ({ topic }) => ({
       content: [{ type: "text", text: await android17Compliance(topic ?? "overview") }],
+    })
+  );
+
+  // ── Tool 23: Android Developer Verification Program ───────────────────────
+  server.registerTool(
+    "android_developer_verification",
+    {
+      title: "Android Developer Verification Program",
+      description:
+        "Android developer verification enforcement begins September 30, 2026 " +
+        "(Brazil, Indonesia, Singapore, Thailand first; global rollout 2027). " +
+        "Only apps registered by a verified developer can be installed/updated on " +
+        "certified Android devices via Google Play or participating third-party stores. " +
+        "This is an IDENTITY check, not a content review. Sideloading is NOT removed — " +
+        "unregistered apps remain installable via ADB or a new advanced flow. " +
+        "Affects every Android developer, not just Play Store publishers. " +
+        "Topics: 'overview' (what this is, why it matters), 'timeline' (full rollout dates), " +
+        "'registration' (Play Console / Android Developer Console / CI-CD bulk registration), " +
+        "'enterprise' (managed-device exemptions, advanced sideloading flow), " +
+        "'studio' (Android Studio IDE registration status integration).",
+      inputSchema: {
+        topic: z.string().max(200).optional()
+          .describe(
+            "Topic: 'overview', 'timeline', 'registration', 'enterprise', 'studio'"
+          ),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ topic }) => ({
+      content: [{ type: "text", text: await androidDeveloperVerification(topic ?? "overview") }],
     })
   );
 

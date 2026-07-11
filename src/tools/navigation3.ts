@@ -174,6 +174,86 @@ val sceneStrategy = remember {
 Source: https://developer.android.com/guide/navigation/navigation-3/adaptive
 `;
 
+  // ── Scene Decorators (Navigation 3 1.1, stable May 18, 2026) ───────────────
+  const sceneDecorators = `
+# Navigation 3 — Scene Decorators (1.1 release, May 18, 2026)
+Source: https://developer.android.com/guide/navigation/navigation-3/scenes
+
+## What Changed in Navigation 3 1.1
+
+The compose-navigation3 1.1 release introduces **Scene Decorators**, letting
+you wrap your screens with other content — bars, rails, dialogs — without
+each destination needing to know about the surrounding chrome.
+
+\`\`\`toml
+# libs.versions.toml — bump to 1.1
+[versions]
+navigation3 = "1.1.0"
+\`\`\`
+
+## Why Decorators Exist
+
+Before 1.1, adding a persistent bottom bar or navigation rail meant every
+screen's Composable had to be aware of, and wrapped by, that chrome — or you
+duplicated the scaffold logic per destination. Decorators separate "what the
+screen shows" from "what wraps the screen."
+
+\`\`\`kotlin
+// A decorator wraps every entry rendered inside a given NavDisplay –
+// the destination Composables themselves stay unaware of the chrome.
+@Composable
+fun AppNavDisplay(backStack: NavBackStack) {
+  NavDisplay(
+    backStack = backStack,
+    // Decorators run around whichever entry is currently visible
+    sceneDecorators = listOf(
+      rememberSceneSetupNavEntryDecorator(),
+      rememberNavigationBarDecorator(items = bottomNavItems),
+    ),
+    entryProvider = entryProvider {
+      entry<HomeKey> { HomeScreen() }       // No bottom bar code needed here
+      entry<ProfileKey> { ProfileScreen() } // Same — decorator wraps both
+    }
+  )
+}
+\`\`\`
+
+## Dialog-as-Decorator Pattern
+
+\`\`\`kotlin
+// A confirmation dialog can be expressed as a decorator rather than
+// conditional state inside each screen that might need to show one.
+@Composable
+fun rememberConfirmationDialogDecorator(
+  pendingConfirmation: PendingAction?,
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit,
+): SceneDecorator = remember(pendingConfirmation) {
+  SceneDecorator { content ->
+    content()
+    if (pendingConfirmation != null) {
+      AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onConfirm) { Text("Confirm") } },
+        text = { Text(pendingConfirmation.message) },
+      )
+    }
+  }
+}
+\`\`\`
+
+## When to Reach for a Decorator vs. a Scene Strategy
+
+| Use case | Tool |
+|---|---|
+| Persistent bottom bar / rail across all destinations | Scene Decorator |
+| Modal dialog overlay tied to app-level state | Scene Decorator |
+| Two-pane / list-detail adaptive layout | Scene Strategy (see \`scenes\` topic) |
+| Different destination count shown per window size | Scene Strategy |
+
+Source: https://developer.android.com/guide/navigation/navigation-3/scenes
+`;
+
   // ── Migration from Nav2 ────────────────────────────────────────────────────
   const migration = `
 # Navigation 3 — Migrating from Navigation 2
@@ -314,6 +394,9 @@ Source: https://developer.android.com/guide/navigation/navigation-3/testing
 `;
 
   // ── Route dispatch ─────────────────────────────────────────────────────────
+  if (t.includes("decorator") || t.includes("wrap") || t.includes("bottom bar") || t.includes("navigation rail")) {
+    return sceneDecorators;
+  }
   if (t.includes("scene") || t.includes("adaptive") || t.includes("pane") || t.includes("tablet")) {
     return scenes;
   }

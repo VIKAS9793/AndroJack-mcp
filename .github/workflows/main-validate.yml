@@ -36,7 +36,7 @@ jobs:
       - name: Print dependency tree
         run: npm ls hono @modelcontextprotocol/sdk @hono/node-server
 
-      - name: Assert secure Hono resolution
+      - name: Assert secure Hono resolution (floor >= 4.12.7)
         shell: bash
         run: |
           node <<'NODE'
@@ -60,10 +60,15 @@ jobs:
             throw new Error('Resolved dependency tree does not contain hono');
           }
 
-          if (versions.size !== 1 || !versions.has('4.12.7')) {
-            console.error(`Unexpected hono versions: ${[...versions].join(', ')}`);
-            process.exit(1);
+          for (const v of versions) {
+            const parts = v.split('.').map(Number);
+            const [maj, min, pat] = parts;
+            if (maj < 4 || (maj === 4 && min < 12) || (maj === 4 && min === 12 && pat < 7)) {
+              console.error(`Hono version ${v} is below floor 4.12.7`);
+              process.exit(1);
+            }
           }
+          console.log('Hono floor OK:', [...versions].join(', '));
           NODE
 
       - name: Assert SDK floor >= 1.27.1
@@ -101,8 +106,8 @@ jobs:
           fi
           echo ".connector-build hygiene OK"
 
-      - name: Rigorous Testing (54-test suite)
+      - name: Rigorous Testing (85-test suite)
         run: |
           echo "Verifying test files..."
-          ls -l test/rules.test.mjs test/parser.test.mjs test/cache.test.mjs test/http.test.mjs test/tool-outputs.test.mjs
+          ls -l test/rules.test.mjs test/parser.test.mjs test/cache.test.mjs test/http.test.mjs test/tool-outputs.test.mjs test/content-sanitizer.test.mjs test/cli-routing.test.mjs test/http-session.test.mjs
           npm test

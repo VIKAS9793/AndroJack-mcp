@@ -15,7 +15,7 @@
  *   This is the Android-specific implementation of the same pattern.
  *
  * Rule engine: src/rules/android-rules.ts
- *   - 24 rules across Kotlin, XML, Gradle
+ *   - 28 rules across Kotlin, XML, Gradle
  *   - Zero new dependencies (pure TypeScript RegExp)
  *   - Data-driven: new rules require no code changes
  */

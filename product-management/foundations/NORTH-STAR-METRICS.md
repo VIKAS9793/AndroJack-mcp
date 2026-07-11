@@ -11,7 +11,7 @@
 
 > ### Validated Code Blocks Shipped Per Month
 > (Tool 21) and received a PASS or WARN verdict — meaning they were grounded in
-> official documentation and cleared of the 31 rule classes before reaching the developer.*
+> official documentation and cleared of the 28 rule classes before reaching the developer.*
 
 **Why this metric:**
 
@@ -33,7 +33,7 @@ These are the levers. Improving these drives the North Star.
 | **Grounding Gate compliance rate** | % of code generation tasks where at least one doc-fetch tool was called before output | ≥ 95% | Gate bypassed = no grounding = North Star uncountable |
 | **Validator call rate** | % of code generation tasks where `android_code_validator` was called | ≥ 95% | Validation skipped = North Star uncountable |
 | **FAIL-fix-rerun rate** | % of FAIL verdicts where the agent fixed and re-ran (vs. returning FAIL code) | ≥ 99% | Gate effectiveness — FAIL code reaching user = product failure |
-| **Rule coverage breadth** | Number of rule classes in validator | 22 (v1.5.0) → 31 (v1.7.1) | More rules = more ground covered |
+| **Rule coverage breadth** | Number of rule classes in validator | 22 (v1.5.0) → 28 (v2.0.0) | More rules = more ground covered |
 | **Skill trigger accuracy** | % of Antigravity tasks where the correct SKILL.md loaded | ≥ 90% | Wrong skill or no skill = missed grounding |
 
 ---
@@ -58,7 +58,7 @@ These measure outcomes. We cannot directly control them, but input metrics predi
 |---|---|---|
 | **Tool availability** | % of tool calls that succeed (no 5xx, no timeout) | < 98% triggers investigation |
 | **Validator false-positive rate** | % of FAIL verdicts on correct code | > 1% triggers rule audit |
-| **Validator false-negative rate** | Known deprecated API patterns missed by the 31 rules | Any new miss added to backlog immediately |
+| **Validator false-negative rate** | Known deprecated API patterns missed by the 28 rules | Any new miss added to backlog immediately |
 | **Node.js version compat** | Passes on Node 18, 20, 22 LTS | Any failure is a P0 bug |
 | **Install success rate** | % of `npx @androjack/mcp` installs that complete without error | < 99% triggers investigation |
 
@@ -79,14 +79,19 @@ These measure outcomes. We cannot directly control them, but input metrics predi
 
 ## Measurement Plan
 
-### Opt-In Telemetry (v1.7.1 target)
+### Opt-In Telemetry (still not shipped — retargeted to v2.1.0)
 
-AndroJack v1.5.0 has no telemetry. All current metrics are measured via:
+AndroJack v2.0.0 has no telemetry. All current metrics are measured via:
 - Community surveys (GitHub Discussions, X/Twitter, Discord)
 - Bug reports and GitHub Issues
 - Self-reported postmortems (like the Atomic Robot case study)
 
-v1.7.1 will offer **opt-in telemetry** with explicit consent:
+**Note:** This was originally targeted for v1.7.1, then not shipped in that
+release. v2.0.0 prioritized the content-sanitizer security fix, Compose-First
+platform updates, and the developer verification tool instead. Retargeting
+to v2.1.0 rather than silently carrying forward a stale version claim.
+
+v2.1.0 will offer **opt-in telemetry** with explicit consent:
 - Rule ID hit frequency (which rules fire most often)
 - PASS/WARN/FAIL verdict distribution
 - Tool call latency by tool
@@ -99,15 +104,15 @@ v1.7.1 will offer **opt-in telemetry** with explicit consent:
 | North Star | Monthly | PM |
 | Input metrics | Weekly (during active development) | Engineering |
 | Output metrics | Quarterly (via community survey) | PM |
-| Health metrics | Continuous (automated alerting in v1.7.1) | Engineering |
+| Health metrics | Continuous (automated alerting planned for v2.1.0) | Engineering |
 
 ---
 
-## Current Baseline (March 2026 — No Telemetry)
+## Current Baseline (July 2026 — No Telemetry)
 
 | Metric | Current Measurement | Method |
 |---|---|---|
-| North Star | Unknown — no telemetry | Establish via opt-in in v1.7.1 |
+| North Star | Unknown — no telemetry | Establish via opt-in in v2.1.0 |
 | FAIL-fix-rerun rate | System prompt enforces it; compliance unverified | SKILL.md + Gate enforcement; verify via user reports |
 | Developer trust retention | Unknown | Establish via GitHub star trend, issue activity |
 | Deprecated API regression rate | Unknown | Community survey Q2 2026 |

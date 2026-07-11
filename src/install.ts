@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * AndroJack MCP â€“ Interactive Installer
+ * AndroJack MCP – Interactive Installer
  *
  * Detects OS, installed IDEs, and config file locations automatically.
  * Supports both automated (--auto) and guided interactive installation.
  *
  * Usage:
- *   npx androjack-mcp@1.7.1 install           â†’ interactive guided mode
- *   npx androjack-mcp@1.7.1 install --auto    â†’ auto-detect and install to all found IDEs
- *   npx androjack-mcp@1.7.1 install --ide cursor   â†’ target a specific IDE
- *   npx androjack-mcp@1.7.1 install --list    â†’ list all supported IDEs and their status
+ *   npx androjack-mcp@2.0.0 install           → interactive guided mode
+ *   npx androjack-mcp@2.0.0 install --auto    → auto-detect and install to all found IDEs
+ *   npx androjack-mcp@2.0.0 install --ide cursor   → target a specific IDE
+ *   npx androjack-mcp@2.0.0 install --list    → list all supported IDEs and their status
  */
 
 import * as fs from "fs";
@@ -22,7 +22,7 @@ import * as clack from "@clack/prompts";
 import { isDirectExecution } from "./cli-entry.js";
 import { VERSIONED_PACKAGE } from "./version.js";
 
-// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Types ───────────────────────────────────────────────────────────────────
 
 interface IdeTarget {
   id: string;
@@ -43,7 +43,7 @@ interface InstallResult {
   message: string;
 }
 
-// â”€â”€ AndroJack server config block (reused for all IDEs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── AndroJack server config block (reused for all IDEs) ───────────────────
 
 const SERVER_CONFIG_STANDARD = {
   command: "npx",
@@ -63,7 +63,7 @@ const INSTALL_COMMAND = `npx ${VERSIONED_PACKAGE} install`;
 const AUTO_INSTALL_COMMAND = `${INSTALL_COMMAND} --auto`;
 const LIST_COMMAND = `${INSTALL_COMMAND} --list`;
 
-// â”€â”€ IDE Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── IDE Definitions ─────────────────────────────────────────────────────────
 
 const HOME = os.homedir();
 const PLATFORM = process.platform; // darwin | linux | win32
@@ -74,7 +74,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
   void localappdata; // reserved for future use
 
   return [
-    // â”€â”€ Claude Desktop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Claude Desktop ──────────────────────────────────────────────────────
     {
       id: "claude",
       name: "Claude Desktop",
@@ -89,7 +89,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
       notes: "Restart Claude Desktop after install. Look for ðŸ”¨ in chat input.",
     },
 
-    // â”€â”€ Cursor IDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Cursor IDE ──────────────────────────────────────────────────────────
     {
       id: "cursor",
       name: "Cursor",
@@ -99,10 +99,10 @@ function getConfigPaths(platform: string): IdeTarget[] {
       ],
       configKey: "mcpServers",
       format: "standard",
-      notes: "Check Settings â†’ MCP for green dot confirmation.",
+      notes: "Check Settings → MCP for green dot confirmation.",
     },
 
-    // â”€â”€ Windsurf (Codeium) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Windsurf (Codeium) ──────────────────────────────────────────────────
     {
       id: "windsurf",
       name: "Windsurf",
@@ -112,10 +112,10 @@ function getConfigPaths(platform: string): IdeTarget[] {
       ],
       configKey: "mcpServers",
       format: "standard",
-      notes: "Restart Windsurf â†’ Cascade panel shows AndroJack tools.",
+      notes: "Restart Windsurf → Cascade panel shows AndroJack tools.",
     },
 
-    // â”€â”€ VS Code (GitHub Copilot) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── VS Code (GitHub Copilot) ─────────────────────────────────────────────
     {
       id: "vscode",
       name: "VS Code (GitHub Copilot)",
@@ -129,10 +129,10 @@ function getConfigPaths(platform: string): IdeTarget[] {
       ],
       configKey: "servers",
       format: "vscode",
-      notes: "VS Code 1.99+ required. Copilot Chat â†’ Agent mode to access tools.",
+      notes: "VS Code 1.99+ required. Copilot Chat → Agent mode to access tools.",
     },
 
-    // â”€â”€ AWS Kiro IDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── AWS Kiro IDE ─────────────────────────────────────────────────────────
     {
       id: "kiro",
       name: "AWS Kiro",
@@ -161,7 +161,7 @@ function getConfigPaths(platform: string): IdeTarget[] {
       notes: "Or use the one-click Kiro install link in the README.",
     },
 
-    // â”€â”€ Google Antigravity IDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Google Antigravity IDE ────────────────────────────────────────────
     {
       id: "antigravity",
       name: "Google Antigravity IDE",
@@ -171,10 +171,10 @@ function getConfigPaths(platform: string): IdeTarget[] {
       configKey: "mcpServers",
       format: "standard",
       notes:
-        "After saving: Antigravity Agent pane â†’ '...' â†’ MCP Servers â†’ Manage â†’ Refresh.",
+        "After saving: Antigravity Agent pane → '...' → MCP Servers → Manage → Refresh.",
     },
 
-    // â”€â”€ JetBrains (Android Studio / IntelliJ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── JetBrains (Android Studio / IntelliJ) ────────────────────────────────
     {
       id: "jetbrains",
       name: "JetBrains AI (Android Studio / IntelliJ)",
@@ -212,12 +212,12 @@ function getConfigPaths(platform: string): IdeTarget[] {
       configKey: "mcpServers",
       format: "standard",
       notes:
-        "Or add manually: Android Studio â†’ Settings â†’ Tools â†’ AI Assistant â†’ MCP Servers â†’ +",
+        "Or add manually: Android Studio → Settings → Tools → AI Assistant → MCP Servers → +",
     },
   ];
 }
 
-// â”€â”€ Config helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Config helpers ──────────────────────────────────────────────────────────
 
 function buildConfig(target: IdeTarget): Record<string, unknown> {
   if (target.format === "vscode") {
@@ -278,7 +278,7 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
   }
 }
 
-// â”€â”€ IDE Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── IDE Detection ────────────────────────────────────────────────────────────
 
 function detectInstalledIdes(targets: IdeTarget[]): IdeTarget[] {
   return targets.filter((target) => {
@@ -314,7 +314,7 @@ function alreadyInstalled(target: IdeTarget): string | null {
   return null;
 }
 
-// â”€â”€ Install to best path for a target â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Install to best path for a target ───────────────────────────────────────
 
 function installTarget(target: IdeTarget): InstallResult {
   const existingPath = target.configPaths.find((p) => fs.existsSync(p));
@@ -322,7 +322,7 @@ function installTarget(target: IdeTarget): InstallResult {
   return installToPath(chosenPath, target);
 }
 
-// â”€â”€ TTY Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── TTY Detection ───────────────────────────────────────────────────────────
 
 /**
  * Returns true when running inside a real terminal (VS Code integrated terminal,
@@ -334,7 +334,7 @@ function hasTty(): boolean {
   return Boolean(process.stdin.isTTY && process.stdout.isTTY);
 }
 
-// â”€â”€ Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Banner ───────────────────────────────────────────────────────────────────
 
 function printBanner(): void {
   const art = figlet.textSync("AndroJack", {
@@ -342,7 +342,7 @@ function printBanner(): void {
     horizontalLayout: "default",
   });
 
-  // Gradient: cyan â†’ blue â†’ purple line by line
+  // Gradient: cyan → blue → purple line by line
   const lines = art.split("\n");
   const gradientColors = [
     "#00D4FF", "#00C4F0", "#00B0E0",
@@ -377,7 +377,7 @@ function printBanner(): void {
   );
 }
 
-// â”€â”€ Status table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Status table ──────────────────────────────────────────────────────────────
 
 function printStatusTable(targets: IdeTarget[]): void {
   console.log(chalk.bold.underline("  IDE Detection Results\n"));
@@ -408,17 +408,17 @@ function printStatusTable(targets: IdeTarget[]): void {
   console.log();
 }
 
-// â”€â”€ Non-interactive (legacy) output helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Non-interactive (legacy) output helpers ───────────────────────────────────
 
 function legacyOk(msg: string): void {
-  process.stdout.write(chalk.green("  âœ… ") + msg + "\n");
+  process.stdout.write(chalk.green("  ✅ ") + msg + "\n");
 }
 
 function legacyFail(msg: string): void {
-  process.stdout.write(chalk.red("  âŒ ") + msg + "\n");
+  process.stdout.write(chalk.red("  ❌ ") + msg + "\n");
 }
 
-// â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 function normalizeInstallerArgs(rawArgs: string[]): string[] {
   return rawArgs[0] === "install" ? rawArgs.slice(1) : rawArgs;
@@ -431,25 +431,25 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
   const listFlag = args.includes("--list");
   const ideFlag = args.find((a) => a.startsWith("--ide="))?.split("=")[1] ?? null;
 
-    // â”€â”€ --list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── --list ──────────────────────────────────────────────────────────────
     if (listFlag) {
       printBanner();
       printStatusTable(targets);
       return;
     }
 
-    // â”€â”€ --ide=<id> â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── --ide=<id> ──────────────────────────────────────────────────────────
     if (ideFlag) {
       printBanner();
       const target = targets.find((t) => t.id === ideFlag);
       if (!target) {
-        console.error(chalk.red(`  âŒ Unknown IDE: "${ideFlag}". Supported: ${targets.map((t) => t.id).join(", ")}`));
+        console.error(chalk.red(`  ❌ Unknown IDE: "${ideFlag}". Supported: ${targets.map((t) => t.id).join(", ")}`));
         process.exit(1);
       }
       const result = installTarget(target);
       if (result.success) {
         legacyOk(result.message);
-        if (target.notes) console.log(chalk.dim(`     â†’ ${target.notes}`));
+        if (target.notes) console.log(chalk.dim(`     → ${target.notes}`));
       } else {
         legacyFail(result.message);
       }
@@ -457,11 +457,11 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       return;
     }
 
-    // â”€â”€ --auto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── --auto ──────────────────────────────────────────────────────────────
     if (autoFlag) {
       printBanner();
       const spinner = ora({
-        text: chalk.dim("Scanning system for installed IDEsâ€¦"),
+        text: chalk.dim("Scanning system for installed IDEs…"),
         color: "cyan",
       }).start();
 
@@ -480,17 +480,17 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       for (const target of detected) {
         const existing = alreadyInstalled(target);
         if (existing) {
-          console.log(chalk.green(`  â­  ${target.name}`) + chalk.dim(` â€” already installed at ${existing}`));
+          console.log(chalk.green(`  ⏭  ${target.name}`) + chalk.dim(` — already installed at ${existing}`));
           continue;
         }
 
-        const s = ora({ text: chalk.dim(`Installing for ${target.name}â€¦`), color: "cyan" }).start();
+        const s = ora({ text: chalk.dim(`Installing for ${target.name}…`), color: "cyan" }).start();
         await new Promise((r) => setTimeout(r, 400));
         const result = installTarget(target);
         results.push(result);
         if (result.success) {
-          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` â†’ ${result.path}`));
-          if (target.notes) console.log(chalk.dim(`       â†’ ${target.notes}`));
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) console.log(chalk.dim(`       → ${target.notes}`));
         } else {
           s.fail(chalk.red(`${target.name}: ${result.message}`));
         }
@@ -501,16 +501,16 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       return;
     }
 
-    // â”€â”€ Interactive guided mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Interactive guided mode ─────────────────────────────────────────────
 
     printBanner();
 
-    // â”€â”€ TTY guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── TTY guard ────────────────────────────────────────────────────────────
     // If stdin/stdout are not a real TTY (CI, IDE task runner without PTY,
     // piped output), fall back to --auto instead of crashing.
     if (!hasTty()) {
       console.log(
-        chalk.yellow("  âš   No interactive terminal detected.") +
+        chalk.yellow("  ⚠️  No interactive terminal detected.") +
         chalk.dim(" Falling back to --auto mode.\n")
       );
       console.log(
@@ -530,15 +530,15 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       for (const target of detected) {
         const alreadyAt = alreadyInstalled(target);
         if (alreadyAt) {
-          console.log(chalk.green(`  â­  ${target.name}`) + chalk.dim(` â€” already installed`));
+          console.log(chalk.green(`  ⏭  ${target.name}`) + chalk.dim(` — already installed`));
           continue;
         }
-        const s = ora({ text: chalk.dim(`Writing config for ${target.name}â€¦`), color: "cyan" }).start();
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
         await new Promise((r) => setTimeout(r, 350));
         const result = installTarget(target);
         if (result.success) {
-          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` â†’ ${result.path}`));
-          if (target.notes) console.log(chalk.dim(`       â†’ ${target.notes}`));
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
+          if (target.notes) console.log(chalk.dim(`       → ${target.notes}`));
         } else {
           s.fail(chalk.red(`${target.name}: ${result.message}`));
         }
@@ -549,7 +549,7 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
 
     // Scan spinner
     const scanSpinner = ora({
-      text: chalk.dim("Scanning system for installed IDEsâ€¦"),
+      text: chalk.dim("Scanning system for installed IDEs…"),
       color: "cyan",
     }).start();
     await new Promise((r) => setTimeout(r, 700));
@@ -561,7 +561,7 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
 
     clack.intro(chalk.bold.hex("#00D4FF")("  AndroJack MCP  ") + chalk.dim("Installer"));
 
-    // â”€â”€ Mode select â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Mode select ──────────────────────────────────────────────────────────
     const mode = await clack.select<string>({
       message: "Select installation mode:",
       options: [
@@ -592,7 +592,7 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       return;
     }
 
-    // â”€â”€ Auto mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auto mode ────────────────────────────────────────────────────────────
     if (mode === "auto") {
       const detected = detectInstalledIdes(targets);
 
@@ -633,13 +633,13 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
           }
         }
 
-        const s = ora({ text: chalk.dim(`Writing config for ${target.name}â€¦`), color: "cyan" }).start();
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
         await new Promise((r) => setTimeout(r, 350));
         const result = installTarget(target);
         results.push(result);
 
         if (result.success) {
-          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` â†’ ${result.path}`));
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
           if (target.notes) clack.log.info(chalk.dim(target.notes));
         } else {
           s.fail(chalk.red(`${target.name}: ${result.message}`));
@@ -649,14 +649,14 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       const ok = results.filter((r) => r.success).length;
       const fail = results.filter((r) => !r.success).length;
       clack.outro(
-        chalk.bold.green(`âœ“ ${ok} installed`) +
-        (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
+        chalk.bold.green(`✓ ${ok} installed`) +
+        (fail > 0 ? chalk.red(`  ✗ ${fail} failed`) : "") +
         chalk.dim(`  Run  ${LIST_COMMAND}  to verify.`)
       );
       return;
     }
 
-    // â”€â”€ Pick specific IDEs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Pick specific IDEs ───────────────────────────────────────────────────
     if (mode === "pick") {
       const chosen = await clack.multiselect<string>({
         message: "Select IDEs to install (Space to toggle, Enter to confirm):",
@@ -712,13 +712,13 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
           }
         }
 
-        const s = ora({ text: chalk.dim(`Writing config for ${target.name}â€¦`), color: "cyan" }).start();
+        const s = ora({ text: chalk.dim(`Writing config for ${target.name}…`), color: "cyan" }).start();
         await new Promise((r) => setTimeout(r, 350));
         const result = installTarget(target);
         results.push(result);
 
         if (result.success) {
-          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` â†’ ${result.path}`));
+          s.succeed(chalk.green(`${target.name}`) + chalk.dim(` → ${result.path}`));
           if (target.notes) clack.log.info(chalk.dim(target.notes));
           if (target.oneClickUrl) clack.log.info(chalk.yellow(`One-click: ${target.oneClickUrl}`));
         } else {
@@ -729,14 +729,14 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
       const ok = results.filter((r) => r.success).length;
       const fail = results.filter((r) => !r.success).length;
       clack.outro(
-        chalk.bold.green(`âœ“ ${ok} installed`) +
-        (fail > 0 ? chalk.red(`  âœ— ${fail} failed`) : "") +
+        chalk.bold.green(`✓ ${ok} installed`) +
+        (fail > 0 ? chalk.red(`  ✗ ${fail} failed`) : "") +
         chalk.dim(`  Run  ${LIST_COMMAND}  to verify.`)
       );
       return;
     }
 
-    // â”€â”€ Manual snippet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Manual snippet ────────────────────────────────────────────────────────
     if (mode === "snippet") {
       const snippet = {
         mcpServers: { androjack: SERVER_CONFIG_STANDARD },

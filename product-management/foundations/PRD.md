@@ -4,10 +4,10 @@
 | Field | Value |
 |---|---|
 | **Product** | AndroJack MCP |
-| **Version** | 1.7.1 |
+| **Version** | 2.0.0 |
 | **Status** | ✅ Shipped |
 | **PM** | North Star Hunter |
-| **Last Updated** | March 2026 |
+| **Last Updated** | July 2026 |
 | **Review Cycle** | Quarterly or on breaking Android platform change |
 
 ---
@@ -54,7 +54,7 @@ enforcement layer, no code validation, and no structured gate.
 
 ### Primary Goal
 
-Reduce AI-generated Android regressions to zero for the 31 rule classes covered by the
+Reduce AI-generated Android regressions to zero for the 28 rule classes covered by the
 `android_code_validator` (Tool 21).
 
 ### Secondary Goals
@@ -136,7 +136,7 @@ Developer asks to migrate legacy code. AndroJack:
 - Every code block MUST include an inline comment citing the official documentation URL from which it was derived.
 
 ### F-04 — 31 Validation Rules
-- The validator MUST detect and report all 31 rules across 3 severity levels.
+- The validator MUST detect and report all 28 rules across 3 severity levels.
 - Rule output MUST include: rule ID, severity, line number, violating snippet, replacement, documentation URL.
 
 ### F-05 — Negative Constraints
@@ -144,7 +144,7 @@ Developer asks to migrate legacy code. AndroJack:
 - These constraints apply even if the user requests them explicitly.
 
 ### F-06 — Tool Availability
-- All 21 tools MUST be registered and available via both stdio and HTTP transports.
+- All 23 tools MUST be registered and available via both stdio and HTTP transports.
 - Transport parity is required — the gate must apply equally on both.
 
 ### F-07 — Antigravity Skills Format
@@ -169,14 +169,16 @@ Developer asks to migrate legacy code. AndroJack:
 
 | Criterion | Status |
 |---|---|
-| 31 rules implemented and unit-tested | ✅ |
-| Tool 21 registered on both transports | ✅ |
+| 28 rules implemented and unit-tested | ✅ |
+| Tool 23 registered on both transports | ✅ |
 | Grounding Gate includes Step 8 (validate output) | ✅ |
 | Negative constraints section in system prompt | ✅ |
 | agents.md + 11 SKILL.md files shipped | ✅ |
-| README tool count consistent (22 everywhere) | ✅ |
-| No stale "21 tools" references in README | ✅ |
-| Version 1.7.1 in package.json, index.ts, serve.ts | ✅ |
+| README tool count consistent (23 everywhere) | ✅ |
+| No stale "22 tools" references in README | ✅ |
+| Version 2.0.0 synced across package.json, version.ts, manifest.json, server.json, .mcp/server.json, all 7 config/*.json files | ✅ |
+| Content sanitizer wired into android_debugger for issuetracker.google.com | ✅ |
+| npm audit — 0 vulnerabilities | ✅ |
 
 ---
 

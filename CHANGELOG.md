@@ -1,5 +1,42 @@
 # Changelog
 
+## [2.0.0] – 2026-07-11
+
+### Security
+
+- **NEW: Content sanitizer for externally-fetched text** (`src/content-sanitizer.ts`) — mitigates indirect prompt injection via tool output, the dominant client-side MCP vulnerability class. Any tool result built from live-fetched HTML now passes through structural pattern detection (fake role markers, instruction-reset framing, direct AI-addressing) before reaching the calling agent's context.
+- **`android_debugger` hardened** — `issuetracker.google.com` is the only allowlisted domain indexing free-text, publicly-postable, user-submitted content (bug reports/comments). Unlike single-publisher sources (`developer.android.com`, `kotlinlang.org`), anyone can file a public issue with an embedded instruction payload. Results from this source are now wrapped in an explicit `<UNTRUSTED_EXTERNAL_CONTENT>` boundary via `wrapUntrustedContent()`, with the calling model told explicitly the content is reference data, not directives.
+- **Dependency vulnerabilities patched** — `npm audit` surfaced 7 vulnerabilities (3 high) in transitive `undici`/`qs` via `cheerio`. Resolved with `npm audit fix` — `cheerio` updated in place, zero breaking changes, all 70 tests still passing post-patch. **0 vulnerabilities** in the shipped dependency tree.
+- **`SECURITY.md`** — supported-version table updated for 2.0.x; documents the new content-sanitizer layer under Secure Defaults.
+
+### Added
+
+- **Tool 23: `android_developer_verification`** — Android's developer verification program enforcement begins September 30, 2026 (Brazil, Indonesia, Singapore, Thailand first; global 2027). Identity check, not content review — affects every Android developer, not just Play Store publishers. Covers full rollout timeline, registration paths (Play Console, Android Developer Console, CI/CD bulk registration APIs), managed-device/enterprise exemptions, and the new Android Studio IDE registration-status integration.
+- **2 new validator rules** (26 → 28) reflecting the May 2026 platform shift:
+  - `UNCONFINED_DISPATCHER_COMPOSE_TEST` (warning) — flags `UnconfinedTestDispatcher()` in test code. Compose 1.11+ defaults to `StandardTestDispatcher` (queued execution); tests written against the old immediate-execution assumption may now hang or assert too early.
+  - `NEW_FRAGMENT_CLASS_COMPOSE_FIRST` (info) — flags new classes extending `Fragment`. As of May 19, 2026, Android UI development is officially Compose First; Views are in maintenance mode (critical bugfixes only). Existing Fragment code is unaffected — this flags new subclasses only.
+- **Compose 1.11 v2 Testing Framework section** (`testing.ts`) — full migration guide for the default test-dispatcher change, with before/after code and a per-item checklist.
+- **Navigation 3 Scene Decorators** (`navigation3.ts`) — covers the 1.1 release (May 18, 2026): wrapping destinations with persistent chrome (bottom bars, nav rails, dialogs) without each screen needing to know about it.
+- **Compose-First maintenance-mode notices** (`architecture.ts`, `constants.ts`) — queries for View-based topics (Fragments, RecyclerView, ViewPager, Navigation/Layout Editor) now return an explicit notice steering toward Compose, sourced from Google's own "Android UI Development is Compose First" announcement, rather than silently returning legacy guidance as if still current.
+- **Android Skills / Android CLI positioning** (`build-publish.ts`) — documents Google's first-party Android Skills GitHub repo, Android CLI, and Android Knowledge Base (launched April 16, 2026). Positioned explicitly as complementary: Android Skills provide instructional context before code generation; AndroJack's `android_code_validator` is the enforcement gate that runs after.
+- **AGP 10.0 upcoming breaking-changes warning** (`build-publish.ts`) — flags the removal of `android.newDsl=false` / `android.builtInKotlin=false` opt-outs and `CommonExtension` type-parameter changes ahead of the mid-2026 release.
+
+### Changed
+
+- **`ANDROID_STUDIO_CURRENT` fully corrected** — was two full codenames stale (claimed "Panda 2" current). Now correctly reflects **Android Studio Quail (2026.1.x)** as current stable, AGP 9.2.0, Kotlin Gradle Plugin 2.2.10 — all verified against official release notes rather than carried forward from a prior snapshot.
+- **Version catalog example rewritten** (`build-publish.ts`) — removed several dependency version numbers that were asserted without verification in a prior session (fabricated, not sourced). Replaced with only-verified versions (AGP 9.2.0, Compose BOM 2026.04.01, Hilt 1.4.0-beta01, Lifecycle 2.11.0-beta01, Navigation3 1.1.0) plus explicit `CHECK_LIVE_VIA_gradle_dependency_checker` placeholders for anything not independently confirmed this cycle — the tool now tells the AI to verify live rather than trust a hardcoded guess.
+- **Full version string sync** — `1.7.1` → `2.0.0` across every file that referenced it: `package.json`, `.mcp/server.json`, `manifest.json`, `server.json`, all 7 IDE config files in `config/`, and CLI usage comments in `src/serve.ts` / `src/install.ts`. A prior release had bumped `src/version.ts` without propagating to these files — this release closes that gap and adds it as a pre-release checklist item.
+- **`/.well-known/mcp` discovery endpoint** — `tools: 22` → `tools: 23`.
+
+### Fixed
+
+- **Test-suite/version desync caught by CI** — bumping `src/version.ts` without `package.json` broke 2 existing tests (`cli-routing.test.mjs`) that assert CLI `--version` output and IDE config install commands against `package.json`'s version field. Fixed at the source (synced `package.json`) rather than adjusting the tests to match — the tests were correctly catching a real inconsistency.
+- **Test Suite Expansion** — Expanded test coverage in `test/tool-outputs.test.mjs` from 70 to 85 tests to thoroughly exercise non-default topic branches for revised v2.0.0 tools (Architecture Compose-First notice, Navigation 3 Scenes/migration, Testing pyramid/unit fakes, Build/Publish KSP, and Debugger inputs).
+- **Brittle CI Assertion Fixed** — Converted the Hono version assertion in `.github/workflows/main-validate.yml` from an exact pin on `4.12.7` to a floor check (`>= 4.12.7`), matching the SDK floor check pattern. This prevents CI failure when dependency upgrades (e.g. `4.12.28`) are applied. Added all 8 test files to the file-existence validation step in CI.
+- **Readme Badges Updated** — Replaced retired dynamic VS Code marketplace and GitHub clones badges with static alternatives, and bumped base64-encoded installation configurations to version `2.0.0`.
+
+---
+
 ## [1.7.1] – 2026-04-12
 
 ### Added

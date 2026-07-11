@@ -70,6 +70,8 @@ const allRules = [
   { id: 'INFO_GRADLE_HARDCODED_VERSION', lang: 'gradle', fail: 'implementation("group:artifact:1.0.0")', pass: 'implementation(libs.myLib)' },
   { id: 'INFO_ON_BACK_PRESSED_OVERRIDE', lang: 'kotlin', fail: 'override fun onBackPressed()', pass: 'BackHandler { }' },
   { id: 'API37_SMS_RECEIVER_OTP', lang: 'kotlin', fail: 'SMS_RECEIVED', pass: 'SmsRetriever.startSmsUserConsent()', targetSdk: 37 },
+  { id: 'UNCONFINED_DISPATCHER_COMPOSE_TEST', lang: 'kotlin', fail: 'UnconfinedTestDispatcher()', pass: 'StandardTestDispatcher()' },
+  { id: 'NEW_FRAGMENT_CLASS_COMPOSE_FIRST', lang: 'kotlin', fail: 'class HomeFragment : Fragment(', pass: '@Composable\nfun HomeScreen(' },
 ];
 
 allRules.forEach(({ id, lang, fail, pass, targetSdk }) => {

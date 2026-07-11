@@ -203,7 +203,7 @@ And the fixed manifest must use adaptive layout approaches, not orientation lock
 
 ## Epic 05 — Antigravity Skills Integration
 
-> AndroJack's 21 tools and gate are discoverable and usable in Antigravity IDE.
+> AndroJack's 23 tools and gate are discoverable and usable in Antigravity IDE.
 
 ---
 

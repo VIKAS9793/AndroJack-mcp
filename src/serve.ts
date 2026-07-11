@@ -6,9 +6,9 @@
  * httpUrl-based MCP client.
  *
  * Usage:
- *   npx androjack-mcp@1.7.1 serve                 # localhost:3000
- *   npx androjack-mcp@1.7.1 serve --port 8080     # custom port
- *   npx androjack-mcp@1.7.1 serve --host 0.0.0.0  # expose on LAN (add your own auth)
+ *   npx androjack-mcp@2.0.0 serve                 # localhost:3000
+ *   npx androjack-mcp@2.0.0 serve --port 8080     # custom port
+ *   npx androjack-mcp@2.0.0 serve --host 0.0.0.0  # expose on LAN (add your own auth)
  *
  * Android Studio setup:
  *   File → Settings → Tools → AI → MCP Servers → Enable MCP Servers
@@ -84,7 +84,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
   console.error(g("  ║                                                      ║"));
   console.error(g("  ║    🤖  AndroJack MCP  –  HTTP Server                 ║"));
   console.error(g("  ║    The Jack of All Android Trades                    ║"));
-  console.error(g("  ║    21 tools · Documentation-grounded · Read-only     ║"));
+  console.error(g("  ║    23 tools · Documentation-grounded · Read-only     ║"));
   console.error(g("  ║                                                      ║"));
   console.error(g("  ╚══════════════════════════════════════════════════════╝"));
   console.error("");
@@ -104,7 +104,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
     null, 4
   ).split("\n").map(l => "  " + l).join("\n")));
   console.error("");
-  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim("in Gemini chat to verify all 21 tools are listed.")}`);
+  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim("in Gemini chat to verify all 23 tools are listed.")}`);
   console.error("");
   console.error(chalk.dim("  Not affiliated with or endorsed by Google LLC or the Android Open Source Project."));
   console.error(chalk.dim("  Documentation sourced under CC-BY 4.0 from developer.android.com."));

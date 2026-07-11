@@ -297,7 +297,27 @@ export const ARCHITECTURE_GUIDES: Record<string, string> = {
   performance: "https://developer.android.com/topic/performance",
   accessibility: "https://developer.android.com/guide/topics/ui/accessibility",
   security: "https://developer.android.com/topic/security/best-practices",
+  // ── Compose-First era additions (May 2026 platform shift) ─────────────────
+  grid: "https://developer.android.com/develop/ui/compose/layouts/grid",
+  flexbox: "https://developer.android.com/develop/ui/compose/layouts/flexbox",
+  "style api": "https://developer.android.com/develop/ui/compose/styling",
+  mediaquery: "https://developer.android.com/develop/ui/compose/layouts/adaptive/media-query",
+  "scene decorators": "https://developer.android.com/guide/navigation/navigation-3/scenes",
+  "compose testing v2": "https://developer.android.com/develop/ui/compose/testing",
 };
+
+/**
+ * View-based topics now in maintenance mode as of the Android UI Development
+ * is Compose First announcement (May 19, 2026). Existing view-based tools and
+ * libraries are frozen to critical bugfixes only — Google's own guidance now
+ * directs all new development to Jetpack Compose.
+ * Source: https://android-developers.googleblog.com/2026/05/android-ui-development-is-compose-first.html
+ */
+export const VIEW_BASED_MAINTENANCE_MODE_TOPICS = new Set<string>([
+  "fragment", "fragments", "recyclerview", "viewpager", "viewpager2",
+  "navigation editor", "layout editor", "xml layout", "view binding",
+  "data binding", "constraintlayout xml",
+]);
 
 // ── M3 Expressive additions to component registry ───────────────────────────
 // These are added at runtime into COMPONENT_REGISTRY via Object.assign below

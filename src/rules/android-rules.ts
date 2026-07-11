@@ -332,6 +332,30 @@ export const ANDROID_RULES: AndroidRule[] = [
     docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#sms-otp",
     minSdkAbove: 35,
   },
+
+  // ── Compose-First / Compose 1.11 rules (v2.0, May 2026 platform shift) ────
+
+  {
+    id:          "UNCONFINED_DISPATCHER_COMPOSE_TEST",
+    severity:    "warning",
+    languages:   ["kotlin"],
+    pattern:     /UnconfinedTestDispatcher\s*\(/g,
+    message:     "UnconfinedTestDispatcher assumes immediate coroutine execution — this was the v1 Compose testing default. Compose 1.11+ defaults to StandardTestDispatcher (queued execution), and tests relying on the old assumption may now hang or assert before the coroutine completes.",
+    replacement: "Use StandardTestDispatcher and call advanceUntilIdle() (plus composeTestRule.awaitIdle() for Compose UI tests) before assertions that depend on coroutine completion.",
+    docUrl:      "https://android-developers.googleblog.com/2026/04/jetpack-compose-april-2026-updates.html",
+    notes:       "Not an error — UnconfinedTestDispatcher is still valid Kotlin, just no longer matches Compose 1.11's default test behavior. Flagged so intermittent test failures get traced to this cause instead of assumed to be flaky infrastructure.",
+  },
+
+  {
+    id:          "NEW_FRAGMENT_CLASS_COMPOSE_FIRST",
+    severity:    "info",
+    languages:   ["kotlin"],
+    pattern:     /class\s+\w+\s*:\s*Fragment\s*\(/g,
+    message:     "New class extends Fragment. As of May 19, 2026, Android UI development is Compose First — Views (Fragments, RecyclerView, ViewPager) are in maintenance mode, receiving critical bugfixes only. New screens should be built with Jetpack Compose.",
+    replacement: "For a new screen, use a @Composable function with Navigation 3 instead of a new Fragment. Existing Fragment-based code does not need migration unless you are already touching it.",
+    docUrl:      "https://android-developers.googleblog.com/2026/05/android-ui-development-is-compose-first.html",
+    notes:       "Info-level only — this is a platform direction signal, not a defect. Maintaining existing Fragment code is fine; this flags NEW Fragment subclasses specifically.",
+  },
 ];
 
 // ── Rule Engine ───────────────────────────────────────────────────────────────

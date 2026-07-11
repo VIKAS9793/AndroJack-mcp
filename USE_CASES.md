@@ -10,7 +10,7 @@
 AndroJack is a **read-only verification server**. It does three things and nothing else:
 
 1. **Looks up** the status of an Android API, library, or architecture pattern against a built-in registry or live official documentation
-2. **Validates** code you or an AI wrote against a rule engine (`src/rules/android-rules.ts`) — 24 rules, zero network calls required
+2. **Validates** code you or an AI wrote against a rule engine (`src/rules/android-rules.ts`) — 28 rules, zero network calls required
 3. **Fetches** live documentation excerpts from `developer.android.com`, `kotlinlang.org`, `source.android.com`, and Google Maven
 
 It does **not** generate code. It does **not** modify files. It does **not** give opinions.
@@ -37,6 +37,8 @@ It does **not** generate code. It does **not** modify files. It does **not** giv
   - [UC-13 — Full AI loop-back validation before shipping code](#uc-13--full-ai-loop-back-validation-before-shipping-code)
   - [UC-14 — I am adding background location — what are the Play Store rules?](#uc-14--i-am-adding-background-location--what-are-the-play-store-rules)
   - [UC-15 — Validate an entire feature before it reaches code review](#uc-15--validate-an-entire-feature-before-it-reaches-code-review)
+  - [UC-16 — Is my code safe to run on Android 17 / API 37?](#uc-16--is-my-code-safe-to-run-on-android-17--api-37)
+  - [UC-17 — Will my app be blocked from installing after September 30, 2026?](#uc-17--will-my-app-be-blocked-from-installing-after-september-30-2026)
 
 ---
 
@@ -134,7 +136,7 @@ implementation(platform(libs.compose.bom))
 
 **Source:** `src/tools/validator.ts` + `src/rules/android-rules.ts`
 
-The rule engine is pure TypeScript RegExp matching — **zero network calls**. 24 rules across Kotlin, XML, and Gradle files. Results in under 100ms.
+The rule engine is pure TypeScript RegExp matching — **zero network calls**. 28 rules across Kotlin, XML, and Gradle files. Results in under 100ms.
 
 **Example prompt:**
 ```
@@ -176,7 +178,7 @@ fun loadData() {
    Source:      https://developer.android.com/kotlin/coroutines/coroutines-best-practices
 ```
 
-**All 24 rules by ID:**
+**All 28 rules by ID:**
 
 | Rule ID | Severity | What it catches |
 |---------|----------|-----------------|
@@ -204,6 +206,10 @@ fun loadData() {
 | `INFO_HARDCODED_DISPATCH_MAIN` | info | `Dispatchers.Main` — makes unit tests harder |
 | `INFO_GRADLE_HARDCODED_VERSION` | info | Hardcoded version in `implementation("group:id:1.2.3")` |
 | `INFO_ON_BACK_PRESSED_OVERRIDE` | info | `override fun onBackPressed()` — legacy, no predictive back gesture |
+| `API37_STATIC_FINAL_REFLECTION` | error | `field.isAccessible = true` on static final fields — `IllegalAccessException` on API 37+ |
+| `API37_SMS_RECEIVER_OTP` | warning | `SMS_RECEIVED` broadcast for OTP — delayed 3 hours on API 37+ targets |
+| `UNCONFINED_DISPATCHER_COMPOSE_TEST` | warning | `UnconfinedTestDispatcher()` — Compose 1.11+ defaults to `StandardTestDispatcher`, may hang/mis-assert |
+| `NEW_FRAGMENT_CLASS_COMPOSE_FIRST` | info | New `class X : Fragment(` — Views are maintenance-mode as of May 2026, Compose is the default for new screens |
 
 ---
 
@@ -598,7 +604,7 @@ android_build_and_publish("ksp")
 ```
 
 Running this sequence on a feature before opening a pull request catches:
-- All 24 rule violations across Kotlin, XML, and Gradle
+- All 28 rule violations across Kotlin, XML, and Gradle
 - Stale dependency versions
 - API 36 manifest compliance failures
 - Test anti-patterns
@@ -661,6 +667,38 @@ What breaks when I target Android 17?
 
 ---
 
+### UC-17 — Will my app be blocked from installing after September 30, 2026?
+
+**The problem:** Google's Android developer verification program begins enforcement September 30, 2026 — apps registered by unverified developers cannot be installed or updated on certified devices in the first four rollout countries. This affects every distribution channel, not just Google Play, and most developers have not audited whether their apps and package names are properly registered.
+
+**The tool:** `android_developer_verification`
+
+**Source:** `src/tools/developer-verification.ts`
+
+**Example prompt:**
+```
+Do I need to do anything for Android developer verification?
+```
+
+**What the tool returns (grounded in official Android Developers Blog + Help Center sources):**
+
+```typescript
+// src/tools/developer-verification.ts — timeline excerpt
+| Date | Milestone |
+|------|-----------|
+| March 2026 | Verification rolled out to all developers via Play Console
+              and the new Android Developer Console |
+| September 30, 2026 | Enforcement begins — Brazil, Indonesia, Singapore,
+                        Thailand |
+| 2027 and beyond | Global expansion to all certified Android devices |
+```
+
+The tool distinguishes four paths depending on your distribution model — Play Store (likely auto-registered), non-Play distribution (manual registration via Android Developer Console), CI/CD bulk registration (via the Developer ID Status API), and enterprise/managed-device apps (exempt, with a caveat about mixed distribution scenarios).
+
+**Query topics:** `'timeline'` (full rollout dates), `'registration'` (how to register per distribution model), `'enterprise'` (managed-device exemptions, advanced sideloading flow), `'studio'` (Android Studio IDE registration-status integration).
+
+---
+
 ## Appendix — Tool to Source File Mapping
 
 | Tool name | Source file |
@@ -687,8 +725,10 @@ What breaks when I target Android 17?
 | `android_wearos_guide` | `src/tools/wear.ts` |
 | `android_code_validator` | `src/tools/validator.ts` + `src/rules/android-rules.ts` |
 | `android_api17_compliance` | `src/tools/android17-compliance.ts` |
-| Rule engine | `src/rules/android-rules.ts` (31 rules) |
+| `android_developer_verification` | `src/tools/developer-verification.ts` |
+| Rule engine | `src/rules/android-rules.ts` (28 rules) |
 | Response cache | `src/cache.ts` (LRU, per-hostname TTL) |
+| Content sanitizer (v2.0) | `src/content-sanitizer.ts` — untrusted-content boundary for externally-fetched text |
 
 ---
 

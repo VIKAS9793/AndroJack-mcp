@@ -4,7 +4,7 @@
 > Format: Now = committed and shipped. Next = high-confidence, scoped for next release.
 > Later = directional bets, not commitments.
 > Each item carries: the user job it serves, the assumption it tests, and the evidence required to proceed.
-> Updated: March 2026.
+> Updated: July 2026.
 
 ---
 
@@ -21,54 +21,30 @@ an assumption to test, and a signal that tells us the bet was correct.
 
 ---
 
-## NOW — v1.5.0 (Shipped, March 2026)
+## NOW — Shipped Releases
 
-### ✅ Level 3 Loop-Back Validation (Tool 21 — `android_code_validator`)
+### ✅ v2.0.0 (Shipped, July 2026)
 
-**User job:** Confidence Gate (JTBD-01) — no deprecated code reaches the developer's clipboard  
-**What shipped:**
-- 22-rule validation engine (pure TypeScript, zero new deps)
-- 3 severity levels: error / warning / info
-- PASS / WARN / FAIL verdict with line-level violations, replacements, doc URLs
-- Gate mandates: FAIL code never returned to user
+*   **Security & Sanitization:** Shipped pure TypeScript `content-sanitizer` to defend against indirect prompt injections. Hardened the `android_debugger` tool to wrap unmoderated user-submitted bug tracker results in an explicit `<UNTRUSTED_EXTERNAL_CONTENT>` boundary.
+*   **New Tools & Rules:** Added **Tool 23: `android_developer_verification`** (covering Play Store compliance, timelines, bulk registration APIs). Added 2 new platform validation rules (covering unconfined dispatcher usage and Compose-first Fragment notices), bringing rule coverage from 26 to 28 rules.
+*   **Platform Alignment:** Included Navigation 3 Scene Decorators reference and Compose-First deprecation notices to guide assistants away from legacy View systems.
 
-**Metric to watch:** FAIL-fix-rerun rate ≥ 99%
+### ✅ v1.7.1 & v1.7.0 (Shipped, April & March 2026)
 
----
+*   **Engineering Hardening:** Integrated a comprehensive 54-test suite (now expanded to 85 tests).
+*   **API 37 Support:** Added **Tool 22: `android_api17_compliance`** (handling static final field reflection, `ACCESS_LOCAL_NETWORK` permission, SMS OTP changes) and 7 new validator rules (bringing rule count to 26 rules before v2.0.0).
 
-### ✅ Grounding Gate — Step 8 (Validate Output)
+### ✅ v1.5.0 (Shipped, March 2026)
 
-**User job:** Confidence Gate (JTBD-01)  
-**What shipped:**
-- Grounding Gate updated from 7 to 8 steps across both stdio and HTTP transports
-- Hard rule: agent CANNOT return code without validator verdict
-- Negative Constraints section added to system prompt
+*   **Level 3 Loop-Back Validation:** Shipped `android_code_validator` as Tool 21 with a 22-rule engine.
+*   **Grounding Gate:** Enforced mandatory validation before returning code blocks.
+*   **Antigravity Skills:** Added semantic-triggered `SKILL.md` documents.
 
 ---
 
-### ✅ Antigravity IDE Skills Integration
+## NEXT — v2.1.0 (Target: Q3 2026)
 
-**User job:** Time-to-current knowledge (JTBD-02), Safe Delegation (JTBD-03)  
-**What shipped:**
-- `agents.md` — ambient always-loaded gate for Antigravity projects
-- 11 SKILL.md files — on-demand, semantic-triggered, covering all 21 tools by domain
-- Progressive disclosure architecture: only relevant skill loaded per task
-
----
-
-### ✅ PH Bug Ledger Documentation
-
-**User job:** Trust and transparency  
-**What shipped:**
-- "What Can Still Break — Even at Level 3" section in README
-- 5 real bugs from production Android app documented with root cause and correct tool layer
-- Defence-in-Depth table: 9 bug classes mapped to their correct layer
-
----
-
-## NEXT — v1.6.4 (Target: Q2 2026)
-
-### 🔲 MISSING_CONTENT_DESCRIPTION Rule (Validator Rule 23)
+### 🔲 MISSING_CONTENT_DESCRIPTION Rule (Validator Rule 29)
 
 **User job:** Confidence Gate (JTBD-01)  
 **Problem:** Composables with interactive semantics (Button, Image with tap handler) are
@@ -84,7 +60,7 @@ blocks that lack an adjacent `contentDescription` parameter
 
 ---
 
-### 🔲 UPPERCASE_STRING_MUTATION Rule (Validator Rule 24)
+### 🔲 UPPERCASE_STRING_MUTATION Rule (Validator Rule 30)
 
 **User job:** Confidence Gate (JTBD-01)  
 **Problem:** M3 Expressive requires Sentence case for button labels. AI frequently generates
@@ -118,7 +94,7 @@ For large code blocks, this means a 2-second wait before any feedback.
 
 ---
 
-## LATER — v2.x (Directional, 2026 H2)
+## LATER — v2.2+ (Directional, 2026 H2)
 
 ### 🔭 AST-Based Structural Absence Detection
 
@@ -198,11 +174,15 @@ These are explicit non-goals. We will not build them unless evidence changes the
 | Grounding Gate Step 8 | v1.5.0 | ✅ Shipped | JTBD-01 |
 | Antigravity Skills (agents.md + 11 SKILLs) | v1.5.0 | ✅ Shipped | JTBD-02, JTBD-03 |
 | PH Bug Ledger docs | v1.5.0 | ✅ Shipped | Trust / transparency |
-| MISSING_CONTENT_DESCRIPTION rule | v1.6.4 | 🔲 Scoped | JTBD-01 |
-| UPPERCASE_STRING_MUTATION rule | v1.6.4 | 🔲 Scoped | JTBD-01 |
-| Opt-in telemetry | v1.6.4 | 🔲 Scoped | Measurement |
-| Validator streaming feedback | v1.6.4 | 🔲 Scoped | JTBD-01 (UX) |
-| AST-based absence detection | v2.0 | 🔭 Bet | JTBD-01 |
-| Android Studio HTTP transport | v2.0 | 🔭 Bet | JTBD-03 |
-| Play Store policy change monitor | v2.x | 🔭 Bet | JTBD-05 |
-| Community regression database | v2.x | 🔭 Bet | All |
+| Tool 22 — `android_api17_compliance` | v1.7.0 | ✅ Shipped | JTBD-01 |
+| Content Sanitizer (`content-sanitizer.ts`) | v2.0.0 | ✅ Shipped | Security |
+| Tool 23 — `android_developer_verification` | v2.0.0 | ✅ Shipped | JTBD-05 |
+| Validator rule count expansion (28 rules) | v2.0.0 | ✅ Shipped | JTBD-01 |
+| MISSING_CONTENT_DESCRIPTION rule | v2.1.0 | 🔲 Scoped | JTBD-01 |
+| UPPERCASE_STRING_MUTATION rule | v2.1.0 | 🔲 Scoped | JTBD-01 |
+| Opt-in telemetry | v2.1.0 | 🔲 Scoped | Measurement |
+| Validator streaming feedback | v2.1.0 | 🔲 Scoped | JTBD-01 (UX) |
+| AST-based absence detection | v2.2+ | 🔭 Bet | JTBD-01 |
+| Android Studio HTTP transport | v2.2+ | 🔭 Bet | JTBD-03 |
+| Play Store policy change monitor | v2.2+ | 🔭 Bet | JTBD-05 |
+| Community regression database | v2.2+ | 🔭 Bet | All |

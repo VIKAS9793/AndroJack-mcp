@@ -6,8 +6,9 @@ The following versions of androjack-mcp are currently being supported with secur
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 2.0.x   | :white_check_mark: |
 | 1.7.x   | :white_check_mark: |
-| 1.6.x   | :white_check_mark: |
+| 1.6.x   | :warning: (critical fixes only) |
 | < 1.6   | :x:                |
 
 ## Secure Defaults
@@ -16,6 +17,7 @@ The following versions of androjack-mcp are currently being supported with secur
 - Outbound documentation fetches are restricted to the authoritative domain allowlist and must use HTTPS.
 - HTTP requests are bounded: request bodies are capped, active sessions are limited, and `Origin` / `Host` headers are validated for local transport safety.
 - All published tools are read-only and do not require user credentials for documentation access.
+- **(v2.0.0)** All externally-fetched content is routed through a content sanitizer (`src/content-sanitizer.ts`) that neutralizes structural prompt-injection patterns and wraps every result in an explicit untrusted-data boundary before it reaches the calling agent's context. `issuetracker.google.com` — the only allowlisted domain indexing free-text, publicly-postable content — receives additional hardening via this same layer.
 
 ## Reporting a Vulnerability
 

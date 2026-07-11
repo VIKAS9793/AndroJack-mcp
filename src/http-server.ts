@@ -206,7 +206,7 @@ export async function startHttpServer(
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
           mcp_endpoint: `http://${advertisedHost}:${advertisedPort}${MCP_PATH}`,
           spec_version: "2025-11-25",
-          tools: 22,
+          tools: 23,
           read_only: true,
           auth_required: false,
         })
