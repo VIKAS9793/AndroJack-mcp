@@ -44,7 +44,16 @@ jobs:
       - name: Publish to MCP Registry (OIDC)
         run: |
           ./mcp-publisher login github-oidc
-          ./mcp-publisher publish --server-path .mcp/server.json
+          # Catch duplicate version error to avoid failing the CI run on re-runs/re-tags
+          ./mcp-publisher publish --server-path .mcp/server.json 2>&1 | tee publish.log || {
+            if grep -q "cannot publish duplicate version" publish.log; then
+              echo "INFO: Version is already published to the MCP Registry. Proceeding."
+              exit 0
+            else
+              echo "ERROR: Publishing failed with a non-duplicate-version error."
+              exit 1
+            fi
+          }
 
       - name: Verify registry entry
         run: |
