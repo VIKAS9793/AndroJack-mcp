@@ -16,6 +16,7 @@ build/
 _mcp_test/
 _mcp_comparison/
 _test_playground/
+VERIFICATION_CHECKLIST.md
 
 # Environment / OS
 .env

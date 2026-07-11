@@ -1,5 +1,12 @@
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 2.0.0
+
+- **v2.0.0 Release Sync:** Extension now launches the hardened `androjack-mcp@2.0.0` release.
+- **Security Sanitization:** Core server now protects against indirect prompt injections via tool output.
+- **New Tools & Rules:** Supports the new Tool 23 (`android_developer_verification`) and 28 platform validation rules.
+- **Improved Platform Alignment:** Up-to-date guidance on Android Studio Quail (2026.1.x), Navigation 3, and Compose 1.11 testing.
+
 ## 1.7.1
 
 - **v1.7.1 Hardening Sync:** Extension now launches the clinical-grade `androjack-mcp@1.7.1` release.
