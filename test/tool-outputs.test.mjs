@@ -13,7 +13,16 @@ test('android17Compliance - overview contents', async () => {
   assert.ok(result.includes('# Android 17 / API 37 Compliance Reference'));
   assert.ok(result.includes('Static Final Field Reflection'));
   assert.ok(result.includes('ACCESS_LOCAL_NETWORK'));
-  assert.ok(result.includes('https://developer.android.com/about/versions/17'));
+  const urls = result.match(/https?:\/\/[^\s)]+/g) ?? [];
+  const hasExpectedAndroid17Url = urls.some((rawUrl) => {
+    try {
+      const parsed = new URL(rawUrl);
+      return parsed.hostname === 'developer.android.com' && parsed.pathname === '/about/versions/17';
+    } catch {
+      return false;
+    }
+  });
+  assert.ok(hasExpectedAndroid17Url);
 });
 
 test('android17Compliance - specific topic: handoff', async () => {
