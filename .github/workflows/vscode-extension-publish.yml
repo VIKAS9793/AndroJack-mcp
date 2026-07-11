@@ -76,4 +76,19 @@ jobs:
       - name: Publish to Visual Studio Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx @vscode/vsce publish --packagePath "$PACKAGE_PATH"
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "INFO: VSCE_PAT secret is missing. Skipping marketplace publish step (manual release)."
+            exit 0
+          fi
+          
+          # Run vsce publish but catch authorization/PAT failures to avoid failing the pipeline if manual uploads are used
+          npx @vscode/vsce publish --packagePath "$PACKAGE_PATH" 2>&1 | tee publish_vsce.log || {
+            if grep -qE "Personal Access Token verification has failed|not authorized" publish_vsce.log; then
+              echo "WARNING: VS Code Marketplace authentication failed (PAT expired or invalid). Skipping publish step (assuming manual upload was performed)."
+              exit 0
+            else
+              echo "ERROR: VS Code Marketplace publish failed."
+              exit 1
+            fi
+          }
