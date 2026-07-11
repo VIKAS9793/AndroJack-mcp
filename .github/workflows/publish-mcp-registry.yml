@@ -50,5 +50,5 @@ jobs:
         run: |
           sleep 5   # allow registry propagation
           curl -sf \
-            "https://registry.modelcontextprotocol.io/v0/servers/io.github.VIKAS9793%2Fandrojack" \
+            "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.VIKAS9793%2Fandrojack/versions/latest" \
             | jq '._meta["io.modelcontextprotocol.registry/official"]'
