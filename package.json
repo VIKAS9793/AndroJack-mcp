@@ -56,7 +56,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@clack/prompts": "^1.7.0",
+    "@clack/prompts": "^1.8.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "chalk": "^5.6.2",
     "cheerio": "^1.0.0",
