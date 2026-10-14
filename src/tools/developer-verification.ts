@@ -2,7 +2,7 @@
 //
 // Google introduced Android developer verification in 2025 and rolled it out
 // to all developers on Play Console and the new Android Developer Console in
-// March 2026. Enforcement begins September 30, 2026 in Brazil, Indonesia,
+// March 2026. Enforcement began September 30, 2026 in Brazil, Indonesia,
 // Singapore, and Thailand, expanding globally in 2027. This is one of the
 // most significant changes to Android app distribution in years — every
 // developer, not just Play Store publishers, is affected.
@@ -17,11 +17,18 @@ export async function androidDeveloperVerification(topic: string): Promise<strin
 
   const overview = `
 # Android Developer Verification Program
-Source: https://android-developers.googleblog.com/2026/06/android-developer-verification.html
+Source: https://developer.android.com/developer-verification
+
+> **Status (checked 2026-10-14): enforcement is LIVE** in Brazil, Indonesia,
+> Singapore, and Thailand since September 30, 2026, for installs from
+> participating stores on certified devices running Android 7+. Global
+> expansion is planned for 2027 — no global date has been published yet.
+> Limited-distribution accounts (students, teachers, hobbyists) can share an
+> app with up to 20 devices without a government ID or registration fee.
 
 ## What This Is
 
-Starting September 30, 2026, only apps registered by a verified developer can
+Since September 30, 2026, only apps registered by a verified developer can
 be installed and updated on certified Android devices — initially in Brazil,
 Indonesia, Singapore, and Thailand, expanding globally in 2027. This applies
 to Google Play **and** participating third-party stores (Samsung Galaxy
@@ -52,7 +59,7 @@ IT admin has already vetted them.
 | June 2026 | Early access: limited-distribution accounts for students/hobbyists |
 | July 2026 | Android Developer ID Status API launches globally; early access to Android Developer Console API |
 | August 2026 | Limited-distribution accounts launch globally; advanced sideloading flow launches globally |
-| **September 30, 2026** | **Enforcement begins** — Brazil, Indonesia, Singapore, Thailand |
+| **September 30, 2026** | **Enforcement began (live)** — Brazil, Indonesia, Singapore, Thailand |
 | 2027 and beyond | Global expansion to all certified Android devices |
 
 ## Do I Need to Do Anything Right Now?

@@ -28,7 +28,9 @@ test('android17Compliance - overview contents', async () => {
 test('android17Compliance - specific topic: handoff', async () => {
   const result = await android17Compliance('handoff');
   assert.ok(result.includes('# Android 17 — Handoff API'));
-  assert.ok(result.includes('android.intent.action.HANDOFF'));
+  // v2.1: assert the official entry points (v2.0 asserted an intent action that does not exist)
+  assert.ok(result.includes('setHandoffEnabled(true, null)'));
+  assert.ok(result.includes('onHandoffActivityDataRequested'));
 });
 
 test('android17Compliance - specific topic: checklist', async () => {
@@ -40,7 +42,9 @@ test('android17Compliance - specific topic: checklist', async () => {
 test('android17Compliance - specific topic: npu', async () => {
   const result = await android17Compliance('npu');
   assert.ok(result.includes('# Android 17 — NPU Access'));
-  assert.ok(result.includes('android.hardware.neural_processing_unit'));
+  // v2.1: the official name is the PackageManager constant; the hardcoded
+  // feature string v2.0 asserted was never verified against the API reference
+  assert.ok(result.includes('FEATURE_NEURAL_PROCESSING_UNIT'));
 });
 
 test('androidDeveloperVerification - overview contents', async () => {

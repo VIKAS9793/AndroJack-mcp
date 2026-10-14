@@ -118,8 +118,8 @@ export const ANDROID_RULES: AndroidRule[] = [
     message:     "android:screenOrientation locks break Android 16 / API 36 compliance on ≥600dp devices (tablets, foldables).",
     replacement: "Remove the screenOrientation attribute. Use WindowSizeClass to handle orientation-specific layouts in code.",
     docUrl:      "https://developer.android.com/about/versions/16/behavior-changes-16",
-    notes:       "Play Store mandates API 36 targeting by August 2026. Apps with orientation locks fail large-screen quality checks.",
-    minSdkAbove: 29, // only enforce aggressively for modern targets
+    notes:       "Play Store mandates API 36 targeting since August 31, 2026. On API 37 targets the Android 16 opt-out is gone; games (android:appCategory=\"game\") remain exempt.",
+    minSdkAbove: 35, // Android 16 large-screen enforcement applies at targetSdk 36+
   },
 
   {
@@ -130,6 +130,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     message:     "android:resizeableActivity=\"false\" is illegal on ≥600dp devices under Android 16 / API 36.",
     replacement: "Remove this attribute entirely. Design adaptive layouts with WindowSizeClass instead.",
     docUrl:      "https://developer.android.com/about/versions/16/behavior-changes-16",
+    minSdkAbove: 35,
   },
 
   {
@@ -260,7 +261,9 @@ export const ANDROID_RULES: AndroidRule[] = [
     id:          "GRADLE_KAPT_NEW_PROJECT",
     severity:    "warning",
     languages:   ["gradle"],
-    pattern:     /\bkapt\s*["']/g,
+    // v2.0 only matched Groovy `kapt "…"`; Kotlin DSL `kapt("…")` (the default
+    // for new projects) and the plugin declarations slipped through.
+    pattern:     /\bkapt\s*\(?\s*["']|\bkotlin\s*\(\s*["']kapt["']\s*\)|["']kotlin-kapt["']|["']org\.jetbrains\.kotlin\.kapt["']/g,
     message:     "KAPT (kapt annotation processor) is slower than KSP and deprecated for most Jetpack libraries.",
     replacement: "Migrate to KSP (ksp plugin + ksp() dependency declaration). Room, Hilt, and Moshi all support KSP.",
     docUrl:      "https://developer.android.com/build/migrate-to-ksp",
@@ -295,7 +298,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     pattern:     /implementation\s*\(\s*["'][^"']+:\d+\.\d+[^"']*["']\s*\)/g,
     message:     "Hardcoded dependency version. Consider using version catalogs (libs.versions.toml) for consistency.",
     replacement: "Define versions in libs.versions.toml and reference via libs.* accessors.",
-    docUrl:      "https://developer.android.com/build/migrate-to-version-catalogs",
+    docUrl:      "https://developer.android.com/build/migrate-to-catalogs",
   },
 
   {
@@ -319,7 +322,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     replacement: "Replace reflected static final mutation with constructor injection or a provider/factory pattern. In tests, use dependency injection instead of field mutation.",
     docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#static-final-reflection",
     notes:       "Only breaks when used on static final fields. isAccessible=true on non-final fields still works. Audit all reflection usage before targeting API 37.",
-    minSdkAbove: 35,  // Only flag for apps targeting API 37+
+    minSdkAbove: 36,  // Only flag for apps targeting API 37+ (v2.0 used 35, which also fired for API 36)
   },
 
   {
@@ -329,8 +332,8 @@ export const ANDROID_RULES: AndroidRule[] = [
     pattern:     /SMS_RECEIVED|android\.provider\.Telephony\.SMS_RECEIVED/g,
     message:     "SMS_RECEIVED broadcast access to OTP messages is delayed 3 hours for apps targeting Android 17 (API 37+).",
     replacement: "Use SmsRetriever.startSmsUserConsent() or SmsCodeRetriever from Play Services. These have no delay and are the recommended OTP pattern.",
-    docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#sms-otp",
-    minSdkAbove: 35,
+    docUrl:      "https://developer.android.com/identity/sms-retriever",
+    minSdkAbove: 36,
   },
 
   // ── Compose-First / Compose 1.11 rules (v2.0, May 2026 platform shift) ────
@@ -356,6 +359,75 @@ export const ANDROID_RULES: AndroidRule[] = [
     docUrl:      "https://android-developers.googleblog.com/2026/05/android-ui-development-is-compose-first.html",
     notes:       "Info-level only — this is a platform direction signal, not a defect. Maintaining existing Fragment code is fine; this flags NEW Fragment subclasses specifically.",
   },
+
+  // ── Android 17 / API 37 — stable since June 16, 2026 (v2.1) ───────────────
+  // Source for all rules below: https://developer.android.com/about/versions/17/behavior-changes-17
+
+  {
+    id:          "API37_MESSAGEQUEUE_REFLECTION",
+    severity:    "error",
+    languages:   ["kotlin"],
+    pattern:     /\bMessageQueue\b[^\n]{0,120}\bgetDeclared(?:Field|Method)\s*\(/g,
+    message:     "Apps targeting API 37 get a new lock-free android.os.MessageQueue. Reflection on its private fields/methods may break.",
+    replacement: "Remove MessageQueue reflection. In tests, use TestLooperManager (peekWhen()/poll() were added for this) or Espresso idling resources.",
+    docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17",
+    minSdkAbove: 36,
+  },
+
+  {
+    id:          "API37_NATIVE_LIB_SYSTEM_LOAD",
+    severity:    "warning",
+    languages:   ["kotlin"],
+    pattern:     /\bSystem\s*\.\s*load\s*\(/g,
+    message:     "On API 37 targets, every native file loaded with System.load() must be read-only, otherwise UnsatisfiedLinkError is thrown (Safer Dynamic Code Loading now covers native libraries).",
+    replacement: "Prefer System.loadLibrary() for libraries packaged in the APK. If you must load from a path, call File.setReadOnly() on it before System.load().",
+    docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17",
+    minSdkAbove: 36,
+  },
+
+  {
+    id:          "API37_SET_REQUESTED_ORIENTATION",
+    severity:    "warning",
+    languages:   ["kotlin"],
+    pattern:     /\bsetRequestedOrientation\s*\(|\brequestedOrientation\s*=(?!=)/g,
+    message:     "On API 37 targets, setRequestedOrientation() is ignored on large screens (smallest width ≥ 600dp) and the Android 16 opt-out no longer exists. Games (android:appCategory=\"game\") are exempt.",
+    replacement: "Build an adaptive layout driven by WindowSizeClass instead of locking orientation.",
+    docUrl:      "https://developer.android.com/about/versions/17/changes/ff-restrictions-ignored",
+    minSdkAbove: 36,
+  },
+
+  {
+    id:          "XML_ASPECT_RATIO_IGNORED",
+    severity:    "warning",
+    languages:   ["xml"],
+    pattern:     /android:(?:min|max)AspectRatio\s*=/g,
+    message:     "android:minAspectRatio / android:maxAspectRatio have no effect on large screens for apps targeting API 37.",
+    replacement: "Remove the attribute and let the layout adapt; use WindowSizeClass breakpoints for layout decisions.",
+    docUrl:      "https://developer.android.com/about/versions/17/changes/ff-restrictions-ignored",
+    minSdkAbove: 36,
+  },
+
+  {
+    id:          "API37_LOCAL_NETWORK_ACCESS",
+    severity:    "warning",
+    languages:   ["kotlin"],
+    pattern:     /\b(?:NsdManager|MulticastSocket|MulticastLock)\b/g,
+    message:     "Local network access is blocked by default for apps targeting API 37 without the ACCESS_LOCAL_NETWORK runtime permission (NEARBY_DEVICES group).",
+    replacement: "Request ACCESS_LOCAL_NETWORK at runtime, or use a system-mediated device picker to avoid the prompt.",
+    docUrl:      "https://developer.android.com/privacy-and-security/local-network-permission",
+    minSdkAbove: 36,
+  },
+
+  {
+    id:          "CAMERAX_ANDROID17_CRASH",
+    severity:    "error",
+    languages:   ["gradle"],
+    pattern:     /androidx\.camera:camera-[a-z0-9-]+:1\.(?:[0-4]\.\d+|5\.[01])(?:-[A-Za-z0-9.]+)?(?=["'])/g,
+    message:     "CameraX versions before 1.5.2 crash on Android 17 devices.",
+    replacement: "Upgrade all androidx.camera artifacts to 1.5.2 or 1.6.0+ (check gradle_dependency_checker for the current stable).",
+    docUrl:      "https://developer.android.com/blog/posts/android-17-is-here",
+    notes:       "Applies to every device running Android 17, regardless of targetSdk.",
+  },
 ];
 
 // ── Rule Engine ───────────────────────────────────────────────────────────────
@@ -375,57 +447,144 @@ export function detectLanguage(code: string, hint?: string): Language {
 }
 
 /**
+ * Blanks out comments while preserving every character offset and newline,
+ * so line/column numbers stay exact. String literals are kept intact (rules
+ * such as hardcoded Gradle versions and SMS_RECEIVED need their contents)
+ * but are tracked so a "//" inside "https://…" is not mistaken for a comment.
+ *
+ * Why (v2.1): the validator matched banned APIs inside comments. An agent
+ * that correctly migrated code and left "// Replaced AsyncTask with
+ * coroutines" got verdict FAIL, "fixed" it, re-ran, and could loop forever
+ * on a violation that did not exist.
+ */
+export function maskComments(code: string, language: Language): string {
+  const out = code.split("");
+  const blank = (from: number, to: number) => {
+    for (let k = from; k < to; k++) if (out[k] !== "\n") out[k] = " ";
+  };
+
+  if (language === "xml") {
+    const re = /<!--[\s\S]*?(?:-->|$)/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(code)) !== null) blank(m.index, m.index + m[0].length);
+    return out.join("");
+  }
+
+  let i = 0;
+  const n = code.length;
+  while (i < n) {
+    const c = code[i]!;
+    const next = code[i + 1];
+
+    // Raw string """…"""
+    if (c === '"' && code.startsWith('"""', i)) {
+      const close = code.indexOf('"""', i + 3);
+      i = close === -1 ? n : close + 3;
+      continue;
+    }
+    // String or char literal with escapes
+    if (c === '"' || c === "'") {
+      i++;
+      while (i < n && code[i] !== c && code[i] !== "\n") i += code[i] === "\\" ? 2 : 1;
+      i++;
+      continue;
+    }
+    // Line comment
+    if (c === "/" && next === "/") {
+      const eol = code.indexOf("\n", i);
+      const stop = eol === -1 ? n : eol;
+      blank(i, stop);
+      i = stop;
+      continue;
+    }
+    // Block comment (Kotlin block comments nest)
+    if (c === "/" && next === "*") {
+      let depth = 1;
+      let j = i + 2;
+      while (j < n && depth > 0) {
+        if (code[j] === "/" && code[j + 1] === "*") { depth++; j += 2; }
+        else if (code[j] === "*" && code[j + 1] === "/") { depth--; j += 2; }
+        else j++;
+      }
+      blank(i, j);
+      i = j;
+      continue;
+    }
+    i++;
+  }
+  return out.join("");
+}
+
+function buildLineStarts(code: string): number[] {
+  const starts = [0];
+  for (let i = 0; i < code.length; i++) if (code[i] === "\n") starts.push(i + 1);
+  return starts;
+}
+
+function lineOf(lineStarts: number[], offset: number): number {
+  let lo = 0;
+  let hi = lineStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (lineStarts[mid]! <= offset) lo = mid; else hi = mid - 1;
+  }
+  return lo; // 0-based
+}
+
+/** Returns true when a rule's SDK gates exclude it for this context. */
+export function isRuleGatedOut(rule: AndroidRule, ctx: ValidationContext): boolean {
+  if (rule.minSdkAbove !== undefined && ctx.targetSdk !== undefined && ctx.targetSdk <= rule.minSdkAbove) {
+    return true;
+  }
+  // v2.0 declared minSdkBelow but never enforced it.
+  if (rule.minSdkBelow !== undefined && ctx.minSdk !== undefined && ctx.minSdk >= rule.minSdkBelow) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Run all applicable rules against a code block.
- * Returns violations sorted by severity (errors first).
+ * Returns violations sorted by severity (errors first), then by position.
  */
 export function runRules(code: string, ctx: ValidationContext): Violation[] {
   const violations: Violation[] = [];
   const lines = code.split("\n");
+  const scanned = maskComments(code, ctx.language);
+  const lineStarts = buildLineStarts(code);
 
   for (const rule of ANDROID_RULES) {
-    // Skip if language doesn't match
-    if (!rule.languages.includes(ctx.language) && !rule.languages.includes("unknown")) {
-      if (ctx.language !== "unknown") continue;
-    }
+    // Skip if language doesn't match (unknown language runs every rule)
+    if (ctx.language !== "unknown" && !rule.languages.includes(ctx.language)) continue;
+    if (isRuleGatedOut(rule, ctx)) continue;
 
-    // Skip context-filtered rules
-    if (rule.minSdkAbove !== undefined && ctx.targetSdk !== undefined) {
-      if (ctx.targetSdk <= rule.minSdkAbove) continue;
-    }
-
-    // Reset lastIndex for global regexes
-    rule.pattern.lastIndex = 0;
+    // Clone so concurrent callers never share lastIndex state
+    const pattern = new RegExp(rule.pattern.source, rule.pattern.flags.includes("g") ? rule.pattern.flags : rule.pattern.flags + "g");
 
     let match: RegExpExecArray | null;
-    while ((match = rule.pattern.exec(code)) !== null) {
-      // Find line number
-      const before     = code.slice(0, match.index);
-      const lineNumber = before.split("\n").length;
-      const lineText   = lines[lineNumber - 1] ?? "";
-      const column     = match.index - before.lastIndexOf("\n");
+    while ((match = pattern.exec(scanned)) !== null) {
+      const line = lineOf(lineStarts, match.index);
+      const lineText = lines[line] ?? "";
 
       violations.push({
         ruleId:      rule.id,
         severity:    rule.severity,
-        line:        lineNumber,
-        column:      Math.max(0, column),
-        snippet:     lineText.trim().slice(0, 80),
+        line:        line + 1,
+        column:      match.index - lineStarts[line]! + 1,
+        snippet:     lineText.trim().slice(0, 80).replace(/`/g, "'"),
         message:     rule.message,
         replacement: rule.replacement,
         docUrl:      rule.docUrl,
       });
 
       // Avoid infinite loops on zero-width matches
-      if (match[0].length === 0) rule.pattern.lastIndex++;
+      if (match[0].length === 0) pattern.lastIndex++;
     }
-
-    // Reset for next use
-    rule.pattern.lastIndex = 0;
   }
 
-  // Sort: errors first, then warnings, then info
+  // Sort: errors first, then warnings, then info; stable by position
   const order: Record<Severity, number> = { error: 0, warning: 1, info: 2 };
-  return violations.sort((a, b) => order[a.severity] - order[b.severity]);
+  return violations.sort((a, b) => order[a.severity] - order[b.severity] || a.line - b.line || a.column - b.column);
 }
 
 /**

@@ -19,14 +19,11 @@ export const ALLOWED_DOMAINS = [
   // Maven / Gradle artifact sources — required by gradle_dependency_checker
   "search.maven.org",       // Maven Central REST API
   "dl.google.com",          // Google Maven repository (Jetpack artifacts)
+  // Google Developer Knowledge API — only contacted when the user configures
+  // an API key (ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY). Single-publisher,
+  // Google-operated documentation corpus.
+  "developerknowledge.googleapis.com",
 ] as const;
-
-// ── Official Search Endpoints ───────────────────────────────────────────────
-export const SEARCH_ENDPOINTS = {
-  androidDeveloper: "https://developer.android.com/s/results",
-  kotlin: "https://kotlinlang.org/search.html",
-  gradlePlugins: "https://plugins.gradle.org/search",
-} as const;
 
 // ── Official Maven / Gradle BOM sources ────────────────────────────────────
 export const MAVEN_SEARCH_URL = "https://search.maven.org/solrsearch/select";
@@ -88,7 +85,7 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   GridView: {
     status: "deprecated",
     replacement: "RecyclerView with GridLayoutManager or LazyVerticalGrid (Compose)",
-    docUrl: "https://developer.android.com/reference/androidx/compose/foundation/lazy/grid/package-summary",
+    docUrl: "https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/grid/package-summary",
   },
   // ── Deprecated Navigation ───────────────────────────────────────────────
   "startActivityForResult": {
@@ -290,7 +287,7 @@ export const ARCHITECTURE_GUIDES: Record<string, string> = {
   "ui testing": "https://developer.android.com/training/testing/espresso",
   "unit testing": "https://developer.android.com/training/testing/local-tests",
   retrofit: "https://square.github.io/retrofit/",
-  "network layer": "https://developer.android.com/training/volley",
+  "network layer": "https://developer.android.com/topic/architecture/data-layer",
   lifecycle: "https://developer.android.com/topic/libraries/architecture/lifecycle",
   "app startup": "https://developer.android.com/topic/libraries/app-startup",
   "modular architecture": "https://developer.android.com/topic/modularization",
@@ -298,10 +295,10 @@ export const ARCHITECTURE_GUIDES: Record<string, string> = {
   accessibility: "https://developer.android.com/guide/topics/ui/accessibility",
   security: "https://developer.android.com/topic/security/best-practices",
   // ── Compose-First era additions (May 2026 platform shift) ─────────────────
-  grid: "https://developer.android.com/develop/ui/compose/layouts/grid",
-  flexbox: "https://developer.android.com/develop/ui/compose/layouts/flexbox",
-  "style api": "https://developer.android.com/develop/ui/compose/styling",
-  mediaquery: "https://developer.android.com/develop/ui/compose/layouts/adaptive/media-query",
+  grid: "https://developer.android.com/develop/ui/compose/lists",
+  flexbox: "https://developer.android.com/develop/ui/compose/layouts/flow",
+  "style api": "https://developer.android.com/develop/ui/compose/styles",
+  mediaquery: "https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes",
   "scene decorators": "https://developer.android.com/guide/navigation/navigation-3/scenes",
   "compose testing v2": "https://developer.android.com/develop/ui/compose/testing",
 };
@@ -378,12 +375,6 @@ export const M3E_COMPONENT_ADDITIONS: Record<string, ComponentEntry> = {
     docUrl: "https://developer.android.com/develop/ui/views/notifications/build-notification",
     notes: "On API 26+ you MUST create a NotificationChannel before posting notifications.",
   },
-  Loader: {
-    status: "deprecated",
-    since: "API 28",
-    replacement: "ViewModel + LiveData/StateFlow",
-    docUrl: "https://developer.android.com/topic/libraries/architecture/viewmodel",
-  },
   SupportMapFragment: {
     status: "deprecated",
     replacement: "MapView with Maps SDK 19+ or Compose GoogleMap()",
@@ -411,7 +402,7 @@ Object.assign(ARCHITECTURE_GUIDES, {
   "motionscheme": "https://developer.android.com/develop/ui/compose/designsystems/material3",
   "materialshapes": "https://developer.android.com/develop/ui/compose/designsystems/material3",
   "theming": "https://developer.android.com/develop/ui/compose/designsystems/material3",
-  "dynamic color": "https://developer.android.com/develop/ui/compose/designsystems/material-you",
+  "dynamic color": "https://developer.android.com/develop/ui/compose/designsystems/material3",
   "wear m3": "https://developer.android.com/design/ui/wear/guides/get-started/apply",
   "compose theming": "https://developer.android.com/develop/ui/compose/designsystems/material3",
   "large screen": "https://developer.android.com/guide/topics/large-screens/get-started-with-large-screens",
@@ -434,7 +425,7 @@ Object.assign(ARCHITECTURE_GUIDES, {
   "proguard": "https://developer.android.com/build/shrink-code",
   "r8": "https://developer.android.com/build/shrink-code",
   "app bundle": "https://developer.android.com/guide/app-bundle",
-  "play store": "https://developer.android.com/distribute/best-practices/launch",
+  "play store": "https://developer.android.com/studio/publish",
   "biometric": "https://developer.android.com/training/sign-in/biometric-auth",
   "keystore": "https://developer.android.com/training/articles/keystore",
   // Navigation 3 (stable Nov 2025)
@@ -442,8 +433,8 @@ Object.assign(ARCHITECTURE_GUIDES, {
   "nav3": "https://developer.android.com/guide/navigation/navigation-3",
   "navdisplay": "https://developer.android.com/guide/navigation/navigation-3",
   "navbackstack": "https://developer.android.com/guide/navigation/navigation-3",
-  "nav3 migration": "https://developer.android.com/guide/navigation/navigation-3/migrate",
-  "nav3 adaptive": "https://developer.android.com/guide/navigation/navigation-3/adaptive",
+  "nav3 migration": "https://developer.android.com/guide/navigation/navigation-3/migration-guide",
+  "nav3 adaptive": "https://developer.android.com/guide/navigation/navigation-3/scenes",
   // Kotlin Multiplatform
   "kmp": "https://kotlinlang.org/docs/multiplatform.html",
   "kotlin multiplatform": "https://kotlinlang.org/docs/multiplatform.html",
@@ -459,9 +450,9 @@ Object.assign(ARCHITECTURE_GUIDES, {
   "smart reply": "https://developers.google.com/ml-kit/genai",
   // Android XR
   "android xr": "https://developer.android.com/xr",
-  "compose xr": "https://developer.android.com/develop/ui/compose/xr",
+  "compose xr": "https://developer.android.com/develop/xr/jetpack-xr-sdk",
   "xr": "https://developer.android.com/xr",
-  "spatial ui": "https://developer.android.com/develop/ui/compose/xr/spatial-ui",
+  "spatial ui": "https://developer.android.com/develop/xr/jetpack-xr-sdk/ui-compose",
   "arcore xr": "https://developers.google.com/ar/develop/android-xr",
   // Wear OS
   "wear os": "https://developer.android.com/training/wearables",

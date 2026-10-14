@@ -27,9 +27,9 @@
 <br/>
 
 [![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDIuMC4wIl19)
-[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMi4wLjAiXX0=)
-[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%402.0.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
+[![Install in Claude Desktop](https://img.shields.io/badge/Install%20in-Claude%20Desktop-D97706?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/integrations/install-mcp?params=eyJuYW1lIjoiYW5kcm9qYWNrIiwiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJhbmRyb2phY2stbWNwQDIuMS4wIl19)
+[![Install in Cursor](https://img.shields.io/badge/Install%20in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=androjack&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFuZHJvamFjay1tY3BAMi4xLjAiXX0=)
+[![Add to Kiro](https://img.shields.io/badge/Add%20to-AWS%20Kiro-FF9900?style=for-the-badge&logoColor=white)](https://kiro.dev/launch/mcp/add?name=androjack&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22androjack-mcp%402.1.0%22%5D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 [![View on npm](https://img.shields.io/badge/View%20on-npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/androjack-mcp)
 
 <br/>
@@ -61,7 +61,7 @@
 - [The 23 Tools](#-what-androjack-covers--23-tools)
 - [Quick Start](#-quick-start--zero-install-required)
 - [Manual Config](#-manual-config--copy--paste)
-- [Ecosystem Comparison](#-the-ecosystem-androjack-vs-other-mcps)
+- [Ecosystem: Google's First-Party Tools](#-the-ecosystem-androjack-and-googles-first-party-agent-tools)
 - [Security & Privacy](#-security--privacy)
 - [Changelog](#-changelog)
 
@@ -161,13 +161,13 @@ With AndroJack:     You ask → AI calls tool → Tool fetches official source l
 |:------|:--------------|:-----------------|
 | **Level 1 — Tools only** | 23 tools registered in IDE | AI *may* call the right tool. Depends on the IDE and the AI's judgment. |
 | **Level 2 — Tools + Grounding Gate** | 23 tools + mandatory pre-generation rulebook | AI *must* call the correct tool for every decision before writing code. |
-| **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 28 rules. Errors must be fixed before the user sees the code. |
+| **Level 3 — Full loop-back** | Level 2 + `android_code_validator` | AI validates every code block against 34 rules. Errors must be fixed before the user sees the code. |
 
 **Level 1 is passive.** The tools are available but the AI decides when to use them. An AI building a Compose screen may call `architecture_reference` but skip `material3_expressive` — and ship M3E violations silently.
 
 **Level 2 is active.** The `androjack_grounding_gate` system prompt maps every task type to the correct tool. Building Compose UI? The AI is mandated to call `material3_expressive` first. Adding a dependency? It must call `gradle_dependency_checker`. No exceptions.
 
-**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 28 rules covering removed APIs, deprecated patterns, Android 16/17 compliance, and Compose-First migration signals. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
+**Level 3 is the loop-back.** `android_code_validator` runs on every code block the AI generates before returning it to the user. 34 rules covering removed APIs, deprecated patterns, Android 16/17 compliance, and Compose-First migration signals. Comments are ignored, so a migration note like `// replaced AsyncTask` never triggers a false FAIL. Results come back as text **and** as `structuredContent` with an output schema. Verdict **FAIL** means the AI must fix and re-validate — the user never sees the broken code.
 
 → *For full grounding, always activate Level 2 + Level 3. See Getting the Full Guarantee below.*
 
@@ -299,11 +299,11 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 
 | # | Tool | What It Does | What Breaks Without It |
 |:----|:-----|:-------------|:-----------------------|
-| 1 | `🔍 search` | Live search across official Android/Kotlin docs | AI reasons from memory — possibly wrong today |
+| 1 | `🔍 search` | Official doc excerpts — Google Developer Knowledge API (optional key) or a verified index of canonical pages | AI reasons from memory — possibly wrong today |
 | 2 | `⚠️ component` | Deprecated/removed check on 40+ APIs | Compiles fine, breaks at runtime/review |
 | 3 | `📐 architecture` | Guides for 40+ topics — MVVM, Nav3, MVI... | AI gives 2022 advice; misses Nav3 |
-| 4 | `🐛 debugger` | Parses stacktraces → searches Issue Tracker | AI hallucinates fixes for known bugs |
-| 5 | `📦 gradle` | Live lookup from Google Maven + BOM resolution | Stale Compose BOM, KAPT instead of KSP |
+| 4 | `🐛 debugger` | Parses stacktraces → official docs + Issue Tracker link | AI hallucinates fixes for known bugs |
+| 5 | `📦 gradle` | Live lookup from Google Maven (highest **stable**, pre-release flagged) + BOM resolution | Stale Compose BOM, KAPT instead of KSP |
 | 6 | `📊 api-level` | API 21–36 table, minSdk warnings | API 26+ calls in minSdk 21 apps |
 | 7 | `🎯 kotlin` | 10 patterns — coroutines, MVI, Compose state | `GlobalScope.launch`, `runBlocking` in UI |
 | 8 | `🎨 m3e` | Material 3 Expressive components & Motion | M2 MaterialTheme in M3E app |
@@ -313,24 +313,24 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 | 12 | `📱 large-screen` | WindowSizeClass (5 breakpoints incl. Large/XL), Adaptive Scaffolds | Phone-only layouts on foldables and desktops |
 | 13 | `🚀 scalability` | Paging 3, WorkManager, modularization | Naive `loadAll()`; unstable keys in lists |
 | 14 | `🧭 nav3` | Nav3 (Nov 2025) — Scenes, migration | AI generates Nav2 dead-ends |
-| 15 | `✅ compliance` | API 36 / Android 16 / 16 KB page size | Apps fail Play Store August 2026 mandate |
+| 15 | `✅ compliance` | API 36 / Android 16 / 16 KB page size | Updates rejected — Play has required targetSdk 36 since Aug 31, 2026 |
 | 16 | `🌐 kmp` | Room KMP, Ktor, source sets, Room 3.0 alpha | Android-only code in KMP projects |
-| 17 | `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano | Cloud-only AI when offline is required |
+| 17 | `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano, **AppFunctions** (on-device MCP) | Cloud-only AI when offline is required |
 | 18 | `📋 policy` | Play Store age-gating, billing openness, data safety | Apps rejected for unknown policy changes |
 | 19 | `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
 | 20 | `⌚ wear` | Tiles, Health, M3 Expressive for Wear OS | Handheld patterns on round displays |
-| 21 | `🛡️ validator` | Level 3 loop-back validation gate — 28 rules | AI ships broken code without checking |
-| 22 | `🆕 api17` | Android 17 / API 37 — static final, LAN, OTP, Handoff | Apps crash or fail Play Store on API 37 |
-| 23 | `🪪 dev-verification` | Developer Verification Program — timeline, registration, CI/CD | Apps blocked from install on certified devices from Sept 30, 2026 |
+| 21 | `🛡️ validator` | Level 3 loop-back validation gate — 34 rules, structured output, also runs in CI | AI ships broken code without checking |
+| 22 | `🆕 api17` | Android 17 / API 37 (stable) — static final, LAN, OTP, MessageQueue, native libs, Handoff | Apps crash on API 37 targets |
+| 23 | `🪪 dev-verification` | Developer Verification Program — timeline, registration, CI/CD | Apps blocked from install on certified devices (enforced since Sept 30, 2026 in 4 countries) |
 
 ---
 
 ## 🚀 Quick Start — Zero Install Required
 
-### Option 1 — Interactive CLI (v2.0.0) ✨ Recommended
+### Option 1 — Interactive CLI (v2.1.0) ✨ Recommended
 
 ```bash
-npx -y androjack-mcp@2.0.0 install
+npx -y androjack-mcp@2.1.0 install
 ```
 
 Launches a full animated terminal wizard with auto-detection for **VS Code, Cursor, Claude, Windsurf, JetBrains, Kiro, and Antigravity.**
@@ -339,26 +339,54 @@ Launches a full animated terminal wizard with auto-detection for **VS Code, Curs
 
 ```bash
 # Preview detected IDEs and config paths
-npx -y androjack-mcp@2.0.0 install --list
+npx -y androjack-mcp@2.1.0 install --list
 
 # Auto-detect all
-npx -y androjack-mcp@2.0.0 install --auto
+npx -y androjack-mcp@2.1.0 install --auto
 
 # Install to a specific IDE
-npx -y androjack-mcp@2.0.0 install --ide=cursor
-npx -y androjack-mcp@2.0.0 install --ide=claude
-npx -y androjack-mcp@2.0.0 install --ide=vscode
-npx -y androjack-mcp@2.0.0 install --ide=windsurf
-npx -y androjack-mcp@2.0.0 install --ide=jetbrains
-npx -y androjack-mcp@2.0.0 install --ide=kiro
-npx -y androjack-mcp@2.0.0 install --ide=antigravity
+npx -y androjack-mcp@2.1.0 install --ide=cursor
+npx -y androjack-mcp@2.1.0 install --ide=claude
+npx -y androjack-mcp@2.1.0 install --ide=vscode
+npx -y androjack-mcp@2.1.0 install --ide=windsurf
+npx -y androjack-mcp@2.1.0 install --ide=jetbrains
+npx -y androjack-mcp@2.1.0 install --ide=kiro
+npx -y androjack-mcp@2.1.0 install --ide=antigravity
 ```
 
 ### Option 3 — Test Without an IDE
 
 ```bash
-npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@2.0.0
+npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@2.1.0
 ```
+
+### Option 4 — Enforce the rules in CI (new in 2.1.0)
+
+The same rule engine the agent is held to, run on every pull request — including code no agent touched:
+
+```bash
+npx -y androjack-mcp@2.1.0 validate app/src --target-sdk=37            # exit 1 on errors
+npx -y androjack-mcp@2.1.0 validate . --format=sarif > androjack.sarif  # GitHub code scanning
+```
+
+```yaml
+# .github/workflows/androjack.yml
+- run: npx -y androjack-mcp@2.1.0 validate . --target-sdk=37 --format=sarif > androjack.sarif || true
+- uses: github/codeql-action/upload-sarif@v3
+  with: { sarif_file: androjack.sarif }
+- run: npx -y androjack-mcp@2.1.0 validate . --target-sdk=37   # fails the job on errors
+```
+
+Flags: `--format=text|json|sarif`, `--target-sdk=N`, `--min-sdk=N`, `--fail-on=error|warning|never`.
+
+### Optional configuration
+
+| Variable | Effect |
+|:---------|:-------|
+| `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` | Use Google's [Developer Knowledge API](https://developers.google.com/knowledge/mcp) as the doc-search backend (full-text search over developer.android.com). Without it, AndroJack uses its verified index of canonical pages. |
+| `ANDROJACK_OFFLINE=1` | Zero outbound requests — tools return canonical links only. For air-gapped setups. |
+| `ANDROJACK_HTTP_TOKEN` | `serve` requires `Authorization: Bearer <token>`. Mandatory for remote binds when a Google API key is set. |
+| `ANDROJACK_HTTP_STATELESS=1` / `serve --stateless` | No MCP sessions — each request is self-contained (load-balancer friendly). |
 
 ---
 
@@ -366,7 +394,7 @@ npx -y @modelcontextprotocol/inspector npx -y androjack-mcp@2.0.0
 
 If you prefer to wire the server manually, or want to inspect the exact JSON before writing anything:
 
-- Run `npx -y androjack-mcp@2.0.0 install --list` to preview detected IDEs and target config paths.
+- Run `npx -y androjack-mcp@2.1.0 install --list` to preview detected IDEs and target config paths.
 - Ready-to-paste examples live in [`config/`](config/).
 
 | IDE / Client | Config file |
@@ -379,23 +407,23 @@ If you prefer to wire the server manually, or want to inspect the exact JSON bef
 | AWS Kiro | [`config/kiro_mcp.json`](config/kiro_mcp.json) |
 | Google Antigravity | [`config/antigravity_mcp.json`](config/antigravity_mcp.json) |
 
-Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@2.0.0`.
+Every example keeps AndroJack local by default and runs the published package via `npx -y androjack-mcp@2.1.0`.
 
 ---
 
-## 📍 The Ecosystem: AndroJack vs. Other MCPs
+## 📍 The Ecosystem: AndroJack and Google's First-Party Agent Tools
 
-| Feature | Google Developer Knowledge MCP | Google Android Skills (Apr 2026) | AndroJack MCP |
-|:--------|:-------------------------------|:----------------------------------|:--------------|
-| **Identity** | The Librarian (Information) | The Instructor (Pre-generation context) | The Gatekeeper (Enforcement) |
-| **Mechanism** | Context Retrieval | Skill files read before code generation | Context Enforcement + post-generation validation |
-| **Scope** | Generalist — Firebase, Cloud, Maps | Android-specific, first-party | Android engineering specialist |
-| **Tools** | 3 retrieval tools | Skill-file based, growing | 23 specialized tools |
-| **Setup** | Google Cloud project + API key required | `android skills add` — first-party CLI | `npx androjack-mcp@2.0.0` — zero auth |
-| **Enforcement** | Passive — AI decides when to retrieve | Passive — instructional context only | Active — mandating calls by task type + `android_code_validator` loop-back gate |
-| **Relationship to AndroJack** | Overlapping retrieval scope | **Complementary, not competing** — Skills inform generation; AndroJack's validator checks the result before it reaches you | — |
+Google now ships its own agent stack for Android. Being straight about the overlap:
 
-> Android Skills and AndroJack solve different halves of the same problem. Skills give an agent context *before* it writes code. AndroJack's `android_code_validator` is the gate that runs *after* — checking the generated code against 28 rules before you ever see it. Use both if your agent supports Agent Skills.
+| | Google Developer Knowledge MCP/API | Android CLI + Android skills + Knowledge Base | AndroJack MCP |
+|:--|:--|:--|:--|
+| **Job** | Retrieve docs (search, get, answer) | Run the toolchain; give agents task instructions; `android docs search` | **Enforce**: validate code, encode time-bound mandates, gate CI |
+| **Retrieval quality** | Best available — Google's own index | Google's own index | Uses Google's API when you set a key; otherwise a verified index of canonical pages |
+| **Fails a build?** | No | No (skills are advisory; `android studio check` needs Studio) | **Yes** — deterministic rule IDs, exit codes, SARIF |
+| **Setup** | Google Cloud project + API key | Install the CLI | `npx androjack-mcp@2.1.0` — no account |
+| **Where it runs** | Remote (googleapis.com) | Local CLI | Local stdio / HTTP, works offline |
+
+**Recommended setup:** use Google's tools for retrieval and task skills, and AndroJack as the enforcement step — `android_code_validator` inside the agent loop and `androjack-mcp validate` in CI. AndroJack does not try to out-search Google's own documentation index. With `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` set, it uses that index.
 
 ---
 
@@ -403,18 +431,32 @@ Every example keeps AndroJack local by default and runs the published package vi
 
 | Property | Implementation |
 |:---------|:---------------|
-| **Domain allowlist** | Requests only to Google/Android/Kotlin official domains |
+| **Domain allowlist** | Requests only to Google/Android/Kotlin official domains, default HTTPS port, no embedded credentials |
+| **Redirects re-validated** | Every redirect hop is checked against the allowlist (2.1.0) — an allowlisted host cannot bounce a fetch elsewhere |
+| **Untrusted-content boundary** | *All* fetched text is normalized, scrubbed of injection patterns and spoofed boundary tags, and wrapped as untrusted before it reaches the agent |
 | **HTTPS only** | Outbound documentation fetches refuse non-HTTPS URLs, cap body size, and redact query strings in retry logs |
 | **Local by default** | `serve` binds to loopback only unless you explicitly pass `--allow-remote` |
-| **HTTP hardening** | Streamable HTTP validates `Origin` and `Host` headers and caps request bodies and active sessions |
-| **Transparent agent** | `User-Agent: AndroJack-MCP/2.0.0` |
-| **Read-only** | All 23 tools annotated `readOnlyHint: true` |
-| **Zero credentials** | No API keys or tokens required for documentation fetching |
+| **HTTP hardening** | `Origin`/`Host` validation, body cap, session cap with idle eviction, optional bearer token, stateless mode |
+| **Transparent agent** | `User-Agent: AndroJack-MCP/2.1.0` |
+| **Read-only** | All 23 tools annotated `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true` |
+| **Credentials** | None required. The optional Google API key is sent only as a header, never in URLs or logs |
+| **Offline mode** | `ANDROJACK_OFFLINE=1` guarantees zero outbound requests |
 | **Security policy** | Disclosure process and supported versions in [SECURITY.md](SECURITY.md) |
 
 ---
 
 ## 📋 Changelog
+
+### v2.1.0 — Fix what didn't work, harden what did, enforce in CI
+
+- **Doc search actually returns docs.** v2.0 scraped client-rendered search pages and returned no documentation for any query. 2.1 uses Google's Developer Knowledge API (optional key) or a verified index of canonical pages.
+- **Security:** redirect allowlist bypass closed; *all* fetched content now goes through the untrusted-content boundary (v2.0 claimed this but only one tool did it); boundary-tag spoofing and zero-width/full-width evasion fixed; HTTP session-exhaustion DoS fixed; bearer auth and stateless mode; 7 dependency vulnerabilities (1 critical) patched.
+- **No more confident wrong answers:** `Row` → "DEPRECATED", `Task` → "REMOVED" registry false positives fixed; Android 17 games exemption corrected; fabricated Handoff API removed; Google Maven alphas no longer labelled "Latest Stable"; 19 dead documentation links replaced.
+- **Validator:** comments ignored (ends agent fix-loops), Kotlin DSL `kapt(...)` detected, API 37 thresholds corrected, 6 new Android 17 rules (34 total), structured output.
+- **New:** `androjack-mcp validate` CLI (text/JSON/SARIF) for CI; MCP resources for the rule catalogue; full tool annotations; AppFunctions guidance; Android Studio Rabbit 1 / AGP 9.4.
+- **Tests:** 85 → 162 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
+
+Full details: [CHANGELOG.md](CHANGELOG.md).
 
 ### v2.0.0 — Security Hardening, Compose-First, Developer Verification
 
@@ -441,7 +483,7 @@ Every example keeps AndroJack local by default and runs the published package vi
 ### v1.7.0 — Android 17 / API 37 Support
 
 - **Tool 22: `android_api17_compliance`** — Full reference for Android 17 platform stability (March 26, 2026).
-- **31 validator rules** — Expanded from 24 to 31 with dedicated Android 17 and Room 3.0 removal checks.
+- **Validator rule expansion** — *(Corrected in 2.1.0: these notes originally claimed 31 rules, including Room 3.0 and `ACCESS_LOCAL_NETWORK` checks that never shipped. The real count was 26 → 28 in 2.0.0 and 34 in 2.1.0.)*
 - **WindowManager 1.5.0** — Added Large (1200dp) and Extra-large (1600dp) breakpoints and layout patterns.
 - **Room 3.0 alpha** — Support for modern SQLiteDriver migration paths.
 

@@ -660,9 +660,9 @@ What breaks when I target Android 17?
 1. Static final reflection — `IllegalAccessException` on API 37, JNI crash
 2. `ACCESS_LOCAL_NETWORK` — new dangerous permission for any LAN socket connection
 3. SMS OTP delay — 3-hour withholding; migrate to `SmsRetriever.startSmsUserConsent()`
-4. Extended large-screen mandate — games exemption removed at API 37
-5. NPU feature declaration for on-device AI
-6. Handoff API for cross-device session continuity
+4. Large-screen opt-out removed at API 37 — games (`android:appCategory="game"`) remain exempt
+5. Lock-free `MessageQueue` and read-only `System.load()` native libraries
+6. NPU feature declaration and Handoff (`setHandoffEnabled`) for cross-device continuity
 7. Full migration checklist with per-item checkboxes
 
 ---

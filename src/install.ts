@@ -6,10 +6,10 @@
  * Supports both automated (--auto) and guided interactive installation.
  *
  * Usage:
- *   npx androjack-mcp@2.0.0 install           → interactive guided mode
- *   npx androjack-mcp@2.0.0 install --auto    → auto-detect and install to all found IDEs
- *   npx androjack-mcp@2.0.0 install --ide cursor   → target a specific IDE
- *   npx androjack-mcp@2.0.0 install --list    → list all supported IDEs and their status
+ *   npx androjack-mcp@2.1.0 install           → interactive guided mode
+ *   npx androjack-mcp@2.1.0 install --auto    → auto-detect and install to all found IDEs
+ *   npx androjack-mcp@2.1.0 install --ide cursor   → target a specific IDE
+ *   npx androjack-mcp@2.1.0 install --list    → list all supported IDEs and their status
  */
 
 import * as fs from "fs";

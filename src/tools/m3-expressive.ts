@@ -15,7 +15,7 @@
  *  - m3.material.io/blog/building-with-m3-expressive
  */
 
-import { secureFetch, extractPageText } from "../http.js";
+import { searchOfficialDocs, formatDocResults } from "../docs-search.js";
 
 // ── Knowledge base ───────────────────────────────────────────────────────────
 
@@ -450,24 +450,12 @@ export async function material3Expressive(topic: string): Promise<string> {
     );
   }
 
-  // Fallback: live fetch from official source
-  const url = `https://developer.android.com/s/results?q=${encodeURIComponent("material 3 expressive " + trimmed)}`;
-  try {
-    const html = await secureFetch(url);
-    const text = extractPageText(html, 2000);
-    return (
-      `## M3 Expressive: "${trimmed}"\n\n` +
-      `No built-in entry found. Live results from developer.android.com:\n\n` +
-      text +
-      `\n\n**Search URL:** ${url}` +
-      `\n\n> 🎨 Verify against https://developer.android.com/develop/ui/compose/designsystems/material3`
-    );
-  } catch {
-    return (
-      `## M3 Expressive: "${trimmed}"\n\n` +
-      `No built-in entry. Search manually:\n` +
-      `- https://developer.android.com/develop/ui/compose/designsystems/material3\n` +
-      `- https://m3.material.io/blog/building-with-m3-expressive`
-    );
-  }
+  // Fallback: official docs
+  const outcome = await searchOfficialDocs(`material 3 ${trimmed}`, { limit: 2, maxChars: 2000 });
+  return (
+    `## M3 Expressive: "${trimmed}"\n\n` +
+    `No built-in entry found. Closest official pages:\n\n` +
+    formatDocResults(outcome) +
+    `\n\n> 🎨 Verify against https://developer.android.com/develop/ui/compose/designsystems/material3`
+  );
 }

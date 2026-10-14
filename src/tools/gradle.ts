@@ -12,7 +12,8 @@
  * Source of truth: dl.google.com/dl/android/maven2 + search.maven.org
  */
 
-import { secureFetchJson, secureFetch, extractPageText } from "../http.js";
+import { secureFetchJson, secureFetch } from "../http.js";
+import { fetchOfficialPage } from "../docs-search.js";
 import { MAVEN_SEARCH_URL, GOOGLE_MAVEN_URL } from "../constants.js";
 
 // ── Library catalogue ─────────────────────────────────────────────────────────
@@ -137,14 +138,49 @@ const LIBRARY_CATALOGUE: Record<string, LibEntry> = {
 
 // ── Maven fetchers ────────────────────────────────────────────────────────────
 
-async function fromGoogleMaven(groupId: string, artifactId: string): Promise<string | null> {
+const PRERELEASE_PATTERN = /-(alpha|beta|rc|dev|eap|snapshot|m\d)/i;
+
+/** Compares dotted numeric versions; qualifiers sort before their release. */
+export function compareVersions(a: string, b: string): number {
+  const pa = a.split(/[.-]/);
+  const pb = b.split(/[.-]/);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = pa[i] ?? "";
+    const y = pb[i] ?? "";
+    const nx = /^\d+$/.test(x) ? Number(x) : NaN;
+    const ny = /^\d+$/.test(y) ? Number(y) : NaN;
+    if (!Number.isNaN(nx) && !Number.isNaN(ny)) {
+      if (nx !== ny) return nx - ny;
+      continue;
+    }
+    if (x === y) continue;
+    if (x === "") return 1;   // "1.0" > "1.0-alpha01"
+    if (y === "") return -1;
+    return x < y ? -1 : 1;
+  }
+  return 0;
+}
+
+/**
+ * Picks the highest stable and highest pre-release version from Google Maven
+ * metadata. v2.0 used the <release> tag, which on Google Maven is simply the
+ * most recently published version — frequently an alpha — and then labelled
+ * it "Latest Stable".
+ */
+export function pickVersionsFromMetadata(xml: string): { stable: string | null; prerelease: string | null } {
+  const versions = [...xml.matchAll(/<version>([^<]+)<\/version>/g)].map((m) => m[1]!.trim());
+  const stable = versions.filter((v) => !PRERELEASE_PATTERN.test(v)).sort(compareVersions).pop() ?? null;
+  const prerelease = versions.filter((v) => PRERELEASE_PATTERN.test(v)).sort(compareVersions).pop() ?? null;
+  return { stable, prerelease: prerelease && (!stable || compareVersions(prerelease, stable) > 0) ? prerelease : null };
+}
+
+async function fromGoogleMaven(groupId: string, artifactId: string): Promise<{ stable: string | null; prerelease: string | null } | null> {
   const groupPath = groupId.replace(/\./g, "/");
   const url = `${GOOGLE_MAVEN_URL}/${groupPath}/${artifactId}/maven-metadata.xml`;
   try {
     const xml = await secureFetch(url);
-    const release = xml.match(/<release>([^<]+)<\/release>/)?.[1];
-    const latest  = xml.match(/<latest>([^<]+)<\/latest>/)?.[1];
-    return release ?? latest ?? null;
+    const picked = pickVersionsFromMetadata(xml);
+    return picked.stable || picked.prerelease ? picked : null;
   } catch {
     return null;
   }
@@ -163,11 +199,28 @@ async function fromMavenCentral(groupId: string, artifactId: string): Promise<st
   }
 }
 
+async function fromMavenCentralByArtifact(
+  artifactId: string
+): Promise<{ groupId: string; artifactId: string; version: string } | null> {
+  try {
+    const q = encodeURIComponent(`a:"${artifactId}"`);
+    const url = `${MAVEN_SEARCH_URL}?q=${q}&rows=1&wt=json`;
+    const data = await secureFetchJson<{
+      response?: { docs?: Array<{ g?: string; a?: string; latestVersion?: string }> };
+    }>(url);
+    const doc = data?.response?.docs?.[0];
+    return doc?.g && doc.a && doc.latestVersion
+      ? { groupId: doc.g, artifactId: doc.a, version: doc.latestVersion }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fromJetpackReleasesPage(slug: string): Promise<string> {
   const url = `https://developer.android.com/jetpack/androidx/releases/${slug}`;
   try {
-    const html = await secureFetch(url);
-    return extractPageText(html, 1800);
+    return await fetchOfficialPage(url, 1800);
   } catch {
     return `Could not fetch release page. Check: https://developer.android.com/jetpack/androidx/versions`;
   }
@@ -222,10 +275,24 @@ export async function gradleDependencyChecker(libraryName: string): Promise<stri
 
   if (entry) {
     // Try Google Maven first (authoritative for Jetpack + Firebase)
-    let version = await fromGoogleMaven(entry.groupId, entry.artifactId);
+    const google = await fromGoogleMaven(entry.groupId, entry.artifactId);
+    let version = google?.stable ?? null;
+    const prereleaseNote = google?.prerelease
+      ? `\n\n> 🧪 Newer pre-release available: \`${google.prerelease}\` — do not use in production unless the user asks for it.`
+      : "";
+    const onlyPrerelease = !version && google?.prerelease ? google.prerelease : null;
 
     // Fallback: Maven Central (for third-party: Retrofit, OkHttp, Coil, etc.)
-    if (!version) version = await fromMavenCentral(entry.groupId, entry.artifactId);
+    if (!version && !onlyPrerelease) version = await fromMavenCentral(entry.groupId, entry.artifactId);
+
+    if (onlyPrerelease) {
+      return (
+        header +
+        `**No stable release exists yet.** Latest pre-release: \`${onlyPrerelease}\`\n\n` +
+        `\`\`\`kotlin\nimplementation("${entry.groupId}:${entry.artifactId}:${onlyPrerelease}")\n\`\`\`\n\n` +
+        `> ⚠️ Pre-release APIs can change between versions. Tell the user this dependency is not stable.`
+      );
+    }
 
     if (version) {
       let body: string;
@@ -247,7 +314,7 @@ export async function gradleDependencyChecker(libraryName: string): Promise<stri
         : `https://search.maven.org/artifact/${entry.groupId}/${entry.artifactId}`;
 
       return (
-        header + body +
+        header + body + prereleaseNote +
         `\n\n**Official release notes:** ${releaseUrl}\n\n` +
         `> ✅ GROUNDING GATE: Use version \`${version}\` as confirmed by authoritative Maven source.`
       );
@@ -265,14 +332,17 @@ export async function gradleDependencyChecker(libraryName: string): Promise<stri
     }
   }
 
-  // Unknown library — try Maven Central by name
-  const mcResult = await fromMavenCentral(name, name);
+  // Unknown library — search Maven Central by artifact id and show the real
+  // group:artifact pair it returns (v2.0 printed "?:name:version", i.e. a
+  // coordinate that cannot resolve).
+  const mcResult = await fromMavenCentralByArtifact(name);
   if (mcResult) {
     return (
       header +
-      `**Not in local catalogue — Maven Central result:**\n` +
-      formatLibrary({ groupId: "?", artifactId: name }, mcResult) +
-      `\n\n> ⚠️ Verify group ID and artifact ID at https://search.maven.org`
+      `**Not in local catalogue — closest Maven Central match:**\n` +
+      formatLibrary({ groupId: mcResult.groupId, artifactId: mcResult.artifactId }, mcResult.version) +
+      `\n\n> ⚠️ Matched by artifact name only. Confirm this is the intended library at ` +
+      `https://search.maven.org/artifact/${mcResult.groupId}/${mcResult.artifactId}`
     );
   }
 

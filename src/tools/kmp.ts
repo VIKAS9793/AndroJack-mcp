@@ -87,7 +87,7 @@ Source: https://kotlinlang.org/docs/multiplatform-get-started.html
 
   const libraries = `
 # KMP — Library Catalogue (2025)
-Source: https://kotlinlang.org/docs/multiplatform-introduce-frameworks.html
+Source: https://kotlinlang.org/docs/multiplatform/multiplatform-ios-integration-overview.html
 
 ## ⚠️ Android vs KMP Artifact Mapping — Where AI Tools Fail
 
@@ -149,7 +149,7 @@ coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref
 coil3-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil3" }
 \`\`\`
 
-Source: https://kotlinlang.org/docs/multiplatform-introduce-frameworks.html
+Source: https://kotlinlang.org/docs/multiplatform/multiplatform-ios-integration-overview.html
 `;
 
   const roomKmp = `

@@ -74,7 +74,7 @@ Source: https://developer.android.com/ai/aicore
 
   const setup = `
 # On-Device AI — Setup & Initialization
-Source: https://developer.android.com/ml-kit/genai/on-device
+Source: https://developer.android.com/ai/gemini-nano
 
 ## Dependencies
 
@@ -151,7 +151,7 @@ sealed interface SummaryUiState {
 }
 \`\`\`
 
-Source: https://developer.android.com/ml-kit/genai/on-device
+Source: https://developer.android.com/ai/gemini-nano
 `;
 
   const smartReply = `
@@ -276,12 +276,82 @@ class MlKitImageAnalysisRepository @Inject constructor() : ImageAnalysisReposito
 Source: https://developers.google.com/ml-kit
 `;
 
+  const appFunctions = `
+# AppFunctions — expose your app to agents (Android's on-device MCP)
+Source: https://developer.android.com/ai/appfunctions (verified 2026-10-14)
+
+AppFunctions let an app publish typed functions that system agents (Gemini and
+other callers holding \`EXECUTE_APP_FUNCTIONS\`) can discover and run on-device.
+Google describes them as the mobile equivalent of MCP tools; agents may combine
+remote MCP tools with local AppFunctions for one request.
+
+**Status:** ⚠️ Experimental. Platform API on Android 16+ (API 36); Jetpack library
+is **alpha** (\`1.0.0-alpha13\`, Oct 7, 2026). Gemini integration is a private preview.
+Do not present this as stable.
+
+## Dependencies (KSP — not kapt)
+
+\`\`\`kotlin
+dependencies {
+    implementation("androidx.appfunctions:appfunctions:1.0.0-alpha13")
+    ksp("androidx.appfunctions:appfunctions-compiler:1.0.0-alpha13")
+    testImplementation("androidx.appfunctions:appfunctions-testing:1.0.0-alpha13")
+}
+\`\`\`
+Confirm the current version with \`gradle_dependency_checker\` — alphas move every few weeks.
+
+## Exposing a function
+
+\`\`\`kotlin
+@RequiresApi(36)
+@AppFunctionServiceEntryPoint(
+    serviceName = "TaskAppFunctionService",
+    appFunctionXmlFileName = "task_app_function_service",
+)
+abstract class BaseTaskAppFunctionService : AppFunctionService() {
+
+    /**
+     * Creates a task based on [createTaskParams].
+     *
+     * @param createTaskParams The parameter to describe how to create the task.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun createTask(createTaskParams: CreateTaskParams): Task {
+        if (createTaskParams.title == null && createTaskParams.content == null) {
+            throw AppFunctionInvalidArgumentException("Title or content should be non-null")
+        }
+        // … create and return the task; throw AppFunctionElementNotFoundException when missing
+    }
+}
+
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class CreateTaskParams(
+    /** The title of the task. */
+    val title: String?,
+    /** The content of the task. */
+    val content: String?,
+)
+\`\`\`
+
+- KDoc **is** the tool description when \`isDescribedByKDoc = true\` — write it for an agent.
+- The annotation processor generates an XML schema the OS indexes.
+- Callers use \`AppFunctionManager\` (the Jetpack library handles feature checks).
+
+## Security checklist (agents are untrusted callers)
+- [ ] Validate every argument; throw \`AppFunctionInvalidArgumentException\` instead of guessing
+- [ ] Never perform destructive or payment actions without in-app user confirmation
+- [ ] Expose the minimum surface — one narrow function per user intent
+- [ ] Treat agent-supplied text as untrusted input (it can carry prompt-injected content)
+`;
+
+  if (t.includes("appfunction") || t.includes("app function") || t.includes("mcp") || t.includes("agent")) return appFunctions;
   if (t.includes("smart reply") || t.includes("suggestion")) return smartReply;
   if (t.includes("setup") || t.includes("install") || t.includes("depend") || t.includes("init")) return setup;
   if (t.includes("ml kit") || t.includes("mlkit") || t.includes("vision") || t.includes("barcode") || t.includes("label")) return mlKit;
 
   return overview + "\n\n---\n\n" +
     "**Query topics:** 'setup' (dependencies + initialization), 'smart reply' (Gmail-style suggestions), " +
-    "'ml kit' (non-generative on-device ML — vision, text, barcode)\n\n" +
+    "'ml kit' (non-generative on-device ML — vision, text, barcode), " +
+    "'appfunctions' (expose app functions to agents — Android's on-device MCP, experimental)\n\n" +
     "Source: https://developer.android.com/ai";
 }

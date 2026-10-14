@@ -8,6 +8,19 @@
  * StreamableHTTPServerTransport pair. Sessions are never shared —
  * this prevents cross-session state leakage that existed in v1.6.3.
  *
+ * v2.1 hardening:
+ *   - Idle sessions are evicted (default 30 min). v2.0 kept every session
+ *     until the client sent DELETE, so 64 abandoned initializes — from a
+ *     crashed IDE or a hostile local page — locked the server at 503.
+ *   - Optional bearer-token auth (ANDROJACK_HTTP_TOKEN), compared in
+ *     constant time. Required by serve.ts for remote binds that would
+ *     otherwise expose a configured Google API key as an open proxy.
+ *   - Stateless mode: each POST gets a throwaway server + transport, no
+ *     Mcp-Session-Id. Matches the direction of MCP spec 2026-07-28 and lets
+ *     the server run behind a round-robin load balancer.
+ *   - DELETE for an unknown session returns 404 (spec), not 200.
+ *   - Signal handlers are installed once per process, not once per server.
+ *
  * Usage:
  *   node build/index.js --http              # default port 3000
  *   PORT=8080 node build/index.js --http    # custom port
@@ -17,8 +30,9 @@ import http from "node:http";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { ANDROJACK_VERSION } from "./version.js";
+import { TOOL_NAMES } from "./server-factory.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = "127.0.0.1";
@@ -26,6 +40,9 @@ const MCP_PATH = "/mcp";
 const WELL_KNOWN_PATH = "/.well-known/mcp";
 const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
 const MAX_ACTIVE_SESSIONS = 64;
+const DEFAULT_SESSION_IDLE_MS = 30 * 60 * 1000;
+const SESSION_SWEEP_INTERVAL_MS = 60 * 1000;
+const HEALTH_PATH = "/healthz";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -34,16 +51,27 @@ type HttpError = Error & { statusCode?: number };
 interface Session {
   server: McpServer;
   transport: StreamableHTTPServerTransport;
+  lastSeenAt: number;
 }
 
 export interface HttpServerHandle {
   close(): void;
+  closeAsync(): Promise<void>;
   address: { host: string; port: number };
+  activeSessions(): number;
 }
 
 export interface HttpServerOptions {
   port?: number;
   host?: string;
+  /** Bearer token required on /mcp. Defaults to ANDROJACK_HTTP_TOKEN. */
+  authToken?: string;
+  /** Evict sessions idle longer than this. Defaults to ANDROJACK_HTTP_SESSION_IDLE_MS or 30 min. */
+  sessionIdleMs?: number;
+  /** Serve without sessions: fresh server per request, GET/DELETE → 405. */
+  stateless?: boolean;
+  /** Install SIGINT/SIGTERM handlers (default true). Tests pass false. */
+  handleSignals?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -129,6 +157,40 @@ function validateHostHeader(hostHeader: string | undefined, bindHost: string): v
   }
 }
 
+function digest(value: string): Buffer {
+  return createHash("sha256").update(value, "utf8").digest();
+}
+
+/** Constant-time bearer check — hashing first equalises buffer lengths. */
+export function isAuthorized(authorizationHeader: string | undefined, expectedToken: string | undefined): boolean {
+  if (!expectedToken) return true;
+  const match = /^Bearer\s+(.+)$/i.exec(authorizationHeader ?? "");
+  if (!match) return false;
+  return timingSafeEqual(digest(match[1]!.trim()), digest(expectedToken));
+}
+
+function parseIdleMs(raw: string | undefined): number | undefined {
+  if (!raw) return undefined;
+  const value = Number.parseInt(raw, 10);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+// Signal handlers are process-global; track live servers and install once.
+const liveServers = new Set<() => Promise<void>>();
+let signalHandlersInstalled = false;
+
+function installSignalHandlers(): void {
+  if (signalHandlersInstalled) return;
+  signalHandlersInstalled = true;
+  for (const sig of ["SIGINT", "SIGTERM"] as const) {
+    process.once(sig, async () => {
+      process.stderr.write(`\nAndroJack HTTP: shutting down (${sig})…\n`);
+      await Promise.allSettled([...liveServers].map((close) => close()));
+      process.exit(0);
+    });
+  }
+}
+
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -158,7 +220,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
  * @param opts - Optional port/host overrides (fall back to env vars / defaults).
  * @returns A handle with close() and the bound address.
  *
- * Security controls (all preserved from v1.6.3):
+ * Security controls (v2.1 additions marked +):
  *   - Loopback-only bind host by default
  *   - Explicit --allow-remote required for non-loopback (enforced in serve.ts)
  *   - Host header validation
@@ -166,6 +228,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
  *   - Body size cap (1 MiB)
  *   - Active session cap (64)
  *   - Per-session server isolation (introduced in v1.6.4, refactored in v1.7.1)
+ *   + Idle-session eviction, optional bearer auth, stateless mode, 404 on unknown session
  */
 export async function startHttpServer(
   createServer: () => McpServer,
@@ -173,6 +236,13 @@ export async function startHttpServer(
 ): Promise<HttpServerHandle> {
   const port = opts?.port ?? parseInt(process.env["PORT"] ?? String(DEFAULT_PORT), 10);
   const host = opts?.host ?? process.env["HOST"] ?? DEFAULT_HOST;
+  const authToken = opts?.authToken ?? (process.env["ANDROJACK_HTTP_TOKEN"]?.trim() || undefined);
+  const sessionIdleMs = opts?.sessionIdleMs ?? parseIdleMs(process.env["ANDROJACK_HTTP_SESSION_IDLE_MS"]) ?? DEFAULT_SESSION_IDLE_MS;
+  const stateless = opts?.stateless ?? false;
+
+  if (!Number.isInteger(port) || port < 0 || port > 65535) {
+    throw new Error(`Invalid port "${port}". Use an integer between 0 and 65535.`);
+  }
 
   let advertisedPort = port;
   let advertisedHost = host;
@@ -194,6 +264,13 @@ export async function startHttpServer(
 
     const url = new URL(req.url ?? "/", "http://localhost");
 
+    // ── /healthz — liveness probe for containers / load balancers ──────────
+    if (url.pathname === HEALTH_PATH && req.method === "GET") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok", version: ANDROJACK_VERSION, sessions: sessions.size }));
+      return;
+    }
+
     // ── .well-known/mcp — capability discovery ─────────────────────────────
     if (url.pathname === WELL_KNOWN_PATH && req.method === "GET") {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -206,9 +283,10 @@ export async function startHttpServer(
             "Forces AI tools to verify official docs before generating Android/Kotlin code.",
           mcp_endpoint: `http://${advertisedHost}:${advertisedPort}${MCP_PATH}`,
           spec_version: "2025-11-25",
-          tools: 23,
+          transport: stateless ? "streamable-http (stateless)" : "streamable-http",
+          tools: TOOL_NAMES.length,
           read_only: true,
-          auth_required: false,
+          auth_required: Boolean(authToken),
         })
       );
       return;
@@ -218,6 +296,17 @@ export async function startHttpServer(
     if (url.pathname !== MCP_PATH) {
       res.writeHead(404, { "Content-Type": "text/plain" });
       res.end(`AndroJack MCP: endpoint is ${MCP_PATH}`);
+      return;
+    }
+
+    if (!isAuthorized(req.headers.authorization, authToken)) {
+      res.writeHead(401, { "Content-Type": "text/plain", "WWW-Authenticate": 'Bearer realm="androjack"' });
+      res.end("Unauthorized");
+      return;
+    }
+
+    if (stateless) {
+      await handleStatelessRequest(req, res);
       return;
     }
 
@@ -232,12 +321,15 @@ export async function startHttpServer(
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
       if (sessionId && sessions.has(sessionId)) {
         const session = sessions.get(sessionId)!;
-        await session.transport.close();
         sessions.delete(sessionId);
+        await session.transport.close();
         process.stderr.write(`AndroJack HTTP: session deleted [${sessionId}]\n`);
+        res.writeHead(200);
+        res.end();
+        return;
       }
-      res.writeHead(200);
-      res.end();
+      res.writeHead(404, { "Content-Type": "text/plain" });
+      res.end("Unknown session ID");
       return;
     }
 
@@ -246,8 +338,9 @@ export async function startHttpServer(
 
       if (sessionId && sessions.has(sessionId)) {
         // ── Resume existing session — reuse only this session's transport ──
-        const { transport } = sessions.get(sessionId)!;
-        await transport.handleRequest(req, res);
+        const session = sessions.get(sessionId)!;
+        session.lastSeenAt = Date.now();
+        await session.transport.handleRequest(req, res);
         return;
       }
 
@@ -281,7 +374,7 @@ export async function startHttpServer(
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => newSessionId,
           onsessioninitialized: (id) => {
-            sessions.set(id, { server: mcpServer, transport });
+            sessions.set(id, { server: mcpServer, transport, lastSeenAt: Date.now() });
             process.stderr.write(`AndroJack HTTP: session opened [${id}]\n`);
           },
         });
@@ -299,8 +392,9 @@ export async function startHttpServer(
         return;
       }
 
-      // Unknown session ID
-      res.writeHead(400, { "Content-Type": "text/plain" });
+      // Unknown (or evicted) session ID — 404 tells spec-compliant clients
+      // to start a new session with a fresh initialize.
+      res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("Unknown session ID");
     } catch (err) {
       process.stderr.write(`AndroJack HTTP error: ${err}\n`);
@@ -313,6 +407,43 @@ export async function startHttpServer(
       }
     }
   });
+
+  async function handleStatelessRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    if (req.method !== "POST") {
+      res.writeHead(405, { Allow: "POST", "Content-Type": "text/plain" });
+      res.end("Stateless mode accepts POST only.");
+      return;
+    }
+    const mcpServer = createServer();
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+    res.on("close", () => {
+      transport.close().catch(() => { });
+      mcpServer.close().catch(() => { });
+    });
+    try {
+      await mcpServer.connect(transport);
+      await transport.handleRequest(req, res);
+    } catch (err) {
+      process.stderr.write(`AndroJack HTTP (stateless) error: ${err}\n`);
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Internal server error");
+      }
+    }
+  }
+
+  // ── Idle-session eviction ────────────────────────────────────────────────
+  const sweepTimer = setInterval(() => {
+    const cutoff = Date.now() - sessionIdleMs;
+    for (const [id, session] of sessions) {
+      if (session.lastSeenAt < cutoff) {
+        sessions.delete(id);
+        session.transport.close().catch(() => { });
+        process.stderr.write(`AndroJack HTTP: session evicted after idle timeout [${id}]\n`);
+      }
+    }
+  }, Math.min(SESSION_SWEEP_INTERVAL_MS, sessionIdleMs));
+  sweepTimer.unref();
 
   await new Promise<void>((resolve, reject) => {
     httpServer.listen(port, host, () => resolve());
@@ -331,20 +462,23 @@ export async function startHttpServer(
     `Discovery:  http://${advertisedHost}:${advertisedPort}${WELL_KNOWN_PATH}\n`
   );
 
-  // Graceful shutdown
-  for (const sig of ["SIGINT", "SIGTERM"] as const) {
-    process.once(sig, async () => {
-      process.stderr.write(`\nAndroJack HTTP: shutting down (${sig})…\n`);
-      for (const { transport } of sessions.values()) await transport.close().catch(() => { });
-      httpServer.close(() => process.exit(0));
-    });
-  }
+  const closeAll = async (): Promise<void> => {
+    clearInterval(sweepTimer);
+    liveServers.delete(closeAll);
+    const transports = [...sessions.values()].map((session) => session.transport);
+    sessions.clear();
+    await Promise.allSettled(transports.map((transport) => transport.close()));
+    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+  };
+  liveServers.add(closeAll);
+  if (opts?.handleSignals !== false) installSignalHandlers();
 
   return {
     close: () => {
-      for (const { transport } of sessions.values()) transport.close().catch(() => { });
-      httpServer.close();
+      void closeAll();
     },
+    closeAsync: closeAll,
     address: { host: advertisedHost, port: advertisedPort },
+    activeSessions: () => sessions.size,
   };
 }

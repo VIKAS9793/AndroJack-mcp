@@ -1,8 +1,15 @@
 // Tool 22: Android 17 / API 37 Compliance Checker
-// Android 17 reached platform stability (Beta 3) on March 26, 2026.
-// API surface is now locked — developers can finalize compatibility testing.
-// Key new breaking rules: static final reflection blocks, ACCESS_LOCAL_NETWORK,
-// OTP protection delay, extended large-screen resizability enforcement on API 37+.
+// Android 17 shipped to stable on June 16, 2026 (Pixel + AOSP).
+// v2.1 corrections, verified against developer.android.com on 2026-10-14:
+//   - Games ARE exempt from the API 37 large-screen rules (android:appCategory).
+//     v2.0 stated the opposite.
+//   - Handoff uses setHandoffEnabled() + onHandoffActivityDataRequested().
+//     v2.0 documented an intent action and callback that do not exist.
+//   - Added: lock-free MessageQueue, read-only native libs for System.load,
+//     app memory limits, config-change recreation, CameraX ≥1.5.2,
+//     certificate transparency default, background audio hardening.
+//   - Fragment anchors (#…) removed: the official page exposes none, so they
+//     pointed nowhere.
 
 export async function android17Compliance(topic: string): Promise<string> {
   const t = topic.toLowerCase().trim();
@@ -10,13 +17,14 @@ export async function android17Compliance(topic: string): Promise<string> {
   const overview = `
 # Android 17 / API 37 Compliance Reference
 Source: https://developer.android.com/about/versions/17/behavior-changes-17
-Status: Platform stable (Beta 3, March 26, 2026) — API surface locked.
+Status: ✅ Stable — released June 16, 2026 (Pixel, AOSP). Behavior changes below apply when targetSdk = 37
+unless marked "all apps".
 
 ## What Android 17 / API 37 Changes
 
-Android 17 extends the large-screen mandates introduced in Android 16 and
-adds several new breaking behaviors that affect generated code, especially
-reflection-heavy code, LAN networking, and OTP handling.
+Android 17 removes the Android 16 large-screen opt-out and adds breaking
+behaviors that affect generated code: reflection-heavy code, LAN networking,
+OTP handling, native library loading, and MessageQueue internals.
 
 ## ❌ Breaking Change 1 — Static Final Field Reflection (CRITICAL)
 
@@ -43,13 +51,14 @@ class MyViewModel(
 ) : ViewModel()
 \`\`\`
 
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#static-final-reflection
+Source: https://developer.android.com/about/versions/17/behavior-changes-17
 
 ## ❌ Breaking Change 2 — ACCESS_LOCAL_NETWORK (New Permission)
 
-Apps targeting Android 17 that communicate over the local area network (LAN) must
-declare the new \`ACCESS_LOCAL_NETWORK\` permission. This protects local network
-access as part of the NEARBY_DEVICES group.
+Local network access is blocked by default for apps targeting Android 17. Two paths:
+use a system-mediated device picker (no permission prompt), or request the new
+\`ACCESS_LOCAL_NETWORK\` runtime permission. It belongs to the NEARBY_DEVICES group,
+so users who already granted another NEARBY_DEVICES permission are not prompted again.
 
 **Affects:** Any app that connects to local IP addresses, mDNS/Bonjour discovery,
 SSDP, or direct socket connections on 192.168.x.x / 10.x.x.x ranges.
@@ -77,9 +86,11 @@ Source: https://developer.android.com/privacy-and-security/local-network-permiss
 
 ## ❌ Breaking Change 3 — SMS OTP Protection (3-Hour Delay)
 
-Apps targeting Android 17 will experience a **3-hour delay** in programmatic
-access to SMS OTP messages. This blocks the pattern of reading SMS in background
-for auto-fill OTP flows.
+For most apps targeting Android 17, standard SMS messages containing an OTP are
+withheld for **three hours**: \`SMS_RECEIVED_ACTION\` is not delivered and SMS provider
+queries are filtered. WebOTP-format messages are delayed for every app that is not the
+intended recipient, regardless of targetSdk. Default SMS, assistant, and connected
+companion apps are exempt.
 
 \`\`\`kotlin
 // ❌ OLD pattern — delayed by 3 hours on API 37+ targets
@@ -97,58 +108,98 @@ task.addOnSuccessListener {
 }
 \`\`\`
 
-**Migration:** Use \`SmsRetriever.startSmsUserConsent()\` or the
-\`SmsCodeRetriever\` API from Play Services. These are not delayed.
+**Migration:** Use the SMS Retriever API or the SMS User Consent API
+(\`SmsRetriever.startSmsUserConsent()\`). These are the paths Google names for OTP.
 
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#sms-otp
+Source: https://developer.android.com/about/versions/17/behavior-changes-17
+Guide: https://developer.android.com/identity/sms-retriever
 
-## ❌ Breaking Change 4 — Extended Large-Screen Resizability (API 37+)
+## ❌ Breaking Change 4 — Large-Screen Opt-Out Removed (API 37+)
 
-Android 17 extends the API 36 large-screen rules. Apps targeting API 37 on
-devices ≥600dp **cannot opt out** of resizing or orientation changes, even
-through the games exemption that was available in API 36.
+Android 16 began ignoring orientation, resizability, and aspect-ratio restrictions on
+large screens (smallest width ≥ 600dp) for API 36 targets, with a temporary opt-out.
+**For API 37 targets the opt-out is gone.** Ignored on large screens:
+
+- \`android:screenOrientation\`, \`setRequestedOrientation()\`, \`getRequestedOrientation()\`
+  (portrait / landscape / sensor* / reverse* / user* values)
+- \`android:resizeableActivity="false"\`
+- \`android:minAspectRatio\`, \`android:maxAspectRatio\`
+
+**Exemptions (still apply on API 37):**
+- **Games**, identified by the \`android:appCategory="game"\` manifest flag
+- Users who explicitly opt the app back into its default behavior in device aspect-ratio settings
+- Screens with smallest width below 600dp (phones)
 
 \`\`\`xml
-<!-- ❌ All of these are overridden by the system on ≥600dp / API 37 targets -->
+<!-- ❌ Ignored on ≥600dp displays for API 37 targets (unless the app is a game) -->
 <activity
   android:screenOrientation="portrait"
   android:resizeableActivity="false"
-  android:maxAspectRatio="1.86"
-/>
-<!-- The android:appCategory="game" exemption no longer applies at API 37 -->
+  android:maxAspectRatio="1.86" />
 \`\`\`
 
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#large-screens
+Source: https://developer.android.com/about/versions/17/changes/ff-restrictions-ignored
+
+## ❌ Breaking Change 5 — Lock-Free MessageQueue
+
+Apps targeting API 37 get a new lock-free \`android.os.MessageQueue\`. Code that reflects
+on its private fields or methods may break. For tests, \`TestLooperManager\` adds
+\`peekWhen()\` and \`poll()\`.
+
+## ❌ Breaking Change 6 — Read-Only Native Libraries
+
+Safer Dynamic Code Loading now covers native code: every file loaded with
+\`System.load()\` must be read-only, or \`UnsatisfiedLinkError\` is thrown.
+
+\`\`\`kotlin
+val lib = File(context.codeCacheDir, "libplugin.so")
+lib.setReadOnly()            // required on API 37 targets
+System.load(lib.absolutePath)
+\`\`\`
+
+## ⚠️ Other Android 17 Changes to Check
+
+- **Activity recreation:** activities are no longer restarted for \`CONFIG_KEYBOARD\`,
+  \`CONFIG_KEYBOARD_HIDDEN\`, \`CONFIG_NAVIGATION\`, \`CONFIG_TOUCHSCREEN\`, \`CONFIG_COLOR_MODE\`;
+  they get \`onConfigurationChanged()\`. Opt back in with \`android:recreateOnConfigChanges\`.
+- **App memory limits:** the system kills processes over a RAM-based limit;
+  \`ApplicationExitInfo.getDescription()\` reports \`"MemoryLimiter:AnonSwap"\`.
+- **Background audio hardening:** restrictions on playback, audio focus, and volume APIs
+  from the background; alarm audio is exempt.
+- **Certificate transparency** is enabled by default; **ECH** (Encrypted Client Hello) is enabled.
+- **CameraX (all apps on Android 17 devices):** use 1.5.2 or 1.6.0+ to avoid a crash.
+- **Custom notification views:** size limits tightened.
+
+Source: https://developer.android.com/about/versions/17/behavior-changes-17
+Release post: https://developer.android.com/blog/posts/android-17-is-here
 `;
 
   const npu = `
 # Android 17 — NPU Access (Neural Processing Unit)
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#npu
+Source: https://developer.android.com/blog/posts/android-17-is-here
 
 ## What Changed
 
-Apps targeting Android 17 that directly access the device NPU must declare
-hardware feature support in the manifest.
-
-\`\`\`xml
-<!-- AndroidManifest.xml — required if app directly uses NPU APIs -->
-<uses-feature
-  android:name="android.hardware.neural_processing_unit"
-  android:required="false" />   <!-- false = app works without NPU, enhances with it -->
-\`\`\`
+Apps that access the NPU **directly** must declare
+\`PackageManager.FEATURE_NEURAL_PROCESSING_UNIT\` in the manifest with \`<uses-feature>\`.
+Take the feature string from that constant in the API 37 reference rather than typing it
+from memory, and set \`android:required="false"\` if the app also works without an NPU.
 
 ## When This Applies
 
-- Apps using ML Kit GenAI (AICore) with NPU acceleration
-- Apps calling Android NNAPI directly
-- Apps integrating with on-device LLM runtimes that target the NPU
+- Apps using the LiteRT NPU delegate
+- Apps using vendor NPU SDKs
+- Apps calling NNAPI directly
+
+Apps that only use system-managed AI (for example Gemini Nano via ML Kit GenAI / AICore)
+are not accessing the NPU directly.
 
 ## Recommended Pattern
 
 \`\`\`kotlin
 // Check NPU availability at runtime before using NPU-accelerated paths
 val packageManager = context.packageManager
-val hasNpu = packageManager.hasSystemFeature("android.hardware.neural_processing_unit")
+val hasNpu = packageManager.hasSystemFeature(PackageManager.FEATURE_NEURAL_PROCESSING_UNIT)
 
 if (hasNpu) {
   // Use NPU-accelerated on-device AI
@@ -159,66 +210,55 @@ if (hasNpu) {
 }
 \`\`\`
 
-Source: https://developer.android.com/about/versions/17/behavior-changes-17#npu
+Source: https://developer.android.com/blog/posts/android-17-is-here
 `;
 
   const handoff = `
-# Android 17 — Handoff API (Cross-Device Continuity)
-Source: https://developer.android.com/about/versions/17/features#handoff
+# Android 17 — Handoff API (Continue On)
+Source: https://developer.android.com/blog/posts/android-17-is-here
 
 ## What Handoff Is
 
-Handoff lets users start an Activity on one Android device and seamlessly
-transfer it to another Android device. The receiving device launches the same
-app (if installed) with state provided by the sending device.
+Handoff ("Continue On") lets a user start an activity on one device and continue it on
+another device signed in to the same account. The receiving device opens your app with
+state your activity provides.
 
-## When to Implement
-
-Implement Handoff if your app has:
-- Long-running user sessions (editing, media playback, reading)
-- State that is meaningful to resume on a larger or different screen
-- Multi-device workflows (start draft on phone, finish on tablet)
-
-## Implementation
+## Implementation (official API surface)
 
 \`\`\`kotlin
-// 1. Declare Handoff support in AndroidManifest.xml
-<activity android:name=".EditorActivity">
-  <intent-filter>
-    <action android:name="android.intent.action.HANDOFF" />
-    <category android:name="android.intent.category.DEFAULT" />
-  </intent-filter>
-</activity>
-
-// 2. Provide Handoff state from the sending device
-class EditorActivity : AppCompatActivity() {
-  override fun onProvideHandoffData(): Bundle {
-    return bundleOf(
-      "document_id" to currentDocumentId,
-      "scroll_position" to editorScrollPosition,
-      "cursor_position" to editorCursorPosition
-    )
-  }
-}
-
-// 3. Receive Handoff state on the target device
-class EditorActivity : AppCompatActivity() {
+class EditorActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val handoffData = intent.getBundleExtra("android.intent.extra.HANDOFF_DATA")
-    if (handoffData != null) {
-      val documentId = handoffData.getString("document_id")
-      openDocument(documentId)
-    }
+    // 1. Opt this activity in to Handoff
+    setHandoffEnabled(true, null)
+  }
+
+  // 2. Supply the state the other device needs to resume
+  override fun onHandoffActivityDataRequested(
+    request: HandoffActivityDataRequestInfo
+  ): HandoffActivityData {
+    // Build HandoffActivityData describing the document / position to resume.
+    // Check the API 37 reference for the builder and fields — do not guess them.
+    TODO("Return HandoffActivityData for the current session")
   }
 }
 \`\`\`
 
+> ⚠️ AndroJack verified only the entry points above (\`setHandoffEnabled(true, null)\` and
+> \`onHandoffActivityDataRequested(HandoffActivityDataRequestInfo): HandoffActivityData\`).
+> Look up \`HandoffActivityData\` in the API 37 reference before writing its construction code.
+> v2.0 of this tool documented an \`android.intent.action.HANDOFF\` intent filter and an
+> \`onProvideHandoffData()\` callback; neither exists.
+
+## When to Implement
+
+- Long-running user sessions (editing, media playback, reading)
+- State that is meaningful to resume on a larger or different screen
+
 ## Handoff vs. Cross-Device Copy
 Handoff transfers **active session state**, not clipboard content.
-For static data sharing between devices, use the Clipboard or Share Sheet instead.
 
-Source: https://developer.android.com/about/versions/17/features#handoff
+Source: https://developer.android.com/blog/posts/android-17-is-here
 `;
 
   const checklist = `
@@ -237,22 +277,33 @@ Source: https://developer.android.com/about/versions/17/behavior-changes-17
 - [ ] Search for socket connections to 192.168.x.x, 10.x.x.x, or 172.x.x.x ranges
 - [ ] Search for mDNS/NSD usage (\`NsdManager\`, \`mDNS\`)
 - [ ] Search for SSDP/UPnP discovery code
-- [ ] Add \`ACCESS_LOCAL_NETWORK\` to manifest if any LAN access found
-- [ ] Add runtime permission check before LAN operations
+- [ ] Prefer a system-mediated device picker (no permission prompt) where one exists
+- [ ] Otherwise declare and request \`ACCESS_LOCAL_NETWORK\` at runtime before LAN operations
 
 ### SMS OTP Migration
 - [ ] Remove \`SMS_RECEIVED\` broadcast receiver used for OTP auto-fill
-- [ ] Replace with \`SmsRetriever.startSmsUserConsent()\` or \`SmsCodeRetriever\`
+- [ ] Replace with the SMS Retriever API or \`SmsRetriever.startSmsUserConsent()\`
 - [ ] Test OTP flow on API 37 emulator — old pattern will be delayed 3 hours
 
-### Large-Screen (extended from API 36)
-- [ ] Remove all \`android:screenOrientation\` attributes
+### Large-Screen (Android 16 opt-out removed)
+- [ ] Remove \`android:screenOrientation\` locks and \`setRequestedOrientation()\` calls (non-game apps)
 - [ ] Remove all \`android:resizeableActivity="false"\` attributes
-- [ ] Remove \`android:maxAspectRatio\` restrictions
-- [ ] Test on ≥600dp emulator with app rotation (no games exemption at API 37)
+- [ ] Remove \`android:minAspectRatio\` / \`android:maxAspectRatio\` restrictions
+- [ ] Games: confirm \`android:appCategory="game"\` is set — the exemption still applies at API 37
+- [ ] Test on a ≥600dp emulator in both orientations and in multi-window
+
+### MessageQueue / Native Code
+- [ ] Remove reflection on \`MessageQueue\` private fields/methods
+- [ ] Mark every file passed to \`System.load()\` read-only, or switch to \`System.loadLibrary()\`
+
+### Dependencies (all apps on Android 17 devices)
+- [ ] CameraX ≥ 1.5.2 (or 1.6.0+)
+
+### Automate it
+- [ ] Run \`npx androjack-mcp validate . --target-sdk=37\` in CI (SARIF: \`--format=sarif\`)
 
 ### NPU (if applicable)
-- [ ] Add \`android.hardware.neural_processing_unit\` feature declaration (optional)
+- [ ] Declare \`PackageManager.FEATURE_NEURAL_PROCESSING_UNIT\` via \`<uses-feature>\` if you access the NPU directly
 - [ ] Add runtime NPU availability check before NPU-accelerated code paths
 
 Source: https://developer.android.com/about/versions/17/behavior-changes-17
@@ -280,12 +331,24 @@ Source: https://developer.android.com/about/versions/17/behavior-changes-17
     const end = overview.indexOf("## ❌ Breaking Change 4");
     return overview.slice(start, end);
   }
+  if (t.includes("large screen") || t.includes("orientation") || t.includes("resiz") || t.includes("game")) {
+    const start = overview.indexOf("## ❌ Breaking Change 4");
+    const end = overview.indexOf("## ❌ Breaking Change 5");
+    return overview.slice(start, end);
+  }
+  if (t.includes("messagequeue") || t.includes("message queue") || t.includes("system.load") || t.includes("native")) {
+    const start = overview.indexOf("## ❌ Breaking Change 5");
+    const end = overview.indexOf("## ⚠️ Other Android 17 Changes");
+    return overview.slice(start, end);
+  }
 
   return overview + "\n\n---\n\n" +
     "**Query topics:** 'checklist' (full API 37 migration checklist), " +
     "'static final' (reflection breaking change), " +
     "'local network' (ACCESS_LOCAL_NETWORK permission), " +
     "'sms otp' (3-hour delay migration), " +
+    "'large screen' (opt-out removal, games exemption), " +
+    "'messagequeue' / 'native' (lock-free MessageQueue, read-only System.load), " +
     "'npu' (Neural Processing Unit feature declaration), " +
     "'handoff' (cross-device continuity API)\n\n" +
     "Source: https://developer.android.com/about/versions/17";

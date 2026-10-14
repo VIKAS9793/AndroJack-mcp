@@ -1,6 +1,6 @@
 {
   "name": "androjack-mcp",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "mcpName": "io.github.VIKAS9793/androjack",
   "files": [
     "build/",
@@ -20,7 +20,10 @@
     "ai-validation",
     "kotlin",
     "jetpack-compose",
-    "android-sdk"
+    "android-sdk",
+    "android-17",
+    "sarif",
+    "ci"
   ],
   "author": "Vikas Sahani",
   "repository": {
@@ -41,7 +44,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node build/index.js",
-    "test": "npm run build && node --test test/*.test.mjs",
+    "test": "npm run build && node --test test/*.test.mjs test/uat/*.test.mjs",
     "install-mcp": "node build/index.js install",
     "install-mcp:auto": "node build/index.js install --auto",
     "install-mcp:list": "node build/index.js install --list",
@@ -53,11 +56,14 @@
     "install-mcp:antigravity": "node build/index.js install --ide=antigravity",
     "install-mcp:kiro": "node build/index.js install --ide=kiro",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:uat": "npm run build && node --test test/uat/*.test.mjs",
+    "test:uat:live": "npm run build && ANDROJACK_UAT_LIVE=1 node --test test/uat/*.test.mjs",
+    "validate": "node build/index.js validate"
   },
   "dependencies": {
     "@clack/prompts": "^1.7.0",
-    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "chalk": "^5.6.2",
     "cheerio": "^1.0.0",
     "figlet": "^1.11.4",
