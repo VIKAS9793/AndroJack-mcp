@@ -121,5 +121,5 @@ jobs:
 
       - name: Dogfood the CI gate (validate CLI emits valid SARIF)
         run: |
-          node build/index.js validate test --format=sarif --fail-on=never > "$RUNNER_TEMP/androjack.sarif"
-          node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if (s.version!=="2.1.0") process.exit(1); console.log("SARIF OK, rules:", s.runs[0].tool.driver.rules.length)' "$RUNNER_TEMP/androjack.sarif"
+          node build/index.js validate test/fixtures/sample-app --format=sarif --fail-on=never > "$RUNNER_TEMP/androjack.sarif"
+          node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if (s.version!=="2.1.0" || s.runs[0].results.length===0) process.exit(1); console.log("SARIF OK, rules:", s.runs[0].tool.driver.rules.length, "results:", s.runs[0].results.length)' "$RUNNER_TEMP/androjack.sarif"

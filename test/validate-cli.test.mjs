@@ -94,20 +94,59 @@ test('CLI-05 JSON output carries totals and per-file reports', async () => {
   }
 });
 
-test('CLI-06 build/, .gradle/, node_modules/ and symlinks are skipped', async () => {
+test('CLI-06 Gradle output dirs, node_modules and walked symlinks are skipped; nested build packages are not', async () => {
   const root = await makeProject({
-    'build/gen/G.kt': 'GlobalScope.launch { }',
+    'app/build.gradle.kts': 'plugins { id("com.android.application") }',
+    'app/build/gen/G.kt': 'GlobalScope.launch { }',
     'node_modules/x/N.kt': 'GlobalScope.launch { }',
     'outside/O.kt': 'GlobalScope.launch { }',
-    'src/ok.kt': 'class Ok',
+    'app/src/com/example/build/Ok.kt': 'class Ok',
   });
   try {
-    await symlink(path.join(root, 'outside'), path.join(root, 'src', 'link'));
-    const r = await run(['src', 'build', 'node_modules'], root);
-    assert.equal(r.code, 0, r.stdout);
+    await symlink(path.join(root, 'outside'), path.join(root, 'app', 'src', 'link'));
+    const r = await run(['app'], root);
+    assert.equal(r.code, 0, r.stdout + r.stderr);
+    assert.match(r.stdout, /2 file\(s\) checked/);
+    assert.match(r.stderr, /skipped 1 symlink/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('CLI-06b an explicitly named path is always checked, even a symlink or a build dir', async () => {
+  const root = await makeProject({ 'real/Bad.kt': 'GlobalScope.launch { }', 'build/Gen.kt': 'GlobalScope.launch { }' });
+  try {
+    await symlink(path.join(root, 'real'), path.join(root, 'linked'));
+    assert.equal((await run(['linked'], root)).code, 1);
+    assert.equal((await run(['build'], root)).code, 1);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI-06c a scan that checks nothing, or skips an oversized file, does not pass', async () => {
+  const root = await makeProject({ 'docs/README.md': '# no code', 'big/Huge.kt': '// ' + 'x'.repeat(1024 * 1024 + 10) });
+  try {
+    const empty = await run(['docs'], root);
+    assert.equal(empty.code, 2);
+    assert.match(empty.stderr, /nothing was checked/);
+    const big = await run(['big', '--fail-on=never'], root);
+    assert.equal(big.code, 2);
+    assert.match(big.stderr, /could not be checked/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI-06d the committed fixture app produces findings (used by the CI dogfood step)', async () => {
+  const fixture = fileURLToPath(new URL('./fixtures/sample-app', import.meta.url));
+  const r = await run([fixture, '--format=json', '--target-sdk=37']);
+  const json = JSON.parse(r.stdout);
+  const files = json.files.map((f) => f.file);
+  assert.ok(files.some((f) => f.endsWith('com/example/build/Feed.kt')), files.join(','));
+  assert.ok(!files.some((f) => f.includes('app/build/generated')), 'module-root build output must be skipped');
+  const feed = json.files.find((f) => f.file.endsWith('Feed.kt'));
+  assert.deepEqual(feed.violations.map((v) => v.ruleId), ['GLOBALSCOPE_LAUNCH'], 'comment must not trigger REMOVED_ASYNCTASK');
 });
 
 test('CLI-07 usage errors exit 2', async () => {

@@ -192,3 +192,9 @@ test('IDX-02 common queries resolve to the right official page', () => {
   }
   assert.deepEqual(matchDocIndex('zzzz qqqq', 3), []);
 });
+
+test('GRD-03 Maven Central version lists skip prereleases too', async () => {
+  const { pickStableVersion } = await import('../build/tools/gradle.js');
+  assert.equal(pickStableVersion(['2.11.0', '3.0.0-RC1', '2.12.0-beta02', '2.9.0']), '2.11.0');
+  assert.equal(pickStableVersion(['1.0.0-alpha01']), null);
+});

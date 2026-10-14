@@ -18,8 +18,7 @@
 
 import chalk from "chalk";
 import { createAndroJackServer, TOOL_NAMES } from "./server-factory.js";
-import { isDeveloperKnowledgeEnabled } from "./integrations/developer-knowledge.js";
-import { startHttpServer } from "./http-server.js";
+import { checkBindPolicy, startHttpServer } from "./http-server.js";
 import { docCache } from "./cache.js";
 import { isDirectExecution } from "./cli-entry.js";
 
@@ -83,38 +82,16 @@ function isLoopbackHost(host: string): boolean {
   return normalized === "127.0.0.1" || normalized === "localhost" || normalized === "::1" || normalized === "[::1]";
 }
 
+/**
+ * Re-exported for callers/tests; the policy itself lives in http-server.ts so
+ * that every entry point (serve, --http, programmatic) enforces it.
+ */
 export function assertSafeBindHost(
   host: string,
   allowRemote: boolean,
   env: NodeJS.ProcessEnv = process.env
 ): void {
-  if (isLoopbackHost(host)) {
-    return;
-  }
-
-  if (!allowRemote) {
-    throw new Error(
-      `Refusing to bind HTTP transport to non-loopback host "${host}" without --allow-remote. ` +
-      `Keep AndroJack local by default, or pass --allow-remote only behind a trusted network boundary.`
-    );
-  }
-
-  const hasToken = Boolean(env["ANDROJACK_HTTP_TOKEN"]?.trim());
-  if (!hasToken && isDeveloperKnowledgeEnabled(env)) {
-    // Without auth, anyone who can reach the port could spend the operator's
-    // Google API quota through android_official_search.
-    throw new Error(
-      `Refusing remote bind: a Google Developer Knowledge API key is configured but ANDROJACK_HTTP_TOKEN is not set. ` +
-      `Set ANDROJACK_HTTP_TOKEN so clients must send "Authorization: Bearer <token>".`
-    );
-  }
-
-  if (!hasToken) {
-    process.stderr.write(
-      `⚠️  AndroJack is listening on "${host}" without authentication. ` +
-      `Set ANDROJACK_HTTP_TOKEN to require a bearer token.\n`
-    );
-  }
+  checkBindPolicy(host, allowRemote, env);
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
@@ -176,7 +153,7 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
   printBanner(host, port, noCache, cacheTtlHours, stateless);
 
   // Each HTTP session gets a fresh McpServer — pass factory, not instance
-  await startHttpServer(createAndroJackServer, { port, host, stateless });
+  await startHttpServer(createAndroJackServer, { port, host, stateless, allowRemote });
 
   // Periodic cache stats — every 5 minutes in hosted mode
   if (!isLoopbackHost(host) && !noCache) {

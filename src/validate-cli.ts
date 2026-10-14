@@ -25,7 +25,12 @@ import { ANDROJACK_VERSION } from "./version.js";
 
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_FILES = 20_000;
-const SKIP_DIRS = new Set([".git", ".gradle", ".idea", "build", "node_modules", ".kotlin", ".cxx", "out"]);
+// Always tool/VCS output — never source.
+const ALWAYS_SKIP_DIRS = new Set([".git", ".gradle", ".idea", "node_modules", ".kotlin", ".cxx"]);
+// Gradle output dirs — skipped only directly inside a Gradle module root, so a
+// Kotlin package such as com/example/build/ is still checked.
+const GRADLE_OUTPUT_DIRS = new Set(["build", "out"]);
+const GRADLE_BUILD_FILES = ["build.gradle.kts", "build.gradle", "settings.gradle.kts", "settings.gradle"];
 
 export type OutputFormat = "text" | "json" | "sarif";
 export type FailOn = "error" | "warning" | "never";
@@ -41,6 +46,16 @@ export interface ValidateOptions {
 export interface FileReport {
   file: string;
   report: ValidationReport;
+}
+
+export interface ScanResult {
+  reports: FileReport[];
+  /** Files that could not be checked (over MAX_FILE_BYTES). A gate cannot pass them. */
+  oversized: string[];
+  /** Symlinks found while walking directories (not followed). */
+  skippedSymlinks: number;
+  /** True when MAX_FILES was reached and the scan stopped early. */
+  truncated: boolean;
 }
 
 export function languageForFile(file: string): Language | null {
@@ -98,38 +113,102 @@ export function parseValidateArgs(args: string[]): ValidateOptions {
   return opts;
 }
 
-async function collectFiles(target: string, out: string[]): Promise<void> {
-  if (out.length >= MAX_FILES) return;
-  const stat = await fs.lstat(target);
-  if (stat.isSymbolicLink()) return; // never follow links out of the tree
-  if (stat.isDirectory()) {
-    if (SKIP_DIRS.has(path.basename(target))) return;
-    const entries = await fs.readdir(target);
-    entries.sort();
-    for (const entry of entries) await collectFiles(path.join(target, entry), out);
-    return;
-  }
-  if (stat.isFile() && languageForFile(target) && stat.size <= MAX_FILE_BYTES) out.push(target);
+interface Walk {
+  files: string[];
+  oversized: string[];
+  skippedSymlinks: number;
+  truncated: boolean;
 }
 
-export async function validatePaths(opts: ValidateOptions, cwd = process.cwd()): Promise<FileReport[]> {
-  const files: string[] = [];
+async function isGradleModuleRoot(dir: string): Promise<boolean> {
+  for (const name of GRADLE_BUILD_FILES) {
+    try {
+      await fs.access(path.join(dir, name));
+      return true;
+    } catch {
+      // not this one
+    }
+  }
+  return false;
+}
+
+async function collectFiles(target: string, walk: Walk, explicit: boolean): Promise<void> {
+  if (walk.files.length >= MAX_FILES) {
+    walk.truncated = true;
+    return;
+  }
+  // Paths the user named are followed even if they are symlinks; links found
+  // while walking are not (they could point outside the tree or loop).
+  const stat = explicit ? await fs.stat(target) : await fs.lstat(target);
+  if (stat.isSymbolicLink()) {
+    walk.skippedSymlinks++;
+    return;
+  }
+  if (stat.isDirectory()) {
+    const base = path.basename(target);
+    if (!explicit) {
+      if (ALWAYS_SKIP_DIRS.has(base)) return;
+      if (GRADLE_OUTPUT_DIRS.has(base) && (await isGradleModuleRoot(path.dirname(target)))) return;
+    }
+    const entries = await fs.readdir(target);
+    entries.sort();
+    for (const entry of entries) await collectFiles(path.join(target, entry), walk, false);
+    return;
+  }
+  if (!stat.isFile() || !languageForFile(target)) return;
+  if (stat.size > MAX_FILE_BYTES) {
+    walk.oversized.push(target);
+    return;
+  }
+  walk.files.push(target);
+}
+
+export async function validatePaths(opts: ValidateOptions, cwd = process.cwd()): Promise<ScanResult> {
+  const walk: Walk = { files: [], oversized: [], skippedSymlinks: 0, truncated: false };
   for (const p of opts.paths) {
     const abs = path.resolve(cwd, p);
     try {
-      await collectFiles(abs, files);
+      await collectFiles(abs, walk, true);
     } catch (err) {
       throw new UsageError(`Cannot read "${p}": ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
+  const rel = (file: string) => path.relative(cwd, file).split(path.sep).join("/") || path.basename(file);
   const reports: FileReport[] = [];
-  for (const file of files) {
+  for (const file of walk.files) {
     const code = await fs.readFile(file, "utf8");
     const report = validateAndroidCode(code, languageForFile(file) ?? undefined, opts.minSdk, opts.targetSdk);
-    reports.push({ file: path.relative(cwd, file).split(path.sep).join("/") || path.basename(file), report });
+    reports.push({ file: rel(file), report });
   }
-  return reports;
+  return {
+    reports,
+    oversized: walk.oversized.map(rel),
+    skippedSymlinks: walk.skippedSymlinks,
+    truncated: walk.truncated,
+  };
+}
+
+/**
+ * Problems that mean the gate did not actually check everything. A CI gate
+ * must not report success in these cases (v2.1 review finding: an empty scan,
+ * an oversized file, or a truncated walk all used to exit 0).
+ */
+export function scanProblems(scan: ScanResult): string[] {
+  const problems: string[] = [];
+  if (scan.reports.length === 0 && scan.oversized.length === 0) {
+    problems.push("No Kotlin, Gradle, or XML files were found in the given paths — nothing was checked.");
+  }
+  if (scan.oversized.length > 0) {
+    problems.push(
+      `${scan.oversized.length} file(s) exceed ${MAX_FILE_BYTES / 1024 / 1024} MiB and could not be checked: ` +
+      scan.oversized.slice(0, 5).join(", ") + (scan.oversized.length > 5 ? ", …" : "")
+    );
+  }
+  if (scan.truncated) {
+    problems.push(`Scan stopped at ${MAX_FILES} files; narrow the paths so every file is checked.`);
+  }
+  return problems;
 }
 
 export function totals(reports: FileReport[]): Record<Severity, number> {
@@ -234,9 +313,9 @@ export async function main(args: string[]): Promise<void> {
     return;
   }
 
-  let reports: FileReport[];
+  let scan: ScanResult;
   try {
-    reports = await validatePaths(opts);
+    scan = await validatePaths(opts);
   } catch (err) {
     process.stderr.write(`androjack validate: ${err instanceof Error ? err.message : String(err)}\n`);
     process.exitCode = 2;
@@ -244,6 +323,16 @@ export async function main(args: string[]): Promise<void> {
   }
 
   const render = opts.format === "sarif" ? renderSarif : opts.format === "json" ? renderJson : renderText;
-  process.stdout.write(render(reports));
-  process.exitCode = exitCodeFor(reports, opts.failOn);
+  process.stdout.write(render(scan.reports));
+
+  if (scan.skippedSymlinks > 0) {
+    process.stderr.write(`androjack validate: skipped ${scan.skippedSymlinks} symlink(s) found while walking (pass them explicitly to check them).\n`);
+  }
+  const problems = scanProblems(scan);
+  if (problems.length > 0) {
+    for (const problem of problems) process.stderr.write(`androjack validate: ${problem}\n`);
+    process.exitCode = 2;
+    return;
+  }
+  process.exitCode = exitCodeFor(scan.reports, opts.failOn);
 }

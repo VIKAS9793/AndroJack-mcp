@@ -17,11 +17,23 @@ This release is mostly about closing the gap between what AndroJack claimed and 
 - **Optional bearer-token auth** for the HTTP transport (`ANDROJACK_HTTP_TOKEN`, constant-time comparison). `serve` refuses a remote bind when a Google API key is configured but no token is set (otherwise the server is an open proxy for the operator's quota) and warns on any unauthenticated remote bind.
 - **Dependency vulnerabilities.** `npm audit` reported 7 (1 critical `proxy-addr`, 3 high incl. `@modelcontextprotocol/sdk` ≤1.30.1, `fast-uri`, `undici`). `@modelcontextprotocol/sdk` → ^1.32.1 plus `npm audit fix`: **0 vulnerabilities**.
 - `ANDROJACK_OFFLINE=1` is enforced at the single function that calls `fetch()`, guaranteeing zero outbound requests.
+- **Found by a fresh-context review of this release, and fixed:**
+  - **API key forwarded on redirect.** A redirect from the Developer Knowledge API to another allowlisted origin would have carried `X-Goog-Api-Key`. Credential headers (`Authorization`, `Cookie`, `X-Goog-Api-Key`, `Proxy-Authorization`) are now dropped on any cross-origin hop, and every hop is rate-limited.
+  - **Titles from the Google API were rendered outside the untrusted boundary unsanitized.** They are now sanitized, collapsed to one line, stripped of `<`/`>` and heading markers, and length-capped (`sanitizeInlineText`).
+  - **`--http` bypassed the remote-bind guard.** `HOST=0.0.0.0 npx androjack-mcp --http` bound publicly with no opt-in and no token. The policy now lives inside `startHttpServer`, so every entry point enforces it (`ANDROJACK_ALLOW_REMOTE_HTTP=1` or `allowRemote` to opt in).
+  - **Unterminated spoofed closing tags** (`</UNTRUSTED_EXTERNAL_CONTENT` followed by a newline) are now redacted.
+  - **Body limits:** the 1 MiB request cap now applies to every transport (it previously covered only `initialize`; stateless and existing sessions fell back to 4 MiB), and stateless mode caps concurrent requests (503 + `Retry-After`).
+  - **Slow-body hold-open:** outbound reads now have a deadline covering the body, not just the headers; the Developer Knowledge response is streamed with a byte cap instead of being buffered first.
+- **Privacy note:** with `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` set, `android_debugger` sends the exception class and message words to Google's API as the search query. Stack-trace messages can contain file paths or user data. Leave the key unset (or use `ANDROJACK_OFFLINE=1`) when that is not acceptable.
 
 ### Fixed
 
 - **`android_official_search` returned no documentation for any query.** It scraped `developer.android.com/s/results` (rendered client-side — the server HTML contains only the words "Search results"), `kotlinlang.org/search.html#q=` (the fragment never reaches the server — HTTP 404) and `source.android.com/search` (no such endpoint). The tool the grounding gate calls the "REQUIRED FIRST STEP" was grounding nothing. The same dead search URL was the fallback in `android_component_status`, `architecture_reference`, `android_debugger`, `kotlin_best_practices`, `material3_expressive` and `android_permission_advisor`. Retrieval now uses Google's Developer Knowledge API when `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` is set, otherwise a curated index of 68 canonical pages (`src/docs-index.ts`), each verified to return HTTP 200, which are fetched directly. When nothing matches, the tool says so.
 - **Text extraction burned the excerpt budget on blank lines.** devsite pages emit hundreds of whitespace-only lines; only runs of spaces were collapsed, so the 2–3 KB excerpt was mostly empty. Fixed.
+- **`androjack-mcp validate` could pass without checking anything** (found in review): an explicitly given symlink checked 0 files, files over 1 MiB were skipped silently, hitting the 20k-file cap truncated silently, and any directory named `build`/`out` was skipped, including Kotlin packages such as `com/example/build`. Named paths are now always checked; `build/` and `out/` are skipped only directly inside a Gradle module root; an empty scan, an oversized file, or a truncated walk exits **2**.
+- **Maven Central lookups labelled prereleases "Latest Stable"** (review finding, same flaw as the Google Maven one). Versions now come from `core=gav` with prereleases filtered. The name-only fallback no longer prints a paste-ready dependency line from an arbitrary publisher (dependency confusion); it lists candidates and asks for confirmation. `gradle_dependency_checker` now accepts explicit `group:artifact`.
+- **`engines.node` was `>=18.0.0`, but runtime dependencies require Node ≥ 20** (`cheerio`/`undici` ≥ 20.18.1, `ora`, `@hono/node-server` ≥ 20). Raised to `>=20.18.1`; CI tests Node 20 and 22.
+- **`.gitignore` ignored every directory named `build`**, not just the root `/build/` output, so a source package named `build` could never be committed. Anchored to `/build/`.
 - **`android_component_status` gave confident wrong verdicts** through bidirectional substring matching: `Row` → ContextualFlowRow **DEPRECATED**, `Task` → AsyncTask **REMOVED**, `io` → Navigation. Lookups are now exact (full name, simple class name, or qualified suffix); unknown names say "status NOT confirmed".
 - **Duplicate `Loader` registry key** silently reverted an earlier docUrl fix (the later entry won).
 - **`gradle_dependency_checker` labelled alphas "Latest Stable".** Google Maven's `<release>` tag is the most recently published version, often an alpha. The highest stable version is now selected from `<versions>`, with any newer pre-release shown separately. Unknown libraries no longer print an unresolvable `?:name:version` coordinate.
@@ -72,9 +84,18 @@ This release is mostly about closing the gap between what AndroJack claimed and 
 
 ### Tests
 
-- 85 → 163 tests (+1 opt-in live test). New suites: `security-v21`, `validator-v21`, `validate-cli`, `http-v21`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
+- 85 → 173 tests (+1 opt-in live test). The 11 tests added for the review findings were confirmed to fail on the pre-fix code. New suites: `security-v21`, `validator-v21`, `validate-cli`, `http-v21`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
 - Two existing assertions were changed because they asserted content that is not in the official docs: the Handoff test asserted the non-existent `android.intent.action.HANDOFF`, and the NPU test asserted an unverified feature string. They now assert the official API names.
 - UAT-03 caps `tools/list` at 30 KB (currently ~28.5 KB ≈ 7k tokens) so context cost cannot grow by accident.
+
+### Behaviour changes when upgrading from 2.0.x
+
+- **Node.js ≥ 20.18.1 required** (dependencies already required it; `engines` now says so).
+- `serve` rejects unknown flags and invalid values (`--port abc`, `--cache-ttl -5`, a non-numeric `PORT` env var) instead of silently ignoring them.
+- `serve` / `--http` refuse a non-loopback bind without `--allow-remote` / `ANDROJACK_ALLOW_REMOTE_HTTP=1`, and refuse it outright when a Google API key is set without `ANDROJACK_HTTP_TOKEN`.
+- HTTP: requests (including DELETE) for an unknown or idle-evicted session return **404** (previously 400 / 200). Spec-compliant clients start a new session; the TypeScript SDK client's `terminateSession()` throws on 404, so callers that terminate long-idle sessions should catch it.
+- `androjack-mcp validate` exit code 2 now also covers "nothing checked", oversized files, and truncated scans.
+- `android_debugger` no longer fetches Issue Tracker content; it links the query.
 
 ### Not in this release (deliberate)
 

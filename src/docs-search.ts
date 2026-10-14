@@ -19,7 +19,7 @@
  */
 
 import { secureFetch, extractPageText } from "./http.js";
-import { wrapUntrustedContent } from "./content-sanitizer.js";
+import { sanitizeInlineText, wrapUntrustedContent } from "./content-sanitizer.js";
 import { matchDocIndex } from "./docs-index.js";
 import {
   isDeveloperKnowledgeEnabled,
@@ -92,8 +92,11 @@ export async function searchOfficialDocs(
       if (chunks.length > 0) {
         return {
           results: chunks.map((c) => ({
-            title: c.title,
-            url: c.url,
+            // Title and URL are rendered outside the untrusted block, so they
+            // must be neutralised here (review finding: raw API titles could
+            // carry a spoofed boundary or instructions).
+            title: sanitizeInlineText(c.title) || "Untitled document",
+            url: new URL(c.url).href,
             excerpt: wrapUntrustedContent(c.url, c.content.slice(0, maxChars), "Google Developer Knowledge API"),
             provider: "google-developer-knowledge",
           })),

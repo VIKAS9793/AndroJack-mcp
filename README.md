@@ -377,15 +377,16 @@ npx -y androjack-mcp@2.1.0 validate . --format=sarif > androjack.sarif  # GitHub
 - run: npx -y androjack-mcp@2.1.0 validate . --target-sdk=37   # fails the job on errors
 ```
 
-Flags: `--format=text|json|sarif`, `--target-sdk=N`, `--min-sdk=N`, `--fail-on=error|warning|never`.
+Flags: `--format=text|json|sarif`, `--target-sdk=N`, `--min-sdk=N`, `--fail-on=error|warning|never`. Exit codes: `0` pass, `1` violations, `2` usage error **or the scan could not check everything** (no matching files, a file over 1 MiB, or the 20k-file cap) — a gate never passes on a partial scan.
 
 ### Optional configuration
 
 | Variable | Effect |
 |:---------|:-------|
-| `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` | Use Google's [Developer Knowledge API](https://developers.google.com/knowledge/mcp) as the doc-search backend (full-text search over developer.android.com). Without it, AndroJack uses its verified index of canonical pages. |
+| `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` | Use Google's [Developer Knowledge API](https://developers.google.com/knowledge/mcp) as the doc-search backend (full-text search over developer.android.com). Without it, AndroJack uses its verified index of canonical pages. **Privacy:** search queries — including exception messages from `android_debugger` — are sent to Google. |
 | `ANDROJACK_OFFLINE=1` | Zero outbound requests — tools return canonical links only. For air-gapped setups. |
 | `ANDROJACK_HTTP_TOKEN` | `serve` requires `Authorization: Bearer <token>`. Mandatory for remote binds when a Google API key is set. |
+| `ANDROJACK_ALLOW_REMOTE_HTTP=1` | Same as `serve --allow-remote`; also applies to `--http`. |
 | `ANDROJACK_HTTP_STATELESS=1` / `serve --stateless` | No MCP sessions — each request is self-contained (load-balancer friendly). |
 
 ---
@@ -454,7 +455,7 @@ Google now ships its own agent stack for Android. Being straight about the overl
 - **No more confident wrong answers:** `Row` → "DEPRECATED", `Task` → "REMOVED" registry false positives fixed; Android 17 games exemption corrected; fabricated Handoff API removed; Room 3 is stable (was described as alpha); Google Maven alphas no longer labelled "Latest Stable"; 19 dead documentation links replaced.
 - **Validator:** comments ignored (ends agent fix-loops), Kotlin DSL `kapt(...)` detected, API 37 thresholds corrected, 6 new Android 17 rules (34 total), structured output.
 - **New:** `androjack-mcp validate` CLI (text/JSON/SARIF) for CI; MCP resources for the rule catalogue; full tool annotations; AppFunctions guidance; Android Studio Rabbit 1 / AGP 9.4.
-- **Tests:** 85 → 163 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
+- **Tests:** 85 → 173 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
 
 Full details: [CHANGELOG.md](CHANGELOG.md).
 

@@ -133,3 +133,26 @@ test('HTTP-08 serve flags are validated instead of becoming NaN', () => {
 test('HTTP-09 invalid port is rejected by startHttpServer', async () => {
   await assert.rejects(start({ port: 70000 }), /Invalid port/);
 });
+
+test('HTTP-10 the bind policy is enforced inside startHttpServer (covers the --http entry point)', async () => {
+  await assert.rejects(start({ host: '0.0.0.0' }), /--allow-remote|ANDROJACK_ALLOW_REMOTE_HTTP/);
+  const prev = process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY;
+  process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY = 'k';
+  try {
+    await assert.rejects(start({ host: '0.0.0.0', allowRemote: true }), /ANDROJACK_HTTP_TOKEN/);
+  } finally {
+    if (prev === undefined) delete process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY; else process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY = prev;
+  }
+});
+
+test('HTTP-11 request bodies over 1 MiB are rejected in stateless mode too', async () => {
+  const h = await start({ stateless: true });
+  try {
+    const big = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: { pad: 'x'.repeat(1024 * 1024 + 100) } });
+    const r = await fetch(`${base(h)}/mcp`, { method: 'POST', headers: HEADERS, body: big });
+    assert.equal(r.status, 413);
+    await r.body?.cancel();
+  } finally {
+    await h.closeAsync();
+  }
+});

@@ -27,12 +27,12 @@
 
 import { ALLOWED_DOMAINS, USER_AGENT } from "../constants.js";
 import { docCache } from "../cache.js";
-import { checkRateLimit, fetchFollowingAllowlistedRedirects } from "../http.js";
+import { checkRateLimit, fetchFollowingAllowlistedRedirects, readResponseText } from "../http.js";
 import { logger } from "../logger.js";
 
 const ENDPOINT = "https://developerknowledge.googleapis.com/v1/documents:searchDocumentChunks";
 const CACHE_TTL_MS = 60 * 60 * 1000;
-const MAX_RESPONSE_CHARS = 512 * 1024;
+const MAX_RESPONSE_BYTES = 512 * 1024;
 
 export const DEVELOPER_KNOWLEDGE_ENV_VARS = [
   "ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY",
@@ -136,10 +136,9 @@ export async function searchDeveloperKnowledge(query: string, limit = 3): Promis
     );
   }
 
-  const text = await response.text();
-  if (text.length > MAX_RESPONSE_CHARS) {
-    throw new Error("Developer Knowledge API response exceeded size limit.");
-  }
+  // Streaming read: enforces the size cap and deadline without buffering an
+  // unbounded body first.
+  const text = await readResponseText(response, MAX_RESPONSE_BYTES);
 
   const chunks = parseKnowledgeResponse(JSON.parse(text), limit);
   logger.debug("devknowledge_search", { results: chunks.length });

@@ -28,7 +28,7 @@
   "author": "Vikas Sahani",
   "repository": {
     "type": "git",
-    "url": "https://github.com/VIKAS9793/androjack-mcp"
+    "url": "git+https://github.com/VIKAS9793/androjack-mcp.git"
   },
   "homepage": "https://androjack-web.netlify.app",
   "bugs": {
@@ -77,6 +77,6 @@
   },
   "overrides": {},
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.18.1"
   }
 }

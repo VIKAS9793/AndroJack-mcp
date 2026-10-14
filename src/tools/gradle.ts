@@ -187,14 +187,23 @@ async function fromGoogleMaven(groupId: string, artifactId: string): Promise<{ s
   }
 }
 
+/** Picks the highest stable version from a flat list of version strings. */
+export function pickStableVersion(versions: string[]): string | null {
+  return versions.filter((v) => !PRERELEASE_PATTERN.test(v)).sort(compareVersions).pop() ?? null;
+}
+
 async function fromMavenCentral(groupId: string, artifactId: string): Promise<string | null> {
   try {
+    // core=gav lists individual versions, so prereleases can be filtered out.
+    // The default core's `latestVersion` is simply the newest upload, which
+    // can be an alpha/RC (the same flaw as Google Maven's <release> tag).
     const q = encodeURIComponent(`g:"${groupId}" AND a:"${artifactId}"`);
-    const url = `${MAVEN_SEARCH_URL}?q=${q}&rows=1&wt=json`;
+    const url = `${MAVEN_SEARCH_URL}?q=${q}&core=gav&rows=100&wt=json`;
     const data = await secureFetchJson<{
-      response?: { docs?: Array<{ latestVersion?: string }> };
+      response?: { docs?: Array<{ v?: string }> };
     }>(url);
-    return data?.response?.docs?.[0]?.latestVersion ?? null;
+    const versions = (data?.response?.docs ?? []).map((d) => d.v).filter((v): v is string => typeof v === "string");
+    return pickStableVersion(versions);
   } catch {
     return null;
   }
@@ -202,19 +211,18 @@ async function fromMavenCentral(groupId: string, artifactId: string): Promise<st
 
 async function fromMavenCentralByArtifact(
   artifactId: string
-): Promise<{ groupId: string; artifactId: string; version: string } | null> {
+): Promise<Array<{ groupId: string; artifactId: string }>> {
   try {
     const q = encodeURIComponent(`a:"${artifactId}"`);
-    const url = `${MAVEN_SEARCH_URL}?q=${q}&rows=1&wt=json`;
+    const url = `${MAVEN_SEARCH_URL}?q=${q}&rows=5&wt=json`;
     const data = await secureFetchJson<{
-      response?: { docs?: Array<{ g?: string; a?: string; latestVersion?: string }> };
+      response?: { docs?: Array<{ g?: string; a?: string }> };
     }>(url);
-    const doc = data?.response?.docs?.[0];
-    return doc?.g && doc.a && doc.latestVersion
-      ? { groupId: doc.g, artifactId: doc.a, version: doc.latestVersion }
-      : null;
+    return (data?.response?.docs ?? [])
+      .filter((d): d is { g: string; a: string } => typeof d.g === "string" && typeof d.a === "string")
+      .map((d) => ({ groupId: d.g, artifactId: d.a }));
   } catch {
-    return null;
+    return [];
   }
 }
 
@@ -271,6 +279,25 @@ export async function gradleDependencyChecker(libraryName: string): Promise<stri
 
   const name = libraryName.trim().toLowerCase().replace(/\s+/g, "-").slice(0, 100);
   const header = `## AndroJack Gradle Dependency Checker\n**Library:** \`${libraryName}\`\n\n`;
+
+  // Explicit "group:artifact" coordinates — look the exact artifact up.
+  const coords = /^([A-Za-z0-9_.-]+):([A-Za-z0-9_.-]+)$/.exec(libraryName.trim());
+  if (coords) {
+    const [, groupId, artifactId] = coords as unknown as [string, string, string];
+    const google = await fromGoogleMaven(groupId, artifactId);
+    const version = google?.stable ?? (await fromMavenCentral(groupId, artifactId));
+    if (version) {
+      return (
+        header + formatLibrary({ groupId, artifactId }, version) +
+        (google?.prerelease ? `\n\n> 🧪 Newer pre-release available: \`${google.prerelease}\`.` : "") +
+        `\n\n> ✅ Highest stable version of \`${groupId}:${artifactId}\` on ${google?.stable ? "Google Maven" : "Maven Central"}.`
+      );
+    }
+    if (google?.prerelease) {
+      return header + `**No stable release of \`${groupId}:${artifactId}\`.** Latest pre-release: \`${google.prerelease}\`.`;
+    }
+    return header + `**\`${groupId}:${artifactId}\` was not found on Google Maven or Maven Central (or they were unreachable).**`;
+  }
 
   const entry = LIBRARY_CATALOGUE[name];
 
@@ -333,17 +360,18 @@ export async function gradleDependencyChecker(libraryName: string): Promise<stri
     }
   }
 
-  // Unknown library — search Maven Central by artifact id and show the real
-  // group:artifact pair it returns (v2.0 printed "?:name:version", i.e. a
-  // coordinate that cannot resolve).
-  const mcResult = await fromMavenCentralByArtifact(name);
-  if (mcResult) {
+  // Unknown library — list Maven Central coordinates that share the artifact
+  // name, but print NO paste-ready dependency line: anyone can publish an
+  // artifact with a popular name under another group (dependency confusion).
+  const candidates = await fromMavenCentralByArtifact(name);
+  if (candidates.length > 0) {
     return (
       header +
-      `**Not in local catalogue — closest Maven Central match:**\n` +
-      formatLibrary({ groupId: mcResult.groupId, artifactId: mcResult.artifactId }, mcResult.version) +
-      `\n\n> ⚠️ Matched by artifact name only. Confirm this is the intended library at ` +
-      `https://search.maven.org/artifact/${mcResult.groupId}/${mcResult.artifactId}`
+      `**Not in AndroJack's verified catalogue.** Maven Central artifacts named \`${name}\` ` +
+      `(publisher NOT verified — confirm the group ID with the library's official docs before using any):\n\n` +
+      candidates.map((c) => `- \`${c.groupId}:${c.artifactId}\` — https://search.maven.org/artifact/${c.groupId}/${c.artifactId}`).join("\n") +
+      `\n\n> ⚠️ Do not add a dependency from this list without confirming the publisher. ` +
+      `Once confirmed, call gradle_dependency_checker with the full "group:artifact".`
     );
   }
 

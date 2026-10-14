@@ -33,6 +33,7 @@ import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { ANDROJACK_VERSION } from "./version.js";
 import { TOOL_NAMES } from "./server-factory.js";
+import { isDeveloperKnowledgeEnabled } from "./integrations/developer-knowledge.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = "127.0.0.1";
@@ -72,6 +73,41 @@ export interface HttpServerOptions {
   stateless?: boolean;
   /** Install SIGINT/SIGTERM handlers (default true). Tests pass false. */
   handleSignals?: boolean;
+  /** Permit a non-loopback bind. Defaults to ANDROJACK_ALLOW_REMOTE_HTTP=1. */
+  allowRemote?: boolean;
+}
+
+/**
+ * Remote-bind policy, enforced inside startHttpServer so no entry point can
+ * skip it (v2.1 review: `--http` previously bypassed the check in serve.ts).
+ * Throws on a violation; returns a warning string for an unauthenticated
+ * remote bind, or undefined.
+ */
+export function checkBindPolicy(
+  host: string,
+  allowRemote: boolean,
+  env: NodeJS.ProcessEnv = process.env
+): string | undefined {
+  if (isLoopbackHost(host)) return undefined;
+
+  if (!allowRemote) {
+    throw new Error(
+      `Refusing to bind HTTP transport to non-loopback host "${host}" without --allow-remote ` +
+      `(or ANDROJACK_ALLOW_REMOTE_HTTP=1). Keep AndroJack local by default.`
+    );
+  }
+
+  const hasToken = Boolean(env["ANDROJACK_HTTP_TOKEN"]?.trim());
+  if (!hasToken && isDeveloperKnowledgeEnabled(env)) {
+    throw new Error(
+      `Refusing remote bind: a Google Developer Knowledge API key is configured but ANDROJACK_HTTP_TOKEN is not set. ` +
+      `Set ANDROJACK_HTTP_TOKEN so clients must send "Authorization: Bearer <token>".`
+    );
+  }
+
+  return hasToken
+    ? undefined
+    : `⚠️  AndroJack is listening on "${host}" without authentication. Set ANDROJACK_HTTP_TOKEN to require a bearer token.`;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -244,6 +280,10 @@ export async function startHttpServer(
     throw new Error(`Invalid port "${port}". Use an integer between 0 and 65535.`);
   }
 
+  const allowRemote = opts?.allowRemote ?? process.env["ANDROJACK_ALLOW_REMOTE_HTTP"] === "1";
+  const bindWarning = checkBindPolicy(host, allowRemote);
+  if (bindWarning) process.stderr.write(bindWarning + "\n");
+
   let advertisedPort = port;
   let advertisedHost = host;
   let allowedOrigins = buildAllowedOrigins(host, port);
@@ -373,6 +413,7 @@ export async function startHttpServer(
         const mcpServer = createServer();  // <-- fresh instance per session
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => newSessionId,
+          maxRequestBodySize: MAX_REQUEST_BODY_BYTES,
           onsessioninitialized: (id) => {
             sessions.set(id, { server: mcpServer, transport, lastSeenAt: Date.now() });
             process.stderr.write(`AndroJack HTTP: session opened [${id}]\n`);
@@ -408,15 +449,32 @@ export async function startHttpServer(
     }
   });
 
+  let statelessInFlight = 0;
+
   async function handleStatelessRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     if (req.method !== "POST") {
       res.writeHead(405, { Allow: "POST", "Content-Type": "text/plain" });
       res.end("Stateless mode accepts POST only.");
       return;
     }
+    if (statelessInFlight >= MAX_ACTIVE_SESSIONS) {
+      res.writeHead(503, { "Content-Type": "text/plain", "Retry-After": "1" });
+      res.end("Too many concurrent MCP requests");
+      return;
+    }
+    statelessInFlight++;
+    let released = false;
+    const release = () => {
+      if (!released) { released = true; statelessInFlight--; }
+    };
     const mcpServer = createServer();
-    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true,
+      maxRequestBodySize: MAX_REQUEST_BODY_BYTES,
+    });
     res.on("close", () => {
+      release();
       transport.close().catch(() => { });
       mcpServer.close().catch(() => { });
     });

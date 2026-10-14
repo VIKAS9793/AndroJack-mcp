@@ -118,7 +118,17 @@ function sanitizeUrlForLogs(url: string): string {
   }
 }
 
-async function readResponseText(response: Response, maxBytes: number): Promise<string> {
+/**
+ * Reads a response body with a byte cap and an overall deadline. The fetch()
+ * timeout only covers receiving headers; without a deadline here a server
+ * that trickles the body could hold a tool call open indefinitely.
+ */
+export async function readResponseText(
+  response: Response,
+  maxBytes: number,
+  timeoutMs: number = HTTP_TIMEOUT_MS
+): Promise<string> {
+  const deadline = Date.now() + timeoutMs;
   const contentLength = response.headers.get("content-length");
   if (contentLength) {
     const parsedLength = Number.parseInt(contentLength, 10);
@@ -140,7 +150,25 @@ async function readResponseText(response: Response, maxBytes: number): Promise<s
   let totalBytes = 0;
 
   while (true) {
-    const { done, value } = await reader.read();
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      await reader.cancel().catch(() => {});
+      throw new Error(`Response body not received within ${timeoutMs / 1000}s.`);
+    }
+    let timer: NodeJS.Timeout | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Response body not received within ${timeoutMs / 1000}s.`)), remaining);
+    });
+    let chunk: Awaited<ReturnType<typeof reader.read>>;
+    try {
+      chunk = await Promise.race([reader.read(), timeout]);
+    } catch (err) {
+      await reader.cancel().catch(() => {});
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+    const { done, value } = chunk;
     if (done) break;
     if (!value) continue;
 
@@ -221,11 +249,13 @@ export async function fetchFollowingAllowlistedRedirects(
   url: string,
   init: RequestInit
 ): Promise<{ response: Response; finalUrl: URL }> {
-  let current = assertAllowedDomain(url);
+  const origin = assertAllowedDomain(url);
+  let current = origin;
+  let hopInit = init;
   assertOnline();
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    const response = await fetchWithRetry(current.toString(), init);
+    const response = await fetchWithRetry(current.toString(), hopInit);
     if (!REDIRECT_STATUS.has(response.status)) {
       return { response, finalUrl: current };
     }
@@ -237,6 +267,13 @@ export async function fetchFollowingAllowlistedRedirects(
     }
 
     const next = assertAllowedDomain(new URL(location, current).toString());
+    checkRateLimit(next.hostname);
+    // Credentials (e.g. the Google API key) are scoped to the origin they were
+    // issued for. Never forward them to a different origin, even an
+    // allowlisted one.
+    if (next.origin !== origin.origin) {
+      hopInit = withoutCredentialHeaders(hopInit);
+    }
     logger.debug("http_redirect", {
       from: sanitizeUrlForLogs(current.toString()),
       to: sanitizeUrlForLogs(next.toString()),
@@ -245,6 +282,16 @@ export async function fetchFollowingAllowlistedRedirects(
   }
 
   throw new Error(`Too many redirects (> ${MAX_REDIRECTS}) starting from ${sanitizeUrlForLogs(url)}.`);
+}
+
+const CREDENTIAL_HEADERS = new Set(["authorization", "cookie", "proxy-authorization", "x-goog-api-key"]);
+
+function withoutCredentialHeaders(init: RequestInit): RequestInit {
+  const headers = new Headers(init.headers);
+  for (const name of [...headers.keys()]) {
+    if (CREDENTIAL_HEADERS.has(name.toLowerCase())) headers.delete(name);
+  }
+  return { ...init, headers };
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────

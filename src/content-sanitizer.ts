@@ -66,7 +66,9 @@ const BOUNDARY_TAG = "UNTRUSTED_EXTERNAL_CONTENT";
 // Any text resembling our own boundary tag (opening or closing, any case,
 // optional whitespace/slashes) would let fetched content "close" the
 // untrusted block early and continue as if it were trusted tool output.
-const BOUNDARY_SPOOF_PATTERN = /<\s*\/?\s*UNTRUSTED[_\s-]*EXTERNAL[_\s-]*CONTENT\b[^>]*>/gi;
+// `>` is optional: an unterminated "</UNTRUSTED_EXTERNAL_CONTENT" followed by
+// a newline is still read by a model as closing the block.
+const BOUNDARY_SPOOF_PATTERN = /<\s*\/?\s*UNTRUSTED[_\s-]*EXTERNAL[_\s-]*CONTENT\b[^>\n]*>?/gi;
 
 // Zero-width and bidi-control characters let an attacker split trigger words
 // ("ign\u200Bore previous instructions") so the regexes above never match,
@@ -141,6 +143,18 @@ export function wrapUntrustedContent(
     `${clean}\n` +
     `</${BOUNDARY_TAG}>`
   );
+}
+
+/**
+ * Makes externally-supplied short text (e.g. a search-result title) safe to
+ * place OUTSIDE the untrusted boundary: sanitized, single line, no Markdown
+ * heading/HTML control, length-capped.
+ */
+export function sanitizeInlineText(value: string, maxLength = 160): string {
+  const { clean } = sanitizeUntrustedText(value);
+  const oneLine = clean.replace(/[\u0000-\u001F\u007F]+/g, " ").replace(/\s{2,}/g, " ").trim();
+  const neutral = oneLine.replace(/[<>]/g, "").replace(/^#+\s*/, "");
+  return neutral.length > maxLength ? neutral.slice(0, maxLength - 1) + "…" : neutral;
 }
 
 // Attribute values are derived from user-controlled input (e.g. a search
