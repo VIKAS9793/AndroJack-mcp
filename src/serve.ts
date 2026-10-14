@@ -6,9 +6,10 @@
  * httpUrl-based MCP client.
  *
  * Usage:
- *   npx androjack-mcp@2.0.0 serve                 # localhost:3000
- *   npx androjack-mcp@2.0.0 serve --port 8080     # custom port
- *   npx androjack-mcp@2.0.0 serve --host 0.0.0.0  # expose on LAN (add your own auth)
+ *   npx androjack-mcp@2.1.0 serve                 # localhost:3000
+ *   npx androjack-mcp@2.1.0 serve --port 8080     # custom port
+ *   npx androjack-mcp@2.1.0 serve --stateless     # no sessions (load-balancer friendly)
+ *   ANDROJACK_HTTP_TOKEN=… npx androjack-mcp@2.1.0 serve --host 0.0.0.0 --allow-remote
  *
  * Android Studio setup:
  *   File → Settings → Tools → AI → MCP Servers → Enable MCP Servers
@@ -16,7 +17,8 @@
  */
 
 import chalk from "chalk";
-import { createAndroJackServer } from "./server-factory.js";
+import { createAndroJackServer, TOOL_NAMES } from "./server-factory.js";
+import { isDeveloperKnowledgeEnabled } from "./integrations/developer-knowledge.js";
 import { startHttpServer } from "./http-server.js";
 import { docCache } from "./cache.js";
 import { isDirectExecution } from "./cli-entry.js";
@@ -29,32 +31,51 @@ function normalizeServeArgs(rawArgs: string[]): string[] {
   return rawArgs[0] === "serve" ? rawArgs.slice(1) : rawArgs;
 }
 
-function parseArgs(args: string[]): {
+export interface ServeArgs {
   port: number;
   host: string;
   cacheTtlHours: number;
   noCache: boolean;
   allowRemote: boolean;
-} {
-  let port      = parseInt(process.env["PORT"] ?? "3000", 10);
+  stateless: boolean;
+}
+
+function parseInteger(flag: string, raw: string | undefined, min: number, max: number): number {
+  const value = Number(raw);
+  if (raw === undefined || raw.trim() === "" || !Number.isInteger(value) || value < min || value > max) {
+    throw new Error(`Invalid value for ${flag}: "${raw ?? ""}". Expected an integer between ${min} and ${max}.`);
+  }
+  return value;
+}
+
+/**
+ * Parses serve flags. v2.0 used bare parseInt, so "--port abc" became NaN
+ * and "--cache-ttl -5" silently disabled caching; both now fail fast.
+ */
+export function parseArgs(args: string[]): ServeArgs {
+  let port      = parseInteger("PORT", process.env["PORT"] ?? "3000", 0, 65535);
   let host      = process.env["HOST"] ?? "127.0.0.1";
   let cacheTtl  = 24;
   let noCache   = false;
   let allowRemote = process.env["ANDROJACK_ALLOW_REMOTE_HTTP"] === "1";
+  let stateless = process.env["ANDROJACK_HTTP_STATELESS"] === "1";
+
+  const valueOf = (i: number, a: string): [string | undefined, number] =>
+    a.includes("=") ? [a.slice(a.indexOf("=") + 1), i] : [args[i + 1], i + 1];
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
-    if (a === "--port"      && args[i + 1]) { port     = parseInt(args[++i]!, 10); }
-    if (a.startsWith("--port="))            { port     = parseInt(a.split("=")[1]!, 10); }
-    if (a === "--host"      && args[i + 1]) { host     = args[++i]!; }
-    if (a.startsWith("--host="))            { host     = a.split("=")[1]!; }
-    if (a === "--cache-ttl" && args[i + 1]) { cacheTtl = parseInt(args[++i]!, 10); }
-    if (a.startsWith("--cache-ttl="))       { cacheTtl = parseInt(a.split("=")[1]!, 10); }
-    if (a === "--no-cache")                 { noCache  = true; }
-    if (a === "--allow-remote")             { allowRemote = true; }
+    const name = a.split("=")[0];
+    if (name === "--port")      { const [v, j] = valueOf(i, a); port = parseInteger("--port", v, 0, 65535); i = j; continue; }
+    if (name === "--host")      { const [v, j] = valueOf(i, a); if (!v) throw new Error("--host requires a value"); host = v; i = j; continue; }
+    if (name === "--cache-ttl") { const [v, j] = valueOf(i, a); cacheTtl = parseInteger("--cache-ttl", v, 0, 24 * 30); i = j; continue; }
+    if (a === "--no-cache")     { noCache = true; continue; }
+    if (a === "--allow-remote") { allowRemote = true; continue; }
+    if (a === "--stateless")    { stateless = true; continue; }
+    throw new Error(`Unknown serve option "${a}". See: npx androjack-mcp --help`);
   }
 
-  return { port, host, cacheTtlHours: cacheTtl, noCache, allowRemote };
+  return { port, host, cacheTtlHours: cacheTtl, noCache, allowRemote, stateless };
 }
 
 function isLoopbackHost(host: string): boolean {
@@ -62,20 +83,43 @@ function isLoopbackHost(host: string): boolean {
   return normalized === "127.0.0.1" || normalized === "localhost" || normalized === "::1" || normalized === "[::1]";
 }
 
-function assertSafeBindHost(host: string, allowRemote: boolean): void {
-  if (isLoopbackHost(host) || allowRemote) {
+export function assertSafeBindHost(
+  host: string,
+  allowRemote: boolean,
+  env: NodeJS.ProcessEnv = process.env
+): void {
+  if (isLoopbackHost(host)) {
     return;
   }
 
-  throw new Error(
-    `Refusing to bind HTTP transport to non-loopback host "${host}" without --allow-remote. ` +
-    `Keep AndroJack local by default, or pass --allow-remote only behind a trusted network boundary.`
-  );
+  if (!allowRemote) {
+    throw new Error(
+      `Refusing to bind HTTP transport to non-loopback host "${host}" without --allow-remote. ` +
+      `Keep AndroJack local by default, or pass --allow-remote only behind a trusted network boundary.`
+    );
+  }
+
+  const hasToken = Boolean(env["ANDROJACK_HTTP_TOKEN"]?.trim());
+  if (!hasToken && isDeveloperKnowledgeEnabled(env)) {
+    // Without auth, anyone who can reach the port could spend the operator's
+    // Google API quota through android_official_search.
+    throw new Error(
+      `Refusing remote bind: a Google Developer Knowledge API key is configured but ANDROJACK_HTTP_TOKEN is not set. ` +
+      `Set ANDROJACK_HTTP_TOKEN so clients must send "Authorization: Bearer <token>".`
+    );
+  }
+
+  if (!hasToken) {
+    process.stderr.write(
+      `⚠️  AndroJack is listening on "${host}" without authentication. ` +
+      `Set ANDROJACK_HTTP_TOKEN to require a bearer token.\n`
+    );
+  }
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
 
-function printBanner(host: string, port: number, noCache: boolean): void {
+function printBanner(host: string, port: number, noCache: boolean, cacheTtlHours: number, stateless: boolean): void {
   const g = gradient(["#3DDC84", "#7F52FF"]);
   const url = `http://${host}:${port}/mcp`;
 
@@ -84,15 +128,16 @@ function printBanner(host: string, port: number, noCache: boolean): void {
   console.error(g("  ║                                                      ║"));
   console.error(g("  ║    🤖  AndroJack MCP  –  HTTP Server                 ║"));
   console.error(g("  ║    The Jack of All Android Trades                    ║"));
-  console.error(g("  ║    23 tools · Documentation-grounded · Read-only     ║"));
+  console.error(g(`  ║    ${`${TOOL_NAMES.length} tools · Documentation-grounded · Read-only`.padEnd(50)}║`));
   console.error(g("  ║                                                      ║"));
   console.error(g("  ╚══════════════════════════════════════════════════════╝"));
   console.error("");
   console.error(chalk.bold("  Server"));
   console.error(`  ${chalk.dim("Endpoint")}   ${chalk.cyan(url)}`);
   console.error(`  ${chalk.dim("Discovery")}  ${chalk.dim(`http://${host}:${port}/.well-known/mcp`)}`);
-  console.error(`  ${chalk.dim("Transport")}  ${chalk.green("Streamable HTTP (MCP 2025-03-26)")}`);
-  console.error(`  ${chalk.dim("Cache")}      ${noCache ? chalk.yellow("disabled (--no-cache)") : chalk.green("24h LRU per URL")}`);
+  console.error(`  ${chalk.dim("Transport")}  ${chalk.green(`Streamable HTTP (MCP 2025-11-25${stateless ? ", stateless" : ""})`)}`);
+  console.error(`  ${chalk.dim("Auth")}       ${process.env["ANDROJACK_HTTP_TOKEN"]?.trim() ? chalk.green("bearer token required") : chalk.dim("none (loopback)")}`);
+  console.error(`  ${chalk.dim("Cache")}      ${noCache ? chalk.yellow("disabled (--no-cache)") : chalk.green(`${cacheTtlHours}h LRU per URL`)}`);
   console.error("");
   console.error(chalk.bold("  Android Studio Setup"));
   console.error(`  ${chalk.dim("Path")}  ${chalk.dim("File → Settings → Tools → AI → MCP Servers → Enable MCP Servers")}`);
@@ -104,7 +149,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
     null, 4
   ).split("\n").map(l => "  " + l).join("\n")));
   console.error("");
-  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim("in Gemini chat to verify all 23 tools are listed.")}`);
+  console.error(`  ${chalk.dim("Then type")} ${chalk.bold("/mcp")} ${chalk.dim(`in Gemini chat to verify all ${TOOL_NAMES.length} tools are listed.`)}`);
   console.error("");
   console.error(chalk.dim("  Not affiliated with or endorsed by Google LLC or the Android Open Source Project."));
   console.error(chalk.dim("  Documentation sourced under CC-BY 4.0 from developer.android.com."));
@@ -117,7 +162,7 @@ function printBanner(host: string, port: number, noCache: boolean): void {
 
 export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<void> {
   const args = normalizeServeArgs(rawArgs);
-  const { port, host, cacheTtlHours, noCache, allowRemote } = parseArgs(args);
+  const { port, host, cacheTtlHours, noCache, allowRemote, stateless } = parseArgs(args);
   assertSafeBindHost(host, allowRemote);
 
   // Configure cache
@@ -128,13 +173,13 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
     docCache.setTtl(cacheTtlHours * 60 * 60 * 1000);
   }
 
-  printBanner(host, port, noCache);
+  printBanner(host, port, noCache, cacheTtlHours, stateless);
 
   // Each HTTP session gets a fresh McpServer — pass factory, not instance
-  await startHttpServer(createAndroJackServer, { port, host });
+  await startHttpServer(createAndroJackServer, { port, host, stateless });
 
   // Periodic cache stats — every 5 minutes in hosted mode
-  if (host !== "127.0.0.1" && !noCache) {
+  if (!isLoopbackHost(host) && !noCache) {
     setInterval(() => {
       const s = docCache.stats();
       process.stderr.write(

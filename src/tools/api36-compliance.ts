@@ -1,5 +1,5 @@
 // Tool 15: Android 16 / API 36 Compliance Checker
-// Google Play mandate: all apps must target API 36 by August 2026.
+// Google Play: new apps and updates must target API 36+ since August 31, 2026.
 // Android 16 removed the ability to lock orientation or restrict resizability on ≥600dp devices.
 
 export async function androidApi36Compliance(topic: string): Promise<string> {
@@ -11,7 +11,9 @@ Source: https://developer.android.com/about/versions/16/behavior-changes-all
 
 ## The Mandate
 
-Google Play requires all apps to **target API 36 by August 2026**.
+Since **August 31, 2026**, Google Play requires new apps and app updates to **target API 36+**
+(extension available to November 1, 2026; existing apps need API 35+ to reach new users).
+Source: https://developer.android.com/google/play/requirements/target-sdk
 Android 16 (API 36) introduced breaking changes for large-screen device behavior.
 Apps that fail compliance checks will receive warning badges in Play Store listings
 and may be demoted in search results.
@@ -161,7 +163,7 @@ fun AppWithAdaptiveNav(content: @Composable () -> Unit) {
 }
 \`\`\`
 
-Source: https://developer.android.com/guide/topics/large-screens/canonical-app-layouts
+Source: https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts
 `;
 
   const checklist = `

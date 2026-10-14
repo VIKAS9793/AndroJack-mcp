@@ -116,7 +116,7 @@ Source: https://developer.android.com/guide/navigation/navigation-3#state-persis
   // ── Scenes API ─────────────────────────────────────────────────────────────
   const scenes = `
 # Navigation 3 — Scenes API (Adaptive Multi-Pane)
-Source: https://developer.android.com/guide/navigation/navigation-3/adaptive
+Source: https://developer.android.com/guide/navigation/navigation-3/scenes
 
 ## What Scenes Does
 
@@ -171,7 +171,7 @@ val sceneStrategy = remember {
 }
 \`\`\`
 
-Source: https://developer.android.com/guide/navigation/navigation-3/adaptive
+Source: https://developer.android.com/guide/navigation/navigation-3/scenes
 `;
 
   // ── Scene Decorators (Navigation 3 1.1, stable May 18, 2026) ───────────────
@@ -257,7 +257,7 @@ Source: https://developer.android.com/guide/navigation/navigation-3/scenes
   // ── Migration from Nav2 ────────────────────────────────────────────────────
   const migration = `
 # Navigation 3 — Migrating from Navigation 2
-Source: https://developer.android.com/guide/navigation/navigation-3/migrate
+Source: https://developer.android.com/guide/navigation/navigation-3/migration-guide
 
 ## AI Agent: Read This Section Carefully
 Google embedded "AI Agent:" annotations in the official Nav3 migration guide specifically
@@ -330,13 +330,13 @@ entry<HomeKey> {
 - Deep links — handled at the Activity level, then push the appropriate NavKey onto the stack
 - ViewModel scoping — still use viewModel() inside entry { } blocks, scoped to that entry
 
-Source: https://developer.android.com/guide/navigation/navigation-3/migrate
+Source: https://developer.android.com/guide/navigation/navigation-3/migration-guide
 `;
 
   // ── Testing ────────────────────────────────────────────────────────────────
   const testing = `
 # Navigation 3 — Testing
-Source: https://developer.android.com/guide/navigation/navigation-3/testing
+Source: https://developer.android.com/guide/navigation/navigation-3/basics
 
 ## Why Nav3 Testing Is Easier Than Nav2
 
@@ -390,7 +390,7 @@ fun clickingProfile_showsProfileScreen() {
 }
 \`\`\`
 
-Source: https://developer.android.com/guide/navigation/navigation-3/testing
+Source: https://developer.android.com/guide/navigation/navigation-3/basics
 `;
 
   // ── Route dispatch ─────────────────────────────────────────────────────────

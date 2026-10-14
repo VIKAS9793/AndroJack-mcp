@@ -9,7 +9,7 @@ export async function androidXrGuide(topic: string): Promise<string> {
   const overview = `
 # Android XR — Official Developer Reference
 Source: https://developer.android.com/xr
-Source: https://developer.android.com/develop/ui/compose/xr
+Source: https://developer.android.com/develop/xr/jetpack-xr-sdk
 
 ## Status (February 2026)
 
@@ -46,7 +46,7 @@ Source: https://developer.android.com/xr
 
   const setup = `
 # Android XR — Setup & Dependencies
-Source: https://developer.android.com/xr/get-started
+Source: https://developer.android.com/develop/xr/get-started
 
 ## Dependencies
 
@@ -81,12 +81,12 @@ implementation(libs.arcore.xr)
   android:required="false" />  <!-- false = app still available on non-XR devices -->
 \`\`\`
 
-Source: https://developer.android.com/xr/get-started
+Source: https://developer.android.com/develop/xr/get-started
 `;
 
   const spatialUi = `
 # Android XR — Spatial UI with Compose for XR
-Source: https://developer.android.com/develop/ui/compose/xr/spatial-ui
+Source: https://developer.android.com/develop/xr/jetpack-xr-sdk/ui-compose
 
 ## SpatialPanel — A Compose UI in 3D Space
 
@@ -170,7 +170,7 @@ When using Material 3 with Compose for XR, some components automatically get spa
 
 No code changes needed if you're already using standard Material 3 components.
 
-Source: https://developer.android.com/develop/ui/compose/xr/spatial-ui
+Source: https://developer.android.com/develop/xr/jetpack-xr-sdk/ui-compose
 `;
 
   const arcore = `
@@ -224,7 +224,7 @@ Source: https://developers.google.com/ar/develop/android-xr
 
   const deviceCompat = `
 # Android XR — Device Compatibility & Non-XR Fallback
-Source: https://developer.android.com/xr/develop/device-compatibility
+Source: https://developer.android.com/develop/xr/devices
 
 ## Running on Both XR and Non-XR Devices
 
@@ -263,7 +263,7 @@ Use the Android XR Emulator in Android Studio:
 2. Create AVD with XR device profile
 3. Test both spatial and 2D fallback layouts
 
-Source: https://developer.android.com/xr/develop/device-compatibility
+Source: https://developer.android.com/develop/xr/devices
 `;
 
   if (t.includes("setup") || t.includes("depend") || t.includes("install")) return setup;

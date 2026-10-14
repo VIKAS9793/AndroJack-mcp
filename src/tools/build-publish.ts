@@ -125,8 +125,8 @@ Source: developer.android.com/build/migrate-to-catalogs
 ### File location: gradle/libs.versions.toml
 \`\`\`toml
 [versions]
-# Verified: developer.android.com/build/releases/agp-9-2-0-release-notes (April 2026)
-agp = "9.2.0"
+# Verified: developer.android.com/build/releases/agp-9-4-0-release-notes (September 2026)
+agp = "9.4.0"
 # Verified: AGP 9.x bundles this Kotlin Gradle Plugin version by default —
 # blog.jetbrains.com/kotlin/2026/01/update-your-projects-for-agp9
 kotlin = "2.2.10"
@@ -358,70 +358,42 @@ class BaselineProfileGenerator {
 
 const ANDROID_STUDIO_CURRENT = `
 ## Android Studio — Current Stable Release
-Source: https://developer.android.com/studio/releases
+Source: https://developer.android.com/studio/releases (verified 2026-10-14)
 
 ## ⚠️ NOTE FOR AI TOOLS
-The current stable Android Studio line is **Quail (2026.1.x)**. Do NOT
-reference Panda, Otter, Narwhal, or any earlier codename as current — Android
-Studio moved through Panda → Quail during 2026. Always confirm the exact
-patch number with \`android_official_search\` before citing one, since patch
-releases ship frequently within a stable line.
+The current stable Android Studio is **Rabbit 1 (2026.2.1)**. Quail (2026.1.x)
+is the previous line. Confirm the exact patch with the release notes before
+citing a version number — patch releases ship frequently.
 
-### Release History (2026)
+### Android Studio ↔ AGP compatibility (from the official table)
 
-| Release | Codename | Status |
-|---------|----------|--------|
-| **Current stable line** | **Android Studio Quail (2026.1.x)** | Stable, patch releases ongoing |
-| Next line | Android Studio Quail 2 | RC — nearing stable |
-| Preview | Android Studio Quail 3 | Canary |
-| Superseded | Android Studio Panda (2025.3.x) | No longer current |
+| Android Studio | Supported AGP |
+|----------------|---------------|
+| **Rabbit 1 · 2026.2.1** (current stable) | 7.1 – 9.4 |
+| Quail 4 · 2026.1.4 | 7.1 – 9.4 |
+| Quail 3 · 2026.1.3 | 7.1 – 9.3 |
+| Quail 2 · 2026.1.2 | 7.1 – 9.3 |
+| Quail 1 · 2026.1.1 | 7.1 – 9.2 |
 
-### Current IDE + AGP Compatibility
+### AGP 9.4.0 (September 2026) — current
 
-| Android Studio | AGP | Max API | Kotlin (bundled KGP) |
-|----------------|-----|---------|----------------------|
-| Quail (stable) | 9.2.0 | 37.0 | 2.2.10 |
-| Panda (superseded) | 9.1.x | 36.1–37.0 | 2.2.x |
+| Requirement | Minimum / default |
+|-------------|-------------------|
+| Gradle | 9.6.0 |
+| JDK | 17 |
+| SDK Build Tools | 36.0.0 |
+| Max supported API level | 37 |
 
-Source: https://developer.android.com/build/releases/agp-9-2-0-release-notes
-
-### Android Skills & Android CLI (New — April 16, 2026)
-
-Google launched a first-party **Android CLI**, an **Android Skills** GitHub
-repository, and an **Android Knowledge Base** for agentic Android development.
-Internal experiments showed token usage reduced by more than 70% and tasks
-completed 3x faster versus standard toolsets.
-
-\`\`\`bash
-# Install first-party Android skills into your agent's skill directory
-android skills add --skill r8-analyzer
-android skills add --skill nav2-to-nav3-migration
-android skills add --skill agp-9-upgrade
-
-# Query the live Android Knowledge Base from any agent/CLI
-android docs "compose grid layout"
-\`\`\`
-
-This is complementary to AndroJack, not a replacement for it: Android Skills
-are instructional context an agent reads before generating code. AndroJack's
-\`android_code_validator\` is an enforcement gate that runs after code is
-generated — the two compose well together. If your agent supports the open
-Agent Skills standard, use Android Skills for setup/scaffolding guidance and
-AndroJack's validator as the pre-return check on the result.
-
-Source: https://developer.android.com/tools/agents/android-skills
-
-### AGP 9.2 — Notable Changes
+Source: https://developer.android.com/build/releases/agp-9-4-0-release-notes
 
 \`\`\`kotlin
-// build.gradle.kts — current recommended config (AGP 9.2, Kotlin built-in)
+// build.gradle.kts — Android 17 target on AGP 9.4
 android {
-  compileSdk = 37      // Android 17 stable line
-  targetSdk = 37
-  minSdk = 26          // Adjust to your actual device coverage target
-
-  // AGP 9.0+: R8 repackages classes into the unnamed package by default.
-  // To opt out: add -dontrepackage to proguard-rules.pro
+  compileSdk = 37
+  defaultConfig {
+    targetSdk = 37     // Play requires ≥ 36 for new apps/updates since Aug 31, 2026
+    minSdk = 26        // Adjust to your actual device coverage target
+  }
   buildTypes {
     release {
       isMinifyEnabled = true
@@ -432,26 +404,50 @@ android {
 }
 \`\`\`
 
-\`\`\`pro
-# proguard-rules.pro — if R8 class repackaging breaks reflection-dependent code
--dontrepackage
+### AGP 10 — announced breaking changes (not yet released)
+
+- The new Variant API becomes **mandatory**. Before AGP 10 you can temporarily
+  opt individual modules out in \`gradle.properties\`:
+  \`android.newDsl.optOut=:example-lib1\`
+- Strict 1:1 variant parity between base app and dynamic feature modules
+  becomes a **fatal** error. Preview it now with
+  \`android.enforceDynamicFeatureVariantMatching=true\`.
+- kapt users should finish the KSP migration first (see the \`ksp\` topic).
+
+Source: https://developer.android.com/build/releases/agp-9-4-0-release-notes
+
+### Google's agent tooling for Android (first-party)
+
+Google now ships its own agent stack. Know what each piece does so you use the
+right tool for the job:
+
+| Tool | What it does | Enforces anything? |
+|------|--------------|--------------------|
+| **Android CLI** (1.0 stable, May 2026) | Terminal interface for agents: SDK/project setup, \`android run\`, \`android install\`, remote device streaming, \`android studio\` commands (analyze-file, check, find-usages, render-compose-preview) | Only what you run — \`android studio check\` needs Android Studio |
+| **Android skills** | Instruction sets (Agent Skills standard) for tasks like XML→Compose, AGP 9 upgrade, Navigation 3, edge-to-edge, R8 audits | No — advisory context for the agent |
+| **Android Knowledge Base** | \`android docs search\` / \`android docs fetch\` from the CLI | No — retrieval |
+| **Developer Knowledge MCP / API** | Google-hosted doc search across developer.android.com, Firebase, Cloud (API key, public preview) | No — retrieval |
+
+\`\`\`bash
+# Verified command shapes (Android CLI docs / release notes)
+android skills list                 # browse available skills
+android skills add <skill-name>     # install or update one skill
+android skills install <s1> <s2>    # install for your agent environment
+android docs search "<query>"       # Android Knowledge Base search
 \`\`\`
 
-### AGP 10.0 — Upcoming Breaking Changes (mid-2026)
+**How AndroJack fits:** Google's tools tell an agent *what the docs say* and
+*how to do a task*. AndroJack's \`android_code_validator\` (and
+\`npx androjack-mcp validate\` in CI) checks *whether the resulting code is allowed
+to ship* — deterministic rule IDs, exit codes, SARIF. Use both: Google for
+retrieval and skills, AndroJack as the gate. Set
+\`ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY\` and AndroJack's own doc search uses
+Google's Developer Knowledge API as its retrieval layer.
 
-The comfortable migration window for several AGP 9.x deprecations **closes
-with AGP 10.0**, expected mid-2026:
-
-- The \`android.newDsl=false\` / \`android.builtInKotlin=false\` opt-outs are
-  **permanently removed** — projects must be on the new DSL and built-in
-  Kotlin support before upgrading.
-- Type parameters are removed from \`CommonExtension\`; block methods move to
-  concrete extension types — affects custom Gradle plugin authors.
-- Projects still using \`kapt\` should migrate to KSP now — AGP 9.2.0 already
-  enforces the KSP migration path for new projects, and kapt is in
-  maintenance mode.
-
-Source: https://developer.android.com/build/releases/agp-9-0-0-release-notes
+Sources:
+- https://developer.android.com/tools/agents/android-cli
+- https://developer.android.com/tools/agents/android-skills
+- https://developer.android.com/tools/agents/android-cli/release-notes
 `;
 
 const PLAY_BILLING_2026 = `
@@ -508,7 +504,7 @@ const TOPICS: BuildTopic[] = [
   { keywords: ["ksp", "kapt", "annotation processing", "migrate kapt", "symbol processing"], content: KSP_MIGRATION },
   { keywords: ["sign", "signing", "keystore", "publish", "play store", "aab", "bundle", "release", "checklist", "upload"], content: SIGNING_PUBLISH },
   { keywords: ["baseline profile", "startup", "performance", "cold start", "art", "precompile"], content: BASELINE_PROFILES },
-  { keywords: ["android studio", "panda", "otter", "agp", "gradle plugin", "ide", "compilesdk", "targetsdk"], content: ANDROID_STUDIO_CURRENT },
+  { keywords: ["android studio", "rabbit", "quail", "panda", "otter", "agp", "gradle plugin", "ide", "compilesdk", "targetsdk", "android cli", "skills", "agent", "knowledge base"], content: ANDROID_STUDIO_CURRENT },
   { keywords: ["billing", "play billing", "alternative billing", "iap", "in-app purchase", "subscription fee"], content: PLAY_BILLING_2026 },
 ];
 
@@ -521,9 +517,12 @@ const INDEX = `
 - \`ksp\` — migrate from KAPT to KSP (Room, Hilt)
 - \`signing\` / \`publish\` — app signing, AAB, Play Store checklist
 - \`baseline profiles\` — startup performance, ART pre-compilation
+- \`android studio\` / \`agp\` — current Studio (Rabbit 1), AGP 9.4, AGP 10 changes
+- \`android cli\` / \`skills\` — Google's agent tooling and how it fits with AndroJack
+- \`billing\` — Play billing openness update
 
 **Official sources:**
-- https://developer.android.com/build/shrink-code
+- https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
 - https://developer.android.com/build/migrate-to-catalogs
 - https://developer.android.com/topic/performance/baselineprofiles
 `;

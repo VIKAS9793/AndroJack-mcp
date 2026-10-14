@@ -9,7 +9,7 @@
  * ActivityResultContracts API, and per-permission notes.
  */
 
-import { secureFetch, extractPageText } from "../http.js";
+import { searchOfficialDocs, formatDocResults } from "../docs-search.js";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -453,12 +453,12 @@ export async function androidPermissionAdvisor(query: string): Promise<string> {
   const found = findPermission(trimmed);
   if (found) return formatEntry(found[0], found[1]);
 
-  // Live fallback
-  const url = `https://developer.android.com/s/results?q=${encodeURIComponent("android permission " + trimmed)}`;
-  try {
-    const html = await secureFetch(url);
-    return `## Permission: "${trimmed}"\n\nNot in registry. Live search from developer.android.com:\n\n${extractPageText(html, 1500)}\n\n**Search URL:** ${url}`;
-  } catch {
-    return `## Permission: "${trimmed}"\n\nNot in registry. Check manually:\nhttps://developer.android.com/reference/android/Manifest.permission\nhttps://developer.android.com/guide/topics/permissions/overview`;
-  }
+  // Official-docs fallback
+  const outcome = await searchOfficialDocs(`permission ${trimmed}`, { limit: 2, maxChars: 1500 });
+  return (
+    `## Permission: "${trimmed}"\n\n` +
+    `Not in AndroJack's verified registry. Closest official pages:\n\n` +
+    formatDocResults(outcome) +
+    `\n\nFull list: https://developer.android.com/reference/android/Manifest.permission`
+  );
 }

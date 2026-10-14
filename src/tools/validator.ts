@@ -15,19 +15,61 @@
  *   This is the Android-specific implementation of the same pattern.
  *
  * Rule engine: src/rules/android-rules.ts
- *   - 28 rules across Kotlin, XML, Gradle
+ *   - Rule count is ANDROID_RULES.length — never hardcode it in prose
+ *     (v2.0 docs claimed 28, 31 and "26 → 28" in different places)
  *   - Zero new dependencies (pure TypeScript RegExp)
  *   - Data-driven: new rules require no code changes
+ *
+ * v2.1: `validateAndroidCode()` returns a structured report that the MCP tool
+ * exposes as `structuredContent` (with an outputSchema) and the
+ * `androjack validate` CLI renders as text, JSON, or SARIF for CI.
  */
 
 import {
+  ANDROID_RULES,
   runRules,
   countBySeverity,
   detectLanguage,
   type Language,
+  type Severity,
   type ValidationContext,
   type Violation,
 } from "../rules/android-rules.js";
+
+export type Verdict = "PASS" | "WARN" | "FAIL";
+
+export interface ValidationReport {
+  verdict: Verdict;
+  language: Language;
+  minSdk: number | null;
+  targetSdk: number | null;
+  counts: Record<Severity, number>;
+  rulesEvaluated: number;
+  violations: Violation[];
+}
+
+/** Pure, synchronous validation — shared by the MCP tool and the CLI. */
+export function validateAndroidCode(
+  code: string,
+  languageHint?: string,
+  minSdk?: number,
+  targetSdk?: number
+): ValidationReport {
+  const language = detectLanguage(code, languageHint) as Language;
+  const ctx: ValidationContext = { language, minSdk, targetSdk };
+  const violations = runRules(code, ctx);
+  const counts = countBySeverity(violations);
+  const verdict: Verdict = counts.error > 0 ? "FAIL" : counts.warning > 0 ? "WARN" : "PASS";
+  return {
+    verdict,
+    language,
+    minSdk: minSdk ?? null,
+    targetSdk: targetSdk ?? null,
+    counts,
+    rulesEvaluated: ANDROID_RULES.length,
+    violations,
+  };
+}
 
 // ── Output formatter ──────────────────────────────────────────────────────────
 
@@ -58,15 +100,18 @@ export async function androidCodeValidator(
     return "android_code_validator: No meaningful code provided. Pass a code block to validate.";
   }
 
-  const language  = detectLanguage(code, languageHint) as Language;
-  const ctx: ValidationContext = { language, minSdk, targetSdk };
-  const violations = runRules(code, ctx);
-  const counts     = countBySeverity(violations);
+  return formatValidationReport(validateAndroidCode(code, languageHint, minSdk, targetSdk));
+}
+
+/** Renders a ValidationReport as the Markdown report agents read. */
+export function formatValidationReport(report: ValidationReport): string {
+  const { verdict, language, counts, violations } = report;
+  const minSdk = report.minSdk ?? undefined;
+  const targetSdk = report.targetSdk ?? undefined;
   const errors     = violations.filter(v => v.severity === "error");
   const warnings   = violations.filter(v => v.severity === "warning");
   const infos      = violations.filter(v => v.severity === "info");
 
-  const verdict = counts.error > 0 ? "FAIL" : counts.warning > 0 ? "WARN" : "PASS";
   const verdictIcon = verdict === "PASS" ? "✅" : verdict === "WARN" ? "⚠️" : "❌";
 
   const lines: string[] = [];
@@ -81,7 +126,9 @@ export async function androidCodeValidator(
   lines.push("");
 
   if (violations.length === 0) {
-    lines.push("No violations found. Code passes all AndroJack Android rules.");
+    lines.push(`No violations found across ${report.rulesEvaluated} AndroJack rules.`);
+    lines.push("");
+    lines.push("Note: PASS means no known anti-pattern matched. It is a pattern check, not a compiler, Lint run, or test — still build and test the code.");
     lines.push("");
     lines.push("---");
     lines.push("**Next step:** Proceed — code is grounded and rule-compliant.");
@@ -121,6 +168,7 @@ export async function androidCodeValidator(
   if (verdict === "FAIL") {
     lines.push("**Required action:** Fix all errors above before returning this code to the user.");
     lines.push("For each error: apply the Fix, verify against the Source URL, then re-run `android_code_validator`.");
+    lines.push("If the same violation persists after two fix attempts, stop and show it to the user — it may be a false positive (comments are ignored, string literals are not).");
   } else if (verdict === "WARN") {
     lines.push("**Required action:** Address warnings if writing new code (not migrating legacy).");
     lines.push("Re-run `android_code_validator` after fixes to confirm PASS.");

@@ -10,7 +10,7 @@
  */
 
 import { COMPONENT_REGISTRY, ComponentEntry } from "../constants.js";
-import { secureFetch, extractPageText } from "../http.js";
+import { searchOfficialDocs, formatDocResults } from "../docs-search.js";
 
 function formatEntry(name: string, entry: ComponentEntry): string {
   const statusEmoji =
@@ -39,51 +39,55 @@ function formatEntry(name: string, entry: ComponentEntry): string {
 }
 
 /**
- * Fuzzy lookup — handles casing differences and partial matches.
+ * Registry lookup. Matches are exact (case-insensitive) on either the full
+ * key or the simple class name (last dotted segment), so
+ * "android.widget.ProgressDialog" and "ProgressDialog" both resolve.
+ *
+ * v2.0 used bidirectional substring matching, which produced confidently
+ * wrong verdicts: "Row" → ContextualFlowRow (DEPRECATED), "Task" → AsyncTask
+ * (REMOVED), "io" → Navigation. A wrong "deprecated" verdict is worse than
+ * "unknown" — the agent rewrites correct code — so unknown names now fall
+ * through to the documentation path instead.
  */
-function findInRegistry(name: string): [string, ComponentEntry] | null {
-  const lower = name.toLowerCase();
+export function findInRegistry(name: string): [string, ComponentEntry] | null {
+  const lower = name.trim().toLowerCase();
+  const simple = (value: string) => value.split(".").pop()!.toLowerCase();
 
-  // Exact match first
   for (const [key, val] of Object.entries(COMPONENT_REGISTRY)) {
     if (key.toLowerCase() === lower) return [key, val];
   }
 
-  // Partial match
-  for (const [key, val] of Object.entries(COMPONENT_REGISTRY)) {
-    if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())) {
-      return [key, val];
+  // Qualified suffix: "Notification.Builder" → "android.app.Notification.Builder"
+  if (lower.includes(".")) {
+    for (const [key, val] of Object.entries(COMPONENT_REGISTRY)) {
+      if (key.toLowerCase().endsWith(`.${lower}`)) return [key, val];
     }
+  }
+
+  for (const [key, val] of Object.entries(COMPONENT_REGISTRY)) {
+    // Skip nested classes ("android.app.Notification.Builder"): their simple
+    // name ("Builder") is too generic to identify them on its own.
+    const segments = key.split(".");
+    const isNested = segments.length > 2 && /^[A-Z]/.test(segments[segments.length - 2]!);
+    if (!isNested && simple(key) === simple(lower)) return [key, val];
   }
 
   return null;
 }
 
 /**
- * Falls back to scraping the Android reference docs for unknown components.
+ * Falls back to official documentation for components not in the registry.
  */
 async function fetchFromAndroidDocs(componentName: string): Promise<string> {
-  const encoded = encodeURIComponent(componentName);
-  const url = `https://developer.android.com/s/results?q=${encoded}`;
-
-  try {
-    const html = await secureFetch(url);
-    const text = extractPageText(html, 1500);
-    return (
-      `## Component Status: \`${componentName}\`\n` +
-      `**Status:** ❓ Not in local registry — showing live search results\n` +
-      `**Search URL:** ${url}\n\n` +
-      text +
-      `\n\n> Review the results above to confirm current API status before use.`
-    );
-  } catch (err) {
-    return (
-      `## Component Status: \`${componentName}\`\n` +
-      `**Status:** ❓ Unknown — not in registry, live fetch failed.\n` +
-      `**Check manually:** https://developer.android.com/reference/${componentName.replace(/\./g, "/")}\n` +
-      `**Error:** ${err instanceof Error ? err.message : String(err)}`
-    );
-  }
+  const referenceUrl = `https://developer.android.com/reference/${componentName.replace(/\./g, "/")}`;
+  const outcome = await searchOfficialDocs(componentName, { limit: 2, maxChars: 1500 });
+  return (
+    `## Component Status: \`${componentName}\`\n` +
+    `**Status:** ❓ Not in AndroJack's verified registry — status NOT confirmed.\n` +
+    `**Reference (if this is a platform class):** ${referenceUrl}\n\n` +
+    (outcome.results.length > 0 || outcome.notes.length > 0 ? formatDocResults(outcome) + "\n\n" : "") +
+    `> Do not assume this API is stable. Confirm its status on the reference page above before use.`
+  );
 }
 
 /**

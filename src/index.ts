@@ -18,11 +18,19 @@ function writeHelp(stream: NodeJS.WriteStream = process.stdout): void {
       "  npx androjack-mcp install --auto         Auto-install to all detected IDEs",
       "  npx androjack-mcp install --ide=cursor   Install to a specific IDE",
       "  npx androjack-mcp serve                  Start the Streamable HTTP server",
-      "  npx androjack-mcp serve --allow-remote   Permit non-loopback HTTP binding",
+      "  npx androjack-mcp serve --allow-remote   Permit non-loopback HTTP binding (set ANDROJACK_HTTP_TOKEN)",
+      "  npx androjack-mcp serve --stateless      Stateless Streamable HTTP (no sessions)",
+      "  npx androjack-mcp validate [paths]       Run validator rules on files (CI gate)",
+      "      --format=text|json|sarif  --target-sdk=N  --min-sdk=N  --fail-on=error|warning|never",
       "  npx androjack-mcp --http                 Start Streamable HTTP from stdio entrypoint",
       "  npx androjack-mcp                        Start the stdio MCP server",
       "  npx androjack-mcp --help                 Show this help",
       "  npx androjack-mcp --version              Show the current version",
+      "",
+      "Environment:",
+      "  ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY    Use Google's Developer Knowledge API for doc search",
+      "  ANDROJACK_OFFLINE=1                      Never touch the network (links only)",
+      "  ANDROJACK_HTTP_TOKEN                     Require 'Authorization: Bearer <token>' on HTTP",
       "",
     ].join("\n")
   );
@@ -35,6 +43,12 @@ export async function main(): Promise<void> {
   if (command === "install") {
     const { main: runInstaller } = await import("./install.js");
     await runInstaller(args.slice(1));
+    return;
+  }
+
+  if (command === "validate") {
+    const { main: runValidate } = await import("./validate-cli.js");
+    await runValidate(args.slice(1));
     return;
   }
 

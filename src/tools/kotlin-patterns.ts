@@ -8,7 +8,7 @@
  * per the coroutines-test 1.6+ migration guide.
  */
 
-import { secureFetch, extractPageText } from "../http.js";
+import { searchOfficialDocs, formatDocResults } from "../docs-search.js";
 
 interface PatternEntry {
   name: string;
@@ -512,23 +512,13 @@ export async function kotlinBestPractices(topic: string): Promise<string> {
     );
   }
 
-  // Live fallback
-  const searchUrl = `https://developer.android.com/s/results?q=${encodeURIComponent(sanitized)}`;
-  try {
-    const html = await secureFetch(searchUrl);
-    const text = extractPageText(html, 2000);
-    return (
-      `## Kotlin Best Practice: "${sanitized}"\n\n` +
-      `No built-in snippet found. Official Android search results:\n` +
-      `**Source:** ${searchUrl}\n\n${text}\n\n` +
-      `> Review the official docs above before implementing.`
-    );
-  } catch {
-    return (
-      `## Kotlin Best Practice: "${sanitized}"\n\n` +
-      `Could not fetch live results. Search manually:\n` +
-      `- https://developer.android.com/s/results?q=${encodeURIComponent(sanitized)}\n` +
-      `- https://kotlinlang.org/docs/coroutines-guide.html`
-    );
-  }
+  // Official-docs fallback
+  const outcome = await searchOfficialDocs(sanitized, { limit: 2, maxChars: 2000 });
+  return (
+    `## Kotlin Best Practice: "${sanitized}"\n\n` +
+    `No built-in snippet found. Closest official pages:\n\n` +
+    formatDocResults(outcome) +
+    `\n\n> Review the official docs above before implementing. ` +
+    `Coroutines guide: https://kotlinlang.org/docs/coroutines-overview.html`
+  );
 }

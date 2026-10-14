@@ -3,10 +3,13 @@
  *
  * All outbound requests are:
  *   1. Validated against the domain allowlist (hard fail on violation)
- *   2. Rate-limited per domain (30 req/min, in-process)
- *   3. Retried on transient failures (503, 429, network timeout) with backoff
- *   4. Body-size capped (4 MB) to prevent OOM on large pages
- *   5. Parsed with cheerio (real HTML parser, not regex) for structured extraction
+ *   2. Re-validated on EVERY redirect hop (v2.1) — fetch() no longer follows
+ *      redirects automatically, so an allowlisted host cannot bounce the
+ *      request to an arbitrary origin
+ *   3. Rate-limited per domain (30 req/min, in-process)
+ *   4. Retried on transient failures (503, 429, network timeout) with backoff
+ *   5. Body-size capped (4 MB) to prevent OOM on large pages
+ *   6. Parsed with cheerio (real HTML parser, not regex) for structured extraction
  *
  * Secrets never appear in logs. All writes go to stderr.
  */
@@ -21,7 +24,7 @@ import { logger } from "./logger.js";
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
 const MAX_REQUESTS_PER_DOMAIN_PER_MINUTE = 30;
 
-function checkRateLimit(domain: string): void {
+export function checkRateLimit(domain: string): void {
   const now = Date.now();
   const entry = requestCounts.get(domain);
 
@@ -56,6 +59,16 @@ export function assertAllowedDomain(url: string): URL {
     throw new Error(`Protocol "${parsed.protocol}" is not allowed. AndroJack only fetches over HTTPS.`);
   }
 
+  // Embedded credentials and non-default ports are never needed for public
+  // documentation and only widen the attack surface (credential leakage,
+  // reaching non-HTTPS services on an allowlisted host).
+  if (parsed.username || parsed.password) {
+    throw new Error("URLs with embedded credentials are not allowed.");
+  }
+  if (parsed.port !== "" && parsed.port !== "443") {
+    throw new Error(`Port ${parsed.port} is not allowed. AndroJack only fetches over the default HTTPS port.`);
+  }
+
   const allowed = ALLOWED_DOMAINS as readonly string[];
   const isAllowed = allowed.some(
     (d) => hostname === d || hostname.endsWith(`.${d}`)
@@ -71,9 +84,23 @@ export function assertAllowedDomain(url: string): URL {
   return parsed;
 }
 
+// ── Offline kill-switch ───────────────────────────────────────────────────────
+
+/**
+ * ANDROJACK_OFFLINE=1 guarantees zero outbound requests — enforced here, at
+ * the only function that calls fetch(), rather than trusted to each tool.
+ */
+export function assertOnline(): void {
+  if (process.env["ANDROJACK_OFFLINE"] === "1") {
+    throw new Error("Network access disabled (ANDROJACK_OFFLINE=1).");
+  }
+}
+
 // ── Core fetch with retry ─────────────────────────────────────────────────────
 
 const MAX_BODY_BYTES = 4 * 1024 * 1024;
+const MAX_REDIRECTS = 3;
+const REDIRECT_STATUS = new Set([301, 302, 303, 307, 308]);
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 const MAX_RETRIES = 2;
 const RETRY_BASE_MS = 800;
@@ -145,7 +172,7 @@ async function fetchWithRetry(
   const timer = setTimeout(() => controller.abort(), HTTP_TIMEOUT_MS);
 
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal });
+    const response = await fetch(url, { ...init, redirect: "manual", signal: controller.signal });
 
     if (!response.ok && RETRYABLE_STATUS.has(response.status) && attempt < MAX_RETRIES) {
       clearTimeout(timer);
@@ -183,6 +210,43 @@ async function fetchWithRetry(
   }
 }
 
+/**
+ * Follows redirects manually, re-validating every hop against the allowlist.
+ * Without this, fetch()'s default `redirect: "follow"` would let any
+ * allowlisted host (or an open redirect on one) send AndroJack to an
+ * arbitrary origin — and the response would then be returned to the agent
+ * as if it came from an authoritative source.
+ */
+export async function fetchFollowingAllowlistedRedirects(
+  url: string,
+  init: RequestInit
+): Promise<{ response: Response; finalUrl: URL }> {
+  let current = assertAllowedDomain(url);
+  assertOnline();
+
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const response = await fetchWithRetry(current.toString(), init);
+    if (!REDIRECT_STATUS.has(response.status)) {
+      return { response, finalUrl: current };
+    }
+
+    const location = response.headers.get("location");
+    await response.body?.cancel().catch(() => {});
+    if (!location) {
+      throw new Error(`HTTP ${response.status} redirect from ${current.hostname} without a Location header.`);
+    }
+
+    const next = assertAllowedDomain(new URL(location, current).toString());
+    logger.debug("http_redirect", {
+      from: sanitizeUrlForLogs(current.toString()),
+      to: sanitizeUrlForLogs(next.toString()),
+    });
+    current = next;
+  }
+
+  throw new Error(`Too many redirects (> ${MAX_REDIRECTS}) starting from ${sanitizeUrlForLogs(url)}.`);
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export async function secureFetch(url: string): Promise<string> {
@@ -196,7 +260,7 @@ export async function secureFetch(url: string): Promise<string> {
 
   checkRateLimit(parsed.hostname);
 
-  const response = await fetchWithRetry(url, {
+  const { response } = await fetchFollowingAllowlistedRedirects(url, {
     headers: {
       "User-Agent": USER_AGENT,
       Accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
@@ -224,7 +288,7 @@ export async function secureFetchJson<T = unknown>(url: string): Promise<T> {
 
   checkRateLimit(parsed.hostname);
 
-  const response = await fetchWithRetry(url, {
+  const { response } = await fetchFollowingAllowlistedRedirects(url, {
     headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
   });
 
@@ -260,9 +324,13 @@ export function extractPageText(html: string, maxChars = 3000): string {
 
   if (!text) text = $("body").text();
 
+  // devsite pages emit hundreds of whitespace-only lines; collapsing only
+  // runs of spaces left them in place and burned most of the maxChars budget
+  // on blank lines before any real content was reached.
   text = text
     .replace(/\t/g, " ")
-    .replace(/ {2,}/g, " ")
+    .replace(/[ \u00a0]{2,}/g, " ")
+    .replace(/^[ \u00a0]+|[ \u00a0]+$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 

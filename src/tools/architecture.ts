@@ -18,7 +18,7 @@ import {
   ARCHITECTURE_GUIDES,
   VIEW_BASED_MAINTENANCE_MODE_TOPICS,
 } from "../constants.js";
-import { secureFetch, extractPageText } from "../http.js";
+import { fetchOfficialPage, formatDocResults, isOfflineMode, searchOfficialDocs } from "../docs-search.js";
 
 const COMPOSE_FIRST_SOURCE =
   "https://android-developers.googleblog.com/2026/05/android-ui-development-is-compose-first.html";
@@ -81,30 +81,27 @@ export async function architectureReference(topic: string): Promise<string> {
     (maintenanceNotice ?? "");
 
   if (!guideUrl) {
-    // Fallback: search developer.android.com
-    const searchUrl = `https://developer.android.com/s/results?q=${encodeURIComponent(sanitized)}`;
-    try {
-      const html = await secureFetch(searchUrl);
-      const text = extractPageText(html, 2500);
-      return (
-        header +
-        `**No direct guide mapped. Showing search results from developer.android.com:**\n` +
-        `**URL:** ${searchUrl}\n\n` +
-        text +
-        `\n\n> 📐 GROUNDING GATE: Review the architecture guide above before proposing any structure.`
-      );
-    } catch (err) {
-      return (
-        header +
-        `Could not fetch guide. Search manually: ${searchUrl}\n` +
-        `Error: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
+    const outcome = await searchOfficialDocs(sanitized, { limit: 2, maxChars: 2500 });
+    return (
+      header +
+      `**No direct guide mapped for this topic.** Closest official pages:\n\n` +
+      formatDocResults(outcome) +
+      `\n\n> 📐 GROUNDING GATE: Review the architecture guide above before proposing any structure. ` +
+      `Pass "list" to see mapped topics.`
+    );
+  }
+
+  if (isOfflineMode()) {
+    return (
+      header +
+      `**Official Guide:** ${guideUrl}\n\n` +
+      `_(Offline mode — open the guide above; excerpt not fetched.)_\n\n---\n` +
+      `> 📐 GROUNDING GATE: Architecture code must align with the official guide above.`
+    );
   }
 
   try {
-    const html = await secureFetch(guideUrl);
-    const text = extractPageText(html, 3000);
+    const text = await fetchOfficialPage(guideUrl, 3000);
 
     return (
       header +

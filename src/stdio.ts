@@ -10,7 +10,7 @@
  *
  * Transport: stdio (universal local compatibility) — or Streamable HTTP
  *            when --http flag is present.
- * Protocol:  MCP spec 2025-11-25 via @modelcontextprotocol/sdk ^1.27.1
+ * Protocol:  MCP spec 2025-11-25 via @modelcontextprotocol/sdk ^1.32.1
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";

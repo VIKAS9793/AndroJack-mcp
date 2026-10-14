@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
 
     steps:
       - name: Check out repository
@@ -21,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -29,6 +33,9 @@ jobs:
 
       - name: Build project
         run: npm run build
+
+      - name: Audit production dependencies (fail on high/critical)
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Validate package contents
         run: npm pack --dry-run
@@ -71,7 +78,7 @@ jobs:
           console.log('Hono floor OK:', [...versions].join(', '));
           NODE
 
-      - name: Assert SDK floor >= 1.27.1
+      - name: Assert SDK floor >= 1.32.1
         shell: bash
         run: |
           node << 'NODE'
@@ -86,9 +93,9 @@ jobs:
           walk(tree.name || 'root', tree);
           if (versions.size === 0) throw new Error('SDK not found in dependency tree');
           for (const v of versions) {
-            const [maj, min] = v.split('.').map(Number);
-            if (maj < 1 || (maj === 1 && min < 27)) {
-              console.error(`SDK version ${v} is below floor 1.27.1`);
+            const [maj, min, pat] = v.split('.').map(Number);
+            if (maj < 1 || (maj === 1 && min < 32) || (maj === 1 && min === 32 && pat < 1)) {
+              console.error(`SDK version ${v} is below floor 1.32.1 (<=1.30.1 has a high-severity advisory)`);
               process.exit(1);
             }
           }
@@ -106,8 +113,13 @@ jobs:
           fi
           echo ".connector-build hygiene OK"
 
-      - name: Rigorous Testing (85-test suite)
+      - name: Unit, regression, and UAT suites
         run: |
           echo "Verifying test files..."
-          ls -l test/rules.test.mjs test/parser.test.mjs test/cache.test.mjs test/http.test.mjs test/tool-outputs.test.mjs test/content-sanitizer.test.mjs test/cli-routing.test.mjs test/http-session.test.mjs
+          ls -l test/*.test.mjs test/uat/*.test.mjs test/uat/UAT_PLAN.md
           npm test
+
+      - name: Dogfood the CI gate (validate CLI emits valid SARIF)
+        run: |
+          node build/index.js validate test --format=sarif --fail-on=never > "$RUNNER_TEMP/androjack.sarif"
+          node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if (s.version!=="2.1.0") process.exit(1); console.log("SARIF OK, rules:", s.runs[0].tool.driver.rules.length)' "$RUNNER_TEMP/androjack.sarif"

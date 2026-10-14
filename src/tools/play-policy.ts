@@ -1,5 +1,6 @@
 // Tool 18: Play Store Policy Advisor
 // October 2025 policy changes affect app code, architecture, and manifest declarations.
+// v2.1: target API section updated — the Aug 31, 2026 deadline has passed.
 // AI tools have zero awareness of these changes. Review failures cost weeks of re-submission.
 
 export async function androidPlayPolicyAdvisor(topic: string): Promise<string> {
@@ -17,18 +18,27 @@ Source: https://support.google.com/googleplay/android-developer/answer/9904549
 | Medical Device labeling (EU) | Oct 2025 | Health/medical apps in European markets |
 | Digital Lending compliance (India) | Oct 2025 | Personal loan apps in India |
 | Subscription charge transparency | Oct 2025 | All apps with subscriptions |
-| API 36 targeting mandate | Aug 2026 | ALL apps — large-screen compliance |
+| API 36 targeting requirement | **In force since Aug 31, 2026** (extension to Nov 1, 2026) | New apps + updates (Wear/Automotive: 35, TV/XR: 34) |
 | Large-screen quality badge | Active | All apps — affects search placement |
 
-## API 36 Targeting Mandate (August 2026)
+## Target API Requirement — in force since August 31, 2026
 
-Every app published on Google Play must target API 36 by August 2026. This means:
-- minSdk can remain at 21+ (no change to minimum)
-- targetSdk must be 36
-- Apps MUST handle all screen sizes, aspect ratios, and multi-window on ≥600dp devices
-- Apps MUST support Predictive Back Gesture
+Verified 2026-10-14 against https://developer.android.com/google/play/requirements/target-sdk
 
-See the android_api36_compliance tool for the full technical implementation guide.
+- **New apps and app updates** must target **Android 16 (API 36)** or higher.
+  Wear OS and Android Automotive OS: API 35+. Android TV and Android XR: API 34+.
+- **Existing apps** must target **API 35+** to stay available to *new users* on
+  newer Android versions. Below that, they are only offered on devices whose OS
+  is at or below the app's targetSdk.
+- **Extension:** developers can request more time, up to **November 1, 2026**,
+  via forms in Play Console.
+- **Exception:** permanently private apps restricted to one organization.
+- minSdk is unaffected.
+- No API 37 / 2027 requirement has been announced on that page yet — do not
+  state one.
+
+Targeting API 36 also activates Android 16's large-screen behavior changes —
+see the android_api36_compliance tool for the implementation guide.
 
 Source: https://support.google.com/googleplay/android-developer/answer/9904549
 `;
@@ -52,7 +62,7 @@ It requires a specific API integration with Google Play's Family Policy system.
 \`\`\`kotlin
 // Implementation uses Play Core Family APIs
 // Check the current official docs for latest SDK version
-// https://developer.android.com/google/play/billing/families
+// https://developer.android.com/google/play/billing
 
 // Manifest — declare the feature
 <meta-data
@@ -66,7 +76,7 @@ class AgeVerificationRepository @Inject constructor(
   fun isRestrictedContentAllowed(): Flow<Boolean> = callbackFlow {
     // Integrate with Google Play Family APIs
     // Implementation details depend on your app category
-    // Reference: https://developer.android.com/google/play/billing/families
+    // Reference: https://developer.android.com/google/play/billing
     trySend(true)  // Default — replace with actual implementation
     awaitClose()
   }
