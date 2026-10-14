@@ -2,17 +2,15 @@
  * AndroJack MCP — Official documentation retrieval (single choke point)
  *
  * Every tool that surfaces externally-fetched documentation goes through this
- * module, which guarantees two properties the v2.0 code only claimed:
+ * module, which guarantees two properties:
  *
- *   1. Fetched text is ALWAYS wrapped by wrapUntrustedContent() — not just
- *      issue-tracker results. (SECURITY.md stated "all externally-fetched
- *      content" was sanitized; in v2.0 only android_debugger did it.)
- *   2. "Search" actually returns documentation. Retrieval order:
+ *   1. Fetched text is ALWAYS wrapped by wrapUntrustedContent().
+ *   2. "Search" returns documentation. Retrieval order:
  *        a. Google Developer Knowledge API, when a key is configured
  *        b. Curated index of verified canonical pages (src/docs-index.ts),
  *           fetched directly (server-rendered, so content is real)
- *      The v2.0 fallback — scraping developer.android.com/s/results — is
- *      gone: that page renders client-side and yielded no results.
+ *      Client-rendered search pages are never scraped: they contain no results
+ *      when fetched server-side.
  *
  * Offline mode (ANDROJACK_OFFLINE=1) skips all network calls and returns the
  * matched canonical links only. Used for air-gapped setups and hermetic tests.
@@ -93,8 +91,8 @@ export async function searchOfficialDocs(
         return {
           results: chunks.map((c) => ({
             // Title and URL are rendered outside the untrusted block, so they
-            // must be neutralised here (review finding: raw API titles could
-            // carry a spoofed boundary or instructions).
+            // must be neutralised here: a raw title could carry a spoofed
+            // boundary or instructions.
             title: sanitizeInlineText(c.title) || "Untitled document",
             url: new URL(c.url).href,
             excerpt: wrapUntrustedContent(c.url, c.content.slice(0, maxChars), "Google Developer Knowledge API"),

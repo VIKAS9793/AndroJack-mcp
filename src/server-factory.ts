@@ -94,9 +94,9 @@ const OPEN_WORLD_TOOLS = new Set<ToolName>([
 ]);
 
 /**
- * Full MCP tool annotations. v2.0 set only readOnlyHint; clients use the
- * other hints to decide auto-approval and retry behaviour (e.g. an
- * idempotent, non-destructive, closed-world tool can be retried freely).
+ * Full MCP tool annotations. Clients use these hints to decide auto-approval
+ * and retry behaviour (e.g. an idempotent, non-destructive, closed-world tool
+ * can be retried freely).
  */
 export function toolAnnotations(name: ToolName): ToolAnnotations {
   return {

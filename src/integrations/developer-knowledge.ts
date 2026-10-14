@@ -60,7 +60,9 @@ export function isDeveloperKnowledgeEnabled(env: NodeJS.ProcessEnv = process.env
 
 function isAllowlistedUri(uri: string): boolean {
   try {
-    const host = new URL(uri).hostname.toLowerCase();
+    const parsed = new URL(uri);
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname.toLowerCase();
     return (ALLOWED_DOMAINS as readonly string[]).some((d) => host === d || host.endsWith(`.${d}`));
   } catch {
     return false;

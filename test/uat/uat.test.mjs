@@ -1,5 +1,5 @@
 /**
- * AndroJack MCP – User Acceptance Tests (v2.1.0)
+ * AndroJack MCP – User Acceptance Tests
  *
  * Black-box acceptance tests: the BUILT server is launched as a real child
  * process and driven through the official MCP SDK client, exactly as Claude

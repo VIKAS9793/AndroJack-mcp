@@ -139,7 +139,9 @@ const LIBRARY_CATALOGUE: Record<string, LibEntry> = {
 
 // ── Maven fetchers ────────────────────────────────────────────────────────────
 
-const PRERELEASE_PATTERN = /-(alpha|beta|rc|dev|eap|snapshot|m\d)/i;
+// Maven qualifiers come after "-" or "." (2.0.0-rc01, 2.0.0.RC1, 6.0.0.M1,
+// 1.1.0-preview01, 2.0-milestone-1). Anything matching is not "stable".
+const PRERELEASE_PATTERN = /[-.](alpha|beta|rc|cr|dev|eap|snapshot|preview|pre|milestone|m(?=\d))/i;
 
 /** Compares dotted numeric versions; qualifiers sort before their release. */
 export function compareVersions(a: string, b: string): number {
@@ -164,9 +166,8 @@ export function compareVersions(a: string, b: string): number {
 
 /**
  * Picks the highest stable and highest pre-release version from Google Maven
- * metadata. v2.0 used the <release> tag, which on Google Maven is simply the
- * most recently published version — frequently an alpha — and then labelled
- * it "Latest Stable".
+ * metadata. The <release> tag is not used: on Google Maven it is simply the
+ * most recently published version, frequently an alpha.
  */
 export function pickVersionsFromMetadata(xml: string): { stable: string | null; prerelease: string | null } {
   const versions = [...xml.matchAll(/<version>([^<]+)<\/version>/g)].map((m) => m[1]!.trim());

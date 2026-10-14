@@ -5,12 +5,10 @@
  * and searches official sources for verified causes and fixes.
  * This is the most powerful debugging tool — no guesswork.
  *
- * Security note (v2.1): issuetracker.google.com indexes free-text,
- * publicly-postable, user-submitted bug reports — the highest-risk source for
- * indirect prompt injection. Its search UI is also rendered client-side, so a
- * server-side fetch returned the app shell, not issues. v2.1 therefore no
- * longer fetches it at all: the tool links to the tracker query instead,
- * which removes the injection surface while losing no actual content.
+ * Security note: issuetracker.google.com indexes free-text, publicly-postable,
+ * user-submitted bug reports — the highest-risk source for indirect prompt
+ * injection — and its search UI renders client-side. The tool therefore
+ * links to the tracker query instead of fetching it.
  * Documentation results flow through src/docs-search.ts and are always
  * wrapped as untrusted content.
  */

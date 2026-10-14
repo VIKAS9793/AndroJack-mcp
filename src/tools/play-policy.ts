@@ -1,6 +1,5 @@
 // Tool 18: Play Store Policy Advisor
 // October 2025 policy changes affect app code, architecture, and manifest declarations.
-// v2.1: target API section updated — the Aug 31, 2026 deadline has passed.
 // AI tools have zero awareness of these changes. Review failures cost weeks of re-submission.
 
 export async function androidPlayPolicyAdvisor(topic: string): Promise<string> {

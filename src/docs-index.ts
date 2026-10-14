@@ -1,15 +1,11 @@
 /**
  * AndroJack MCP — Curated Official Documentation Index
  *
- * Why this exists (v2.1): developer.android.com/s/results is rendered
- * client-side. A server-side fetch of it returns only the page shell
- * ("Search results") with zero result content, so every tool that used it
- * as a "live search" fallback was silently returning nothing. kotlinlang.org
- * search uses a URL fragment (never sent to the server) and returned 404.
- *
- * Direct documentation pages ARE server-rendered, so the reliable keyless
- * path is: match the query against a curated index of canonical pages, then
- * fetch those pages. Every URL below was verified to return HTTP 200
+ * The developer.android.com search page renders its results client-side, so a
+ * server-side fetch of it contains no results, and kotlinlang.org search uses
+ * a URL fragment that never reaches the server. Documentation pages
+ * themselves are server-rendered, so the reliable keyless path is: match the
+ * query against a curated index of canonical pages, then fetch those pages. Every URL below was verified to return HTTP 200
  * (with Accept-Language: en-US) on 2026-10-14. `test/docs-index.test.mjs`
  * guards the structure; refresh the URLs each release.
  *

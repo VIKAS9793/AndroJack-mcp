@@ -3,9 +3,9 @@
  *
  * All outbound requests are:
  *   1. Validated against the domain allowlist (hard fail on violation)
- *   2. Re-validated on EVERY redirect hop (v2.1) — fetch() no longer follows
- *      redirects automatically, so an allowlisted host cannot bounce the
- *      request to an arbitrary origin
+ *   2. Re-validated on EVERY redirect hop — redirects are followed manually,
+ *      so an allowlisted host cannot bounce the request to an arbitrary
+ *      origin, and credentials are dropped on cross-origin hops
  *   3. Rate-limited per domain (30 req/min, in-process)
  *   4. Retried on transient failures (503, 429, network timeout) with backoff
  *   5. Body-size capped (4 MB) to prevent OOM on large pages

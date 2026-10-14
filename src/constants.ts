@@ -196,7 +196,7 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     docUrl: "https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture",
     notes: "Use OnBackPressedCallback or Compose BackHandler. Required for API 35 targets.",
   },
-  // ── Loader (fix docUrl — was pointing to ViewModel) ───────────────────────
+  // ── Loader ─────────────────────────────────────────────────────────────────
   Loader: {
     status: "deprecated",
     since: "API 28",

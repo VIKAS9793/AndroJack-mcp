@@ -22,14 +22,14 @@
  *      enclosed text is reference material, not directives.
  *
  * Every tool that surfaces fetched content MUST route it through
- * `wrapUntrustedContent()` before returning it as a tool result. As of v2.1
- * this is enforced centrally by `fetchOfficialPage()` / `searchOfficialDocs()`
- * in `src/docs-search.ts` rather than relying on each tool to remember.
+ * `wrapUntrustedContent()` before returning it as a tool result. This is
+ * enforced centrally by `fetchOfficialPage()` / `searchOfficialDocs()` in
+ * `src/docs-search.ts` rather than relying on each tool to remember.
  *
- * v2.1 hardening: text is NFKC-normalized with zero-width/bidi characters
- * removed before matching (defeats split-word and full-width evasion), and
- * any spoofed boundary tag inside the content is redacted so fetched text
- * cannot close the untrusted block early.
+ * Text is NFKC-normalized with zero-width/bidi characters removed before
+ * matching (defeats split-word and full-width evasion), and any spoofed
+ * boundary tag inside the content is redacted so fetched text cannot close
+ * the untrusted block early.
  */
 
 import { logger } from "./logger.js";
@@ -152,7 +152,7 @@ export function wrapUntrustedContent(
  */
 export function sanitizeInlineText(value: string, maxLength = 160): string {
   const { clean } = sanitizeUntrustedText(value);
-  const oneLine = clean.replace(/[\u0000-\u001F\u007F]+/g, " ").replace(/\s{2,}/g, " ").trim();
+  const oneLine = clean.replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]+/g, " ").replace(/\s{2,}/g, " ").trim();
   const neutral = oneLine.replace(/[<>]/g, "").replace(/^#+\s*/, "");
   return neutral.length > maxLength ? neutral.slice(0, maxLength - 1) + "…" : neutral;
 }

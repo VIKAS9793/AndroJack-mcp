@@ -41,10 +41,10 @@ developer.android.com, Google Maven or Google APIs being reachable. UAT-L1 is th
 
 | Suite | Covers |
 |-------|--------|
-| `test/security-v21.test.mjs` | Redirect re-validation, port/credential rejection, boundary spoofing, Unicode evasion, attribute escaping, universal wrapping, API-key handling, offline kill-switch |
-| `test/validator-v21.test.mjs` | Comment masking, kapt KTS, SDK gates, CameraX ranges, `minSdkBelow`, regex state, performance, registry matching, Maven stable selection, doc index |
+| `test/security-hardening.test.mjs` | Redirect re-validation, port/credential rejection, boundary spoofing, Unicode evasion, attribute escaping, universal wrapping, API-key handling, offline kill-switch |
+| `test/validator-engine.test.mjs` | Comment masking, kapt KTS, SDK gates, CameraX ranges, `minSdkBelow`, regex state, performance, registry matching, Maven stable selection, doc index |
 | `test/validate-cli.test.mjs` | CLI exit codes, text/JSON/SARIF output, Gradle-root output skipping, symlinks, explicit paths, no-partial-pass (empty / oversized / truncated), committed fixture app |
-| `test/http-v21.test.mjs` | Bearer auth, idle eviction, 404 for unknown sessions, discovery counts, stateless mode, remote-bind policy, flag validation |
+| `test/http-transport.test.mjs` | Bearer auth, idle eviction, 404 for unknown sessions, discovery counts, stateless mode, remote-bind policy, flag validation |
 | `test/release-integrity.test.mjs` | Version sync across all manifests/configs/badges; README counts match code; CHANGELOG head |
 
 ## How to run

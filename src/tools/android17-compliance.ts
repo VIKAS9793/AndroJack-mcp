@@ -1,15 +1,7 @@
 // Tool 22: Android 17 / API 37 Compliance Checker
 // Android 17 shipped to stable on June 16, 2026 (Pixel + AOSP).
-// v2.1 corrections, verified against developer.android.com on 2026-10-14:
-//   - Games ARE exempt from the API 37 large-screen rules (android:appCategory).
-//     v2.0 stated the opposite.
-//   - Handoff uses setHandoffEnabled() + onHandoffActivityDataRequested().
-//     v2.0 documented an intent action and callback that do not exist.
-//   - Added: lock-free MessageQueue, read-only native libs for System.load,
-//     app memory limits, config-change recreation, CameraX ≥1.5.2,
-//     certificate transparency default, background audio hardening.
-//   - Fragment anchors (#…) removed: the official page exposes none, so they
-//     pointed nowhere.
+// Content verified against developer.android.com on 2026-10-14. Links point to
+// whole pages: the official behaviour-changes page exposes no fragment anchors.
 
 export async function android17Compliance(topic: string): Promise<string> {
   const t = topic.toLowerCase().trim();
@@ -247,8 +239,7 @@ class EditorActivity : ComponentActivity() {
 > ⚠️ AndroJack verified only the entry points above (\`setHandoffEnabled(true, null)\` and
 > \`onHandoffActivityDataRequested(HandoffActivityDataRequestInfo): HandoffActivityData\`).
 > Look up \`HandoffActivityData\` in the API 37 reference before writing its construction code.
-> v2.0 of this tool documented an \`android.intent.action.HANDOFF\` intent filter and an
-> \`onProvideHandoffData()\` callback; neither exists.
+> There is no Handoff intent filter or \`onProvideHandoffData()\` callback; do not generate them.
 
 ## When to Implement
 

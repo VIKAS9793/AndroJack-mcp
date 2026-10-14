@@ -48,8 +48,8 @@ function parseInteger(flag: string, raw: string | undefined, min: number, max: n
 }
 
 /**
- * Parses serve flags. v2.0 used bare parseInt, so "--port abc" became NaN
- * and "--cache-ttl -5" silently disabled caching; both now fail fast.
+ * Parses serve flags. Invalid values (e.g. "--port abc", "--cache-ttl -5")
+ * and unknown options fail fast instead of being ignored.
  */
 export function parseArgs(args: string[]): ServeArgs {
   let port      = parseInteger("PORT", process.env["PORT"] ?? "3000", 0, 65535);
@@ -83,8 +83,8 @@ function isLoopbackHost(host: string): boolean {
 }
 
 /**
- * Re-exported for callers/tests; the policy itself lives in http-server.ts so
- * that every entry point (serve, --http, programmatic) enforces it.
+ * Thin wrapper; the policy lives in http-server.ts so that every entry point
+ * (serve, --http, programmatic) enforces it.
  */
 export function assertSafeBindHost(
   host: string,

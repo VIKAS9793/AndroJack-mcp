@@ -261,8 +261,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     id:          "GRADLE_KAPT_NEW_PROJECT",
     severity:    "warning",
     languages:   ["gradle"],
-    // v2.0 only matched Groovy `kapt "…"`; Kotlin DSL `kapt("…")` (the default
-    // for new projects) and the plugin declarations slipped through.
+    // Covers Groovy `kapt "…"`, Kotlin DSL `kapt("…")`, and the plugin declarations.
     pattern:     /\bkapt\s*\(?\s*["']|\bkotlin\s*\(\s*["']kapt["']\s*\)|["']kotlin-kapt["']|["']org\.jetbrains\.kotlin\.kapt["']/g,
     message:     "KAPT (kapt annotation processor) is slower than KSP and deprecated for most Jetpack libraries.",
     replacement: "Migrate to KSP (ksp plugin + ksp() dependency declaration). Room, Hilt, and Moshi all support KSP.",
@@ -322,7 +321,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     replacement: "Replace reflected static final mutation with constructor injection or a provider/factory pattern. In tests, use dependency injection instead of field mutation.",
     docUrl:      "https://developer.android.com/about/versions/17/behavior-changes-17#static-final-reflection",
     notes:       "Only breaks when used on static final fields. isAccessible=true on non-final fields still works. Audit all reflection usage before targeting API 37.",
-    minSdkAbove: 36,  // Only flag for apps targeting API 37+ (v2.0 used 35, which also fired for API 36)
+    minSdkAbove: 36,  // Only flag for apps targeting API 37+
   },
 
   {
@@ -336,7 +335,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     minSdkAbove: 36,
   },
 
-  // ── Compose-First / Compose 1.11 rules (v2.0, May 2026 platform shift) ────
+  // ── Compose-First / Compose 1.11 rules (May 2026 platform shift) ──────────
 
   {
     id:          "UNCONFINED_DISPATCHER_COMPOSE_TEST",
@@ -360,7 +359,7 @@ export const ANDROID_RULES: AndroidRule[] = [
     notes:       "Info-level only — this is a platform direction signal, not a defect. Maintaining existing Fragment code is fine; this flags NEW Fragment subclasses specifically.",
   },
 
-  // ── Android 17 / API 37 — stable since June 16, 2026 (v2.1) ───────────────
+  // ── Android 17 / API 37 — stable since June 16, 2026 ───────────────────────
   // Source for all rules below: https://developer.android.com/about/versions/17/behavior-changes-17
 
   {
@@ -452,10 +451,10 @@ export function detectLanguage(code: string, hint?: string): Language {
  * such as hardcoded Gradle versions and SMS_RECEIVED need their contents)
  * but are tracked so a "//" inside "https://…" is not mistaken for a comment.
  *
- * Why (v2.1): the validator matched banned APIs inside comments. An agent
- * that correctly migrated code and left "// Replaced AsyncTask with
- * coroutines" got verdict FAIL, "fixed" it, re-ran, and could loop forever
- * on a violation that did not exist.
+ * Without this, a migration note such as "// Replaced AsyncTask with
+ * coroutines" would produce a FAIL verdict, and an agent following the
+ * "fix and re-run until PASS" loop could loop on a violation that does not
+ * exist.
  */
 export function maskComments(code: string, language: Language): string {
   const out = code.split("");
@@ -536,7 +535,6 @@ export function isRuleGatedOut(rule: AndroidRule, ctx: ValidationContext): boole
   if (rule.minSdkAbove !== undefined && ctx.targetSdk !== undefined && ctx.targetSdk <= rule.minSdkAbove) {
     return true;
   }
-  // v2.0 declared minSdkBelow but never enforced it.
   if (rule.minSdkBelow !== undefined && ctx.minSdk !== undefined && ctx.minSdk >= rule.minSdkBelow) {
     return true;
   }

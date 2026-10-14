@@ -166,3 +166,78 @@ test('CLI-08 argument parsing and language mapping', () => {
   assert.equal(languageForFile('AndroidManifest.xml'), 'xml');
   assert.equal(languageForFile('README.md'), null);
 });
+
+test('CLI-09 --fail-on semantics at the boundaries', async () => {
+  const errors = await makeProject({ 'E.kt': 'GlobalScope.launch { }' });
+  const warnings = await makeProject({ 'build.gradle.kts': 'dependencies {\n  kapt("x:y:1.0")\n}' });
+  const clean = await makeProject({ 'C.kt': 'class C' });
+  try {
+    assert.equal((await run(['.', '--fail-on=never'], errors)).code, 0, 'never: errors still exit 0');
+    assert.equal((await run(['.', '--fail-on=error'], warnings)).code, 0, 'error: warnings alone pass');
+    assert.equal((await run(['.', '--fail-on=warning'], clean)).code, 0, 'warning: clean project passes');
+    assert.equal((await run(['.', '--fail-on=bogus'], clean)).code, 2, 'invalid --fail-on is a usage error');
+    const text = await run(['.', '--format=text'], clean);
+    assert.equal(text.code, 0);
+    assert.match(text.stdout, /1 file\(s\) checked/);
+    assert.ok(!/skipped/.test(text.stderr), 'no symlink notice when none were skipped');
+  } finally {
+    for (const d of [errors, warnings, clean]) await rm(d, { recursive: true, force: true });
+  }
+});
+
+test('CLI-10 SDK flags are bounded to 1..99', async () => {
+  const clean = await makeProject({ 'C.kt': 'class C' });
+  try {
+    assert.equal((await run(['.', '--target-sdk=0'], clean)).code, 2);
+    assert.equal((await run(['.', '--target-sdk=100'], clean)).code, 2);
+    assert.equal((await run(['.', '--min-sdk=1', '--target-sdk=99'], clean)).code, 0);
+  } finally {
+    await rm(clean, { recursive: true, force: true });
+  }
+});
+
+test('CLI-11 VCS/tool dirs inside a walked tree are skipped; unreadable paths say why', async () => {
+  const root = await makeProject({
+    'src/.git/x/G.kt': 'GlobalScope.launch { }',
+    'src/.gradle/x/G.kt': 'GlobalScope.launch { }',
+    'src/node_modules/x/G.kt': 'GlobalScope.launch { }',
+    'src/.idea/G.kt': 'GlobalScope.launch { }',
+    'src/Ok.kt': 'class Ok',
+  });
+  try {
+    const r = await run(['src'], root);
+    assert.equal(r.code, 0, r.stdout);
+    assert.match(r.stdout, /1 file\(s\) checked/);
+    const missing = await run(['/definitely/not/here']);
+    assert.match(missing.stderr, /Cannot read/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI-12 build/ under a Gradle module root is skipped only when walked, never when named', async () => {
+  const root = await makeProject({ 'build.gradle.kts': 'plugins { }', 'build/Gen.kt': 'GlobalScope.launch { }', 'src/Ok.kt': 'class Ok' });
+  try {
+    assert.equal((await run(['.'], root)).code, 0, 'walked: Gradle output skipped');
+    assert.equal((await run(['build'], root)).code, 1, 'named explicitly: checked');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI-13 hitting the file cap is reported as truncation (fails closed)', async () => {
+  const { validatePaths, scanProblems } = await import('../build/validate-cli.js');
+  const root = await makeProject({ 'a/A.kt': 'class A', 'b/B.kt': 'class B', 'c/C.kt': 'class C' });
+  try {
+    const capped = await validatePaths({ paths: ['.'], format: 'text', failOn: 'error', maxFiles: 2 }, root);
+    assert.equal(capped.truncated, true);
+    assert.equal(capped.reports.length, 2);
+    assert.match(scanProblems(capped).join('\n'), /file cap/);
+    const exact = await validatePaths({ paths: ['.'], format: 'text', failOn: 'error', maxFiles: 3 }, root);
+    assert.equal(exact.truncated, false, 'exactly at the cap is not truncation');
+    assert.deepEqual(scanProblems(exact), []);
+    assert.deepEqual(exact.reports.map((r) => r.file), ['a/A.kt', 'b/B.kt', 'c/C.kt'], 'deterministic order');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

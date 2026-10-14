@@ -22,7 +22,7 @@ Have an idea for a new tool or feature? Open an issue with the "enhancement" lab
 
 ## 🛠️ Validator Rule Contributions
 To add or modify a validator rule in `src/rules/android-rules.ts`, you **must**:
-1. Add a corresponding test in `test/rules.test.mjs` or `test/validator-v21.test.mjs`.
+1. Add a corresponding test in `test/rules.test.mjs` or `test/validator-engine.test.mjs`.
 2. Confirm the rule fires on a minimal positive example (code containing the violation).
 3. Confirm the rule **does not** fire on a known-clean file or negative example — including the same API mentioned only in a comment.
 4. Use an official `docUrl` you have opened yourself (HTTP 200), and set `minSdkAbove` to the last API level the rule should **not** fire for (e.g. `36` for an API 37 behaviour change).

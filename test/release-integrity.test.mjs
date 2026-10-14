@@ -1,11 +1,9 @@
 /**
  * AndroJack MCP – release integrity
  *
- * Guards the two kinds of drift that shipped in earlier releases:
- *   - version strings out of sync across manifests (v2.0.0 shipped with
- *     src/version.ts bumped but package.json and configs stale)
- *   - documentation claiming counts the code does not have (v1.7.x claimed
- *     31 validator rules; 28 existed)
+ * Guards two kinds of drift:
+ *   - version strings out of sync across manifests, configs, and badges
+ *   - documentation claiming counts or tool names the code does not have
  */
 
 import test from 'node:test';
@@ -82,7 +80,7 @@ test('REL-07 every tool name mentioned in src or docs is a real registered tool'
   const files = [];
   (function walk(dir) {
     for (const name of readdirSync(dir)) {
-      if (['node_modules', 'build', '.git', 'release-2.1.0'].includes(name)) continue;
+      if (name.startsWith('.') || ['node_modules', 'build', 'release-2.1.0'].includes(name)) continue;
       const p = path.join(dir, name);
       if (statSync(p).isDirectory()) walk(p);
       else if (/\.(ts|md)$/.test(name)) files.push(p);

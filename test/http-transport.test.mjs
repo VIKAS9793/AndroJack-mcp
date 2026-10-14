@@ -1,5 +1,5 @@
 /**
- * AndroJack MCP – v2.1 HTTP transport hardening tests
+ * AndroJack MCP – HTTP transport hardening tests
  */
 
 import test from 'node:test';
@@ -152,6 +152,28 @@ test('HTTP-11 request bodies over 1 MiB are rejected in stateless mode too', asy
     const r = await fetch(`${base(h)}/mcp`, { method: 'POST', headers: HEADERS, body: big });
     assert.equal(r.status, 413);
     await r.body?.cancel();
+  } finally {
+    await h.closeAsync();
+  }
+});
+
+test('HTTP-12 bind policy uses the token the server enforces, and slow requests time out', async () => {
+  const { checkBindPolicy } = await import('../build/http-server.js');
+  const env = { ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY: 'k' };
+  assert.equal(checkBindPolicy('0.0.0.0', true, env, 'opt-token'), undefined, 'token passed via options must count');
+  assert.throws(() => checkBindPolicy('0.0.0.0', true, { ...env, ANDROJACK_HTTP_TOKEN: 't' }, ''), /ANDROJACK_HTTP_TOKEN/,
+    'an env token the server does not enforce must not count');
+  const net = await import('node:net');
+  const h = await start({ timeouts: { headersMs: 400, requestMs: 800 } });
+  try {
+    // A client that never finishes its headers is cut off by headersTimeout.
+    const closed = await new Promise((resolve) => {
+      const sock = net.connect(h.address.port, '127.0.0.1', () => sock.write('POST /mcp HTTP/1.1\r\nHost: 127.0.0.1\r\n'));
+      sock.resume(); // consume the 408 so 'close' can fire
+      sock.on('close', () => resolve(true));
+      setTimeout(() => { sock.destroy(); resolve(false); }, 5_000);
+    });
+    assert.equal(closed, true);
   } finally {
     await h.closeAsync();
   }

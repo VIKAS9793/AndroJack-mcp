@@ -43,11 +43,10 @@ function formatEntry(name: string, entry: ComponentEntry): string {
  * key or the simple class name (last dotted segment), so
  * "android.widget.ProgressDialog" and "ProgressDialog" both resolve.
  *
- * v2.0 used bidirectional substring matching, which produced confidently
- * wrong verdicts: "Row" → ContextualFlowRow (DEPRECATED), "Task" → AsyncTask
- * (REMOVED), "io" → Navigation. A wrong "deprecated" verdict is worse than
- * "unknown" — the agent rewrites correct code — so unknown names now fall
- * through to the documentation path instead.
+ * There is deliberately no substring or fuzzy matching: "Row" must not match
+ * ContextualFlowRow. A wrong "deprecated" verdict is worse than "unknown" —
+ * the agent rewrites correct code — so unknown names fall through to the
+ * documentation path instead.
  */
 export function findInRegistry(name: string): [string, ComponentEntry] | null {
   const lower = name.trim().toLowerCase();

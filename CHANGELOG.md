@@ -84,7 +84,7 @@ This release is mostly about closing the gap between what AndroJack claimed and 
 
 ### Tests
 
-- 85 → 173 tests (+1 opt-in live test). The 11 tests added for the review findings were confirmed to fail on the pre-fix code. New suites: `security-v21`, `validator-v21`, `validate-cli`, `http-v21`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
+- 85 → 173 tests (+1 opt-in live test). The 11 tests added for the review findings were confirmed to fail on the pre-fix code. New suites: `security-hardening`, `validator-engine`, `validate-cli`, `http-transport`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
 - Two existing assertions were changed because they asserted content that is not in the official docs: the Handoff test asserted the non-existent `android.intent.action.HANDOFF`, and the NPU test asserted an unverified feature string. They now assert the official API names.
 - UAT-03 caps `tools/list` at 30 KB (currently ~28.5 KB ≈ 7k tokens) so context cost cannot grow by accident.
 

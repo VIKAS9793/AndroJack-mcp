@@ -16,11 +16,10 @@
  *
  * Rule engine: src/rules/android-rules.ts
  *   - Rule count is ANDROID_RULES.length — never hardcode it in prose
- *     (v2.0 docs claimed 28, 31 and "26 → 28" in different places)
  *   - Zero new dependencies (pure TypeScript RegExp)
  *   - Data-driven: new rules require no code changes
  *
- * v2.1: `validateAndroidCode()` returns a structured report that the MCP tool
+ * `validateAndroidCode()` returns a structured report that the MCP tool
  * exposes as `structuredContent` (with an outputSchema) and the
  * `androjack validate` CLI renders as text, JSON, or SARIF for CI.
  */

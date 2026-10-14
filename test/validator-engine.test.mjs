@@ -1,5 +1,5 @@
 /**
- * AndroJack MCP – v2.1 validator, registry, and catalogue regression tests
+ * AndroJack MCP – validator, registry, and catalogue regression tests
  */
 
 import test from 'node:test';
@@ -96,7 +96,7 @@ test('VAL-09 CameraX versions before 1.5.2 are flagged; 1.5.2+ are not', () => {
   }
 });
 
-test('VAL-10 minSdkBelow is enforced (was declared but ignored in v2.0)', () => {
+test('VAL-10 minSdkBelow is enforced', () => {
   const rule = { id: 'X', severity: 'info', languages: ['kotlin'], pattern: /x/g, message: '', replacement: '', docUrl: '', minSdkBelow: 26 };
   assert.equal(isRuleGatedOut(rule, { language: 'kotlin', minSdk: 21 }), false);
   assert.equal(isRuleGatedOut(rule, { language: 'kotlin', minSdk: 26 }), true);
@@ -197,4 +197,12 @@ test('GRD-03 Maven Central version lists skip prereleases too', async () => {
   const { pickStableVersion } = await import('../build/tools/gradle.js');
   assert.equal(pickStableVersion(['2.11.0', '3.0.0-RC1', '2.12.0-beta02', '2.9.0']), '2.11.0');
   assert.equal(pickStableVersion(['1.0.0-alpha01']), null);
+});
+
+test('GRD-04 dot- and word-style Maven qualifiers are treated as prereleases', async () => {
+  const { pickStableVersion } = await import('../build/tools/gradle.js');
+  for (const pre of ['2.0.0.RC1', '2.0.0.Beta2', '6.0.0.M1', '1.1.0-preview01', '1.1.0-pre1', '3.1.0-cr1', '2.0-milestone-1']) {
+    assert.equal(pickStableVersion(['1.9.0', pre]), '1.9.0', pre);
+  }
+  assert.equal(pickStableVersion(['33.3.1-jre', '33.3.0-android']), '33.3.1-jre', 'platform classifiers are not prereleases');
 });

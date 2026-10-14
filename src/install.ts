@@ -289,7 +289,7 @@ function detectInstalledIdes(targets: IdeTarget[]): IdeTarget[] {
 /**
  * Returns true when the IDE application is installed on this machine, but the
  * MCP config directory hasn't been created yet (IDE was never launched or
- * the AI/MCP plugin hasn't been set up). Used in v1.6.4 to surface a
+ * the AI/MCP plugin hasn't been set up). Used to surface a
  * more helpful message than silently showing "not found".
  */
 function isIdeApplicationInstalled(target: IdeTarget): boolean {

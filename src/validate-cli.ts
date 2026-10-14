@@ -5,9 +5,8 @@
  * files on disk, so the rules an agent was held to inside the IDE are also
  * enforced on the pull request — including code no agent touched.
  *
- * Why this matters (v2.1): Google's first-party agent stack (Android skills,
- * Android CLI, Developer Knowledge MCP) is advisory — it shapes what an
- * agent generates. Nothing in it fails a build. This command is the
+ * Instruction-style tooling (agent skills, documentation search) shapes what
+ * an agent generates but does not fail a build. This command is the
  * enforcement half: deterministic rule IDs, exit codes, and SARIF output that
  * GitHub code scanning renders inline on the PR.
  *
@@ -41,6 +40,8 @@ export interface ValidateOptions {
   failOn: FailOn;
   minSdk?: number;
   targetSdk?: number;
+  /** File cap for one scan (default 20,000). Not exposed as a CLI flag. */
+  maxFiles?: number;
 }
 
 export interface FileReport {
@@ -114,6 +115,7 @@ export function parseValidateArgs(args: string[]): ValidateOptions {
 }
 
 interface Walk {
+  maxFiles: number;
   files: string[];
   oversized: string[];
   skippedSymlinks: number;
@@ -133,10 +135,7 @@ async function isGradleModuleRoot(dir: string): Promise<boolean> {
 }
 
 async function collectFiles(target: string, walk: Walk, explicit: boolean): Promise<void> {
-  if (walk.files.length >= MAX_FILES) {
-    walk.truncated = true;
-    return;
-  }
+  if (walk.truncated) return;
   // Paths the user named are followed even if they are symlinks; links found
   // while walking are not (they could point outside the tree or loop).
   const stat = explicit ? await fs.stat(target) : await fs.lstat(target);
@@ -160,11 +159,16 @@ async function collectFiles(target: string, walk: Walk, explicit: boolean): Prom
     walk.oversized.push(target);
     return;
   }
+  if (walk.files.length >= walk.maxFiles) {
+    // Only a source file beyond the cap counts as truncation.
+    walk.truncated = true;
+    return;
+  }
   walk.files.push(target);
 }
 
 export async function validatePaths(opts: ValidateOptions, cwd = process.cwd()): Promise<ScanResult> {
-  const walk: Walk = { files: [], oversized: [], skippedSymlinks: 0, truncated: false };
+  const walk: Walk = { maxFiles: opts.maxFiles ?? MAX_FILES, files: [], oversized: [], skippedSymlinks: 0, truncated: false };
   for (const p of opts.paths) {
     const abs = path.resolve(cwd, p);
     try {
@@ -190,9 +194,9 @@ export async function validatePaths(opts: ValidateOptions, cwd = process.cwd()):
 }
 
 /**
- * Problems that mean the gate did not actually check everything. A CI gate
- * must not report success in these cases (v2.1 review finding: an empty scan,
- * an oversized file, or a truncated walk all used to exit 0).
+ * Problems that mean the gate did not check everything: an empty scan, an
+ * oversized file, or a truncated walk. A CI gate must fail closed, so any of
+ * these exits 2 rather than reporting success.
  */
 export function scanProblems(scan: ScanResult): string[] {
   const problems: string[] = [];
@@ -206,7 +210,7 @@ export function scanProblems(scan: ScanResult): string[] {
     );
   }
   if (scan.truncated) {
-    problems.push(`Scan stopped at ${MAX_FILES} files; narrow the paths so every file is checked.`);
+    problems.push(`Scan stopped at the file cap (${scan.reports.length} files checked); narrow the paths so every file is checked.`);
   }
   return problems;
 }

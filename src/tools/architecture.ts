@@ -5,7 +5,7 @@
  * The AI MUST call this before suggesting project structure, patterns,
  * or Jetpack component relationships.
  *
- * v2.0: Android UI Development is now officially "Compose First" (May 19,
+ * Android UI Development is officially "Compose First" (May 19,
  * 2026) — any new Android Studio UI tooling is built for Compose only, and
  * View-based libraries (Fragments, RecyclerView, ViewPager, Navigation/Layout
  * Editor) are frozen to critical bugfixes only. When a query maps to a

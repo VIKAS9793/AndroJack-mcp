@@ -5,20 +5,20 @@
  * Spec: MCP 2025-11-25 Streamable HTTP transport.
  *
  * Security: each new initialize request creates a FRESH McpServer +
- * StreamableHTTPServerTransport pair. Sessions are never shared —
- * this prevents cross-session state leakage that existed in v1.6.3.
+ * StreamableHTTPServerTransport pair. Sessions are never shared, which
+ * prevents cross-session state leakage.
  *
- * v2.1 hardening:
- *   - Idle sessions are evicted (default 30 min). v2.0 kept every session
- *     until the client sent DELETE, so 64 abandoned initializes — from a
- *     crashed IDE or a hostile local page — locked the server at 503.
+ * Hardening:
+ *   - Idle sessions are evicted (default 30 min), so abandoned initializes —
+ *     from a crashed IDE or a hostile local page — cannot exhaust the
+ *     session cap.
  *   - Optional bearer-token auth (ANDROJACK_HTTP_TOKEN), compared in
- *     constant time. Required by serve.ts for remote binds that would
- *     otherwise expose a configured Google API key as an open proxy.
+ *     constant time. Required for remote binds when a Google API key is
+ *     configured, so the server cannot become an open proxy for that quota.
  *   - Stateless mode: each POST gets a throwaway server + transport, no
  *     Mcp-Session-Id. Matches the direction of MCP spec 2026-07-28 and lets
  *     the server run behind a round-robin load balancer.
- *   - DELETE for an unknown session returns 404 (spec), not 200.
+ *   - Requests for an unknown session return 404, per the spec.
  *   - Signal handlers are installed once per process, not once per server.
  *
  * Usage:
@@ -44,6 +44,8 @@ const MAX_ACTIVE_SESSIONS = 64;
 const DEFAULT_SESSION_IDLE_MS = 30 * 60 * 1000;
 const SESSION_SWEEP_INTERVAL_MS = 60 * 1000;
 const HEALTH_PATH = "/healthz";
+const REQUEST_TIMEOUT_MS = 30_000;
+const HEADERS_TIMEOUT_MS = 15_000;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -75,18 +77,21 @@ export interface HttpServerOptions {
   handleSignals?: boolean;
   /** Permit a non-loopback bind. Defaults to ANDROJACK_ALLOW_REMOTE_HTTP=1. */
   allowRemote?: boolean;
+  /** Override connection timeouts (ms). Defaults: request 30s, headers 15s. */
+  timeouts?: { requestMs?: number; headersMs?: number };
 }
 
 /**
- * Remote-bind policy, enforced inside startHttpServer so no entry point can
- * skip it (v2.1 review: `--http` previously bypassed the check in serve.ts).
+ * Remote-bind policy, enforced inside startHttpServer so no entry point
+ * (serve, --http, programmatic) can skip it.
  * Throws on a violation; returns a warning string for an unauthenticated
  * remote bind, or undefined.
  */
 export function checkBindPolicy(
   host: string,
   allowRemote: boolean,
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv = process.env,
+  authToken: string | undefined = env["ANDROJACK_HTTP_TOKEN"]?.trim() || undefined
 ): string | undefined {
   if (isLoopbackHost(host)) return undefined;
 
@@ -97,7 +102,7 @@ export function checkBindPolicy(
     );
   }
 
-  const hasToken = Boolean(env["ANDROJACK_HTTP_TOKEN"]?.trim());
+  const hasToken = Boolean(authToken);
   if (!hasToken && isDeveloperKnowledgeEnabled(env)) {
     throw new Error(
       `Refusing remote bind: a Google Developer Knowledge API key is configured but ANDROJACK_HTTP_TOKEN is not set. ` +
@@ -256,15 +261,15 @@ function readBody(req: http.IncomingMessage): Promise<string> {
  * @param opts - Optional port/host overrides (fall back to env vars / defaults).
  * @returns A handle with close() and the bound address.
  *
- * Security controls (v2.1 additions marked +):
+ * Security controls:
  *   - Loopback-only bind host by default
- *   - Explicit --allow-remote required for non-loopback (enforced in serve.ts)
+ *   - Explicit --allow-remote required for non-loopback (checkBindPolicy)
  *   - Host header validation
  *   - Origin header validation
  *   - Body size cap (1 MiB)
  *   - Active session cap (64)
- *   - Per-session server isolation (introduced in v1.6.4, refactored in v1.7.1)
- *   + Idle-session eviction, optional bearer auth, stateless mode, 404 on unknown session
+ *   - Per-session server isolation
+ *   - Idle-session eviction, optional bearer auth, stateless mode, 404 on unknown session
  */
 export async function startHttpServer(
   createServer: () => McpServer,
@@ -281,7 +286,8 @@ export async function startHttpServer(
   }
 
   const allowRemote = opts?.allowRemote ?? process.env["ANDROJACK_ALLOW_REMOTE_HTTP"] === "1";
-  const bindWarning = checkBindPolicy(host, allowRemote);
+  // Check the token the server will actually enforce, not just the env var.
+  const bindWarning = checkBindPolicy(host, allowRemote, process.env, authToken);
   if (bindWarning) process.stderr.write(bindWarning + "\n");
 
   let advertisedPort = port;
@@ -291,7 +297,13 @@ export async function startHttpServer(
   // Per-session state: each session owns its own server + transport pair
   const sessions = new Map<string, Session>();
 
-  const httpServer = http.createServer(async (req, res) => {
+  const requestTimeoutMs = opts?.timeouts?.requestMs ?? REQUEST_TIMEOUT_MS;
+  const headersTimeoutMs = opts?.timeouts?.headersMs ?? HEADERS_TIMEOUT_MS;
+  // Node enforces request/headers timeouts on a periodic sweep (30s by
+  // default); sweep often enough that the configured limits actually hold.
+  const connectionsCheckingInterval = Math.max(100, Math.min(5_000, Math.floor(headersTimeoutMs / 2)));
+
+  const httpServer = http.createServer({ connectionsCheckingInterval }, async (req, res) => {
     try {
       validateHostHeader(req.headers.host, host);
       validateOriginHeader(req.headers.origin as string | undefined, allowedOrigins);
@@ -502,6 +514,10 @@ export async function startHttpServer(
     }
   }, Math.min(SESSION_SWEEP_INTERVAL_MS, sessionIdleMs));
   sweepTimer.unref();
+
+  // Bound slow uploads so a few clients cannot hold every slot open.
+  httpServer.requestTimeout = requestTimeoutMs;
+  httpServer.headersTimeout = headersTimeoutMs;
 
   await new Promise<void>((resolve, reject) => {
     httpServer.listen(port, host, () => resolve());

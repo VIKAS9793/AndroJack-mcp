@@ -2,14 +2,8 @@
  * Tool 1 – android_official_search
  *
  * Returns official Android/Kotlin documentation excerpts with source URLs so
- * the LLM can cite them in generated code.
- *
- * v2.1: rewritten on top of src/docs-search.ts. The v2.0 implementation
- * scraped developer.android.com/s/results (client-rendered — returned only
- * the words "Search results"), kotlinlang.org/search.html#q= (fragment never
- * reaches the server — HTTP 404) and source.android.com/search (no such
- * endpoint). It therefore returned no documentation for any query while
- * presenting itself as the "REQUIRED FIRST STEP".
+ * the LLM can cite them in generated code. Retrieval is delegated to
+ * src/docs-search.ts.
  */
 
 import { searchOfficialDocs, formatDocResults } from "../docs-search.js";
