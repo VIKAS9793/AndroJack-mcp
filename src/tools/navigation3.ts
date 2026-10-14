@@ -34,7 +34,7 @@ aware Google is that AI tools hallucinate stale navigation code.
 \`\`\`kotlin
 // libs.versions.toml
 [versions]
-navigation3 = "1.0.0"  // Stable November 2025
+navigation3 = "1.2.0"  // Current stable (verified 2026-10-14); 1.0.0 shipped Nov 2025
 
 [libraries]
 navigation3-compose = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
@@ -186,9 +186,9 @@ you wrap your screens with other content — bars, rails, dialogs — without
 each destination needing to know about the surrounding chrome.
 
 \`\`\`toml
-# libs.versions.toml — bump to 1.1
+# libs.versions.toml — Scene decorators need 1.1.0+; current stable is 1.2.0
 [versions]
-navigation3 = "1.1.0"
+navigation3 = "1.2.0"
 \`\`\`
 
 ## Why Decorators Exist

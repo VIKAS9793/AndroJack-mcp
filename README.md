@@ -116,11 +116,11 @@ Every one of these compiles. Most run without errors. The bugs surface later in 
 </details>
 
 <details>
-<summary><strong>The Android 16 / API 36 Mandate (August 2026 deadline)</strong></summary>
+<summary><strong>The Android 16 / API 36 Mandate (in force since August 31, 2026)</strong></summary>
 
-Android 16 made a platform-level change affecting every published app: on devices ≥600dp — tablets, foldables, ChromeOS — apps can **no longer lock screen orientation** or restrict resizability. Google Play requires API 36 targeting by August 2026.
+Android 16 made a platform-level change affecting every published app: on devices ≥600dp — tablets, foldables, ChromeOS — apps can **no longer lock screen orientation** or restrict resizability. Since August 31, 2026, Google Play requires new apps and updates to target API 36 (extension available to November 1, 2026). Android 17 / API 37 removes the remaining opt-out.
 
-An AI tool generating `android:screenOrientation="portrait"` or `android:resizeableActivity="false"` today is generating code that will trigger App Compatibility warnings in Play Console, fail large-screen quality checks, and get apps demoted in Play Store search results.
+An AI tool generating `android:screenOrientation="portrait"` or `android:resizeableActivity="false"` today is generating code that triggers App Compatibility warnings in Play Console, fails large-screen quality checks, and gets apps demoted in Play Store search results.
 
 The business impact is not theoretical: **Foldable users spend 14× more on apps** than phone-only users. Tablet + phone users spend 9× more. FlipaClip saw 54% growth in tablet users within four months of going adaptive.
 
@@ -314,7 +314,7 @@ That's the job AndroJack exists to do — and nothing else in the current ecosys
 | 13 | `🚀 scalability` | Paging 3, WorkManager, modularization | Naive `loadAll()`; unstable keys in lists |
 | 14 | `🧭 nav3` | Nav3 (Nov 2025) — Scenes, migration | AI generates Nav2 dead-ends |
 | 15 | `✅ compliance` | API 36 / Android 16 / 16 KB page size | Updates rejected — Play has required targetSdk 36 since Aug 31, 2026 |
-| 16 | `🌐 kmp` | Room KMP, Ktor, source sets, Room 3.0 alpha | Android-only code in KMP projects |
+| 16 | `🌐 kmp` | Room KMP, Room 3 (stable, `androidx.room3`), Ktor, source sets | Android-only code in KMP projects |
 | 17 | `🤖 ondevice-ai` | AICore, ML Kit Gen AI, Gemini Nano, **AppFunctions** (on-device MCP) | Cloud-only AI when offline is required |
 | 18 | `📋 policy` | Play Store age-gating, billing openness, data safety | Apps rejected for unknown policy changes |
 | 19 | `🥽 xr` | Android XR SDK, SpatialPanel, Orbiter | Works as 2D panel, misses spatial value |
@@ -451,10 +451,10 @@ Google now ships its own agent stack for Android. Being straight about the overl
 
 - **Doc search actually returns docs.** v2.0 scraped client-rendered search pages and returned no documentation for any query. 2.1 uses Google's Developer Knowledge API (optional key) or a verified index of canonical pages.
 - **Security:** redirect allowlist bypass closed; *all* fetched content now goes through the untrusted-content boundary (v2.0 claimed this but only one tool did it); boundary-tag spoofing and zero-width/full-width evasion fixed; HTTP session-exhaustion DoS fixed; bearer auth and stateless mode; 7 dependency vulnerabilities (1 critical) patched.
-- **No more confident wrong answers:** `Row` → "DEPRECATED", `Task` → "REMOVED" registry false positives fixed; Android 17 games exemption corrected; fabricated Handoff API removed; Google Maven alphas no longer labelled "Latest Stable"; 19 dead documentation links replaced.
+- **No more confident wrong answers:** `Row` → "DEPRECATED", `Task` → "REMOVED" registry false positives fixed; Android 17 games exemption corrected; fabricated Handoff API removed; Room 3 is stable (was described as alpha); Google Maven alphas no longer labelled "Latest Stable"; 19 dead documentation links replaced.
 - **Validator:** comments ignored (ends agent fix-loops), Kotlin DSL `kapt(...)` detected, API 37 thresholds corrected, 6 new Android 17 rules (34 total), structured output.
 - **New:** `androjack-mcp validate` CLI (text/JSON/SARIF) for CI; MCP resources for the rule catalogue; full tool annotations; AppFunctions guidance; Android Studio Rabbit 1 / AGP 9.4.
-- **Tests:** 85 → 162 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
+- **Tests:** 85 → 163 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
 
 Full details: [CHANGELOG.md](CHANGELOG.md).
 

@@ -135,8 +135,8 @@ compose-bom = "2026.04.01"
 # Verified: Compose April '26 release notes — Alpha → Beta promotion
 hilt = "1.4.0-beta01"
 lifecycle = "2.11.0-beta01"
-# Verified: developer.android.com/guide/navigation/navigation-3/scenes (1.1, May 2026)
-navigation3 = "1.1.0"
+# Verified: developer.android.com/jetpack/androidx/releases/navigation3 (1.2.0 stable, 2026-10-14)
+navigation3 = "1.2.0"
 # room, retrofit, okhttp, coroutines, mockk, turbine: NOT independently
 # verified this cycle. Call gradle_dependency_checker("<name>") for the live
 # current version before pinning any of these — do not hardcode a guess.
@@ -245,9 +245,9 @@ dependencies {
 // ✅ New KSP
 plugins { alias(libs.plugins.ksp) }
 dependencies {
-    ksp("androidx.room:room-compiler:2.7.1")
+    ksp("androidx.room:room-compiler:2.8.5")
     // Room KSP plugin (AGP 8.3+):
-    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-runtime:2.8.5")
 }
 \`\`\`
 

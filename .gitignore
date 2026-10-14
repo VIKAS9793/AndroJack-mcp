@@ -34,3 +34,4 @@ out/
 .vscode-test/
 .mcpregistry_*
 VERIFICATION_CHECKLIST.md
+release-2.1.0/

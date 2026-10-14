@@ -9,11 +9,19 @@ body:
       value: |
         Thanks for taking the time to fill out this bug report! 🤖
   - type: input
+    id: version
+    attributes:
+      label: AndroJack version
+      description: Output of `npx androjack-mcp --version`
+      placeholder: e.g., 2.1.0
+    validations:
+      required: true
+  - type: input
     id: environment
     attributes:
       label: Environment
-      description: What IDE (Cursor, Windsurf, etc.) and Node.js version are you using?
-      placeholder: e.g., Cursor v0.40, Node v18.1.0
+      description: MCP client / IDE, transport (stdio or HTTP), and Node.js version
+      placeholder: e.g., Cursor 1.4, stdio, Node 22.11
     validations:
       required: true
   - type: textarea

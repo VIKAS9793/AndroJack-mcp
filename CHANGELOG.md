@@ -32,6 +32,11 @@ This release is mostly about closing the gap between what AndroJack claimed and 
   - The NPU section asserted an unverified feature string; now points to `PackageManager.FEATURE_NEURAL_PROCESSING_UNIT`.
   - Status updated from "Beta 3" to stable (June 16, 2026); added lock-free MessageQueue, read-only `System.load()` libraries, memory limits, config-change recreation, CameraX ≥ 1.5.2, certificate transparency, background audio.
 - **Android CLI commands were invented** (`android skills add --skill …`, `android docs "…"`). Replaced with documented syntax.
+- **Room 3 described as alpha.** Tools told agents "Room 3.0 is alpha — stay on Room 2.7.x". Room 3 is stable (`androidx.room3:room3-*` 3.0.3, Sept 9, 2026) and Room 2 is at 2.8.5. `android_kmp_guide`, the component registry, and the Gradle catalogue (`room3` entry added) are updated, with the official 2-to-3 migration guide.
+- **Navigation 3 versions** updated to 1.2.0 stable (1.3.0-alpha02 in preview).
+- **Reference to a non-existent tool:** `android_api36_compliance` told agents to call `android_api37_compliance`. Corrected; `REL-07` now fails the build on any unknown tool name in src or docs.
+- **Broken bug-report issue form:** GitHub issue-form YAML was saved as `bug_report.md` and never rendered as a form. Renamed to `.yml`; added version/transport fields.
+- **`USE_CASES.md` contradicted the source** despite promising "if it's documented here, it exists in the source": UC-16 quoted a regex the engine never had, and UC-06 described issue-tracker fetching. The UC-03 rule table is now generated from `ANDROID_RULES`; UC-18 documents the CI gate.
 - **Validator false FAILs from comments** — `// replaced AsyncTask with coroutines` failed validation, so an agent following the "fix and re-run until PASS" loop could loop forever on a non-existent violation. Comments are now masked (offsets preserved; Kotlin nested block comments and XML comments handled; strings still checked). The FAIL instructions now tell the agent to stop and surface a violation that persists after two attempts.
 - **`GRADLE_KAPT_NEW_PROJECT` missed Kotlin DSL.** The pattern only matched Groovy `kapt "…"`; `kapt("…")`, `kotlin("kapt")` and `id("kotlin-kapt")` were never flagged.
 - **API 37 rules fired at targetSdk 36** (`minSdkAbove: 35`); now 36. Orientation-lock / resizeability rules now apply from targetSdk 36 (Android 16), not 30.
@@ -59,9 +64,15 @@ This release is mostly about closing the gap between what AndroJack claimed and 
 - Play target-API section updated: the August 31, 2026 requirement is in force (extension to November 1, 2026; Wear/Automotive 35, TV/XR 34; existing apps 35+ for new users).
 - Developer verification: enforcement live since September 30, 2026 in Brazil, Indonesia, Singapore, Thailand.
 
+### Docs & contributor process
+
+- **`CLAUDE.md` + `docs/agent-context/`** (`architecture.md`, `bugs.md`, `release.md`): component ownership, hard rules for agents, an 18-entry bug log (symptom → root cause → fix → prevention rule), and the npm-first multi-branch release process.
+- `CONTRIBUTING.md`: rule and content contribution requirements, local test commands, release order.
+- Product docs (`product-management/`) updated: competitive analysis rewritten around Google's first-party stack (Developer Knowledge API, Android CLI 1.0, skills), roadmap re-scoped (v2.1.0 shipped, original v2.1.0 items moved to v2.2.0, SDK v2 to 3.0), PRD/metrics/JTBD/stories facts corrected.
+
 ### Tests
 
-- 85 → 162 tests (+1 opt-in live test). New suites: `security-v21`, `validator-v21`, `validate-cli`, `http-v21`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
+- 85 → 163 tests (+1 opt-in live test). New suites: `security-v21`, `validator-v21`, `validate-cli`, `http-v21`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
 - Two existing assertions were changed because they asserted content that is not in the official docs: the Handoff test asserted the non-existent `android.intent.action.HANDOFF`, and the NPU test asserted an unverified feature string. They now assert the official API names.
 - UAT-03 caps `tools/list` at 30 KB (currently ~28.5 KB ≈ 7k tokens) so context cost cannot grow by accident.
 

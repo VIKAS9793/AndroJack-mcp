@@ -47,6 +47,7 @@ const LIBRARY_CATALOGUE: Record<string, LibEntry> = {
   "navigation":        { groupId: "androidx.navigation", artifactId: "navigation-compose", releasePageSlug: "navigation" },
   "navigation-compose":{ groupId: "androidx.navigation", artifactId: "navigation-compose", releasePageSlug: "navigation" },
   "room":              { groupId: "androidx.room", artifactId: "room-runtime", releasePageSlug: "room" },
+  "room3":             { groupId: "androidx.room3", artifactId: "room3-runtime", releasePageSlug: "room3" },
   "paging":            { groupId: "androidx.paging", artifactId: "paging-runtime", releasePageSlug: "paging" },
   "paging-compose":    { groupId: "androidx.paging", artifactId: "paging-compose", releasePageSlug: "paging" },
   "datastore":         { groupId: "androidx.datastore", artifactId: "datastore-preferences", releasePageSlug: "datastore" },

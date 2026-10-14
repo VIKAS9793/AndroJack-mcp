@@ -10,8 +10,8 @@
 AndroJack is a **read-only verification server**. It does three things and nothing else:
 
 1. **Looks up** the status of an Android API, library, or architecture pattern against a built-in registry or live official documentation
-2. **Validates** code you or an AI wrote against a rule engine (`src/rules/android-rules.ts`) — 28 rules, zero network calls required
-3. **Fetches** live documentation excerpts from `developer.android.com`, `kotlinlang.org`, `source.android.com`, and Google Maven
+2. **Validates** code you or an AI wrote against a rule engine (`src/rules/android-rules.ts`) — 34 rules, zero network calls required — inside the agent loop (`android_code_validator`) or in CI (`npx androjack-mcp validate`)
+3. **Fetches** official documentation excerpts (Google's Developer Knowledge API when a key is configured, otherwise a verified index of canonical `developer.android.com` / `kotlinlang.org` pages) and versions from Google Maven / Maven Central. All fetched text is wrapped as untrusted content.
 
 It does **not** generate code. It does **not** modify files. It does **not** give opinions.
 
@@ -39,6 +39,7 @@ It does **not** generate code. It does **not** modify files. It does **not** giv
   - [UC-15 — Validate an entire feature before it reaches code review](#uc-15--validate-an-entire-feature-before-it-reaches-code-review)
   - [UC-16 — Is my code safe to run on Android 17 / API 37?](#uc-16--is-my-code-safe-to-run-on-android-17--api-37)
   - [UC-17 — Will my app be blocked from installing after September 30, 2026?](#uc-17--will-my-app-be-blocked-from-installing-after-september-30-2026)
+  - [UC-18 — Enforce the same rules on every pull request](#uc-18--enforce-the-same-rules-on-every-pull-request)
 
 ---
 
@@ -54,7 +55,7 @@ It does **not** generate code. It does **not** modify files. It does **not** giv
 
 **Source:** `src/tools/component.ts` + `src/constants.ts` COMPONENT_REGISTRY
 
-The tool first checks the built-in registry (instant, no network) then falls back to scraping `developer.android.com` for unknown components.
+The tool first checks the built-in registry (instant, no network; exact name, simple class name, or qualified suffix — no fuzzy substring matching), then for unknown components returns the closest official pages and says the status is **not confirmed**.
 
 **Example prompt:**
 ```
@@ -136,7 +137,7 @@ implementation(platform(libs.compose.bom))
 
 **Source:** `src/tools/validator.ts` + `src/rules/android-rules.ts`
 
-The rule engine is pure TypeScript RegExp matching — **zero network calls**. 28 rules across Kotlin, XML, and Gradle files. Results in under 100ms.
+The rule engine is pure TypeScript RegExp matching — **zero network calls**. 34 rules across Kotlin, XML, and Gradle files. Results in under 100ms. The MCP response also carries `structuredContent` (verdict, counts, violations with line/column) for clients that read structured output.
 
 **Example prompt:**
 ```
@@ -178,38 +179,44 @@ fun loadData() {
    Source:      https://developer.android.com/kotlin/coroutines/coroutines-best-practices
 ```
 
-**All 28 rules by ID:**
+**All 34 rules by ID** (generated from `ANDROID_RULES`; comments are ignored, string literals are checked):
 
-| Rule ID | Severity | What it catches |
-|---------|----------|-----------------|
-| `REMOVED_ASYNCTASK` | error | `AsyncTask` usage — removed in API 33 |
-| `REMOVED_TEST_COROUTINE_DISPATCHER` | error | `TestCoroutineDispatcher` — removed in coroutines-test 1.8+ |
-| `REMOVED_TEST_COROUTINE_SCOPE` | error | `TestCoroutineScope` — removed in coroutines-test 1.8+ |
-| `GLOBALSCOPE_LAUNCH` | error | `GlobalScope.launch` — lifecycle leak |
-| `GLOBALSCOPE_ASYNC` | error | `GlobalScope.async` — lifecycle leak |
-| `XML_SCREEN_ORIENTATION_LOCK` | error | `android:screenOrientation` locks in XML — illegal on ≥600dp under API 36 |
-| `XML_RESIZE_DISABLED` | error | `android:resizeableActivity="false"` — illegal on ≥600dp under API 36 |
-| `RUNBLOCKING_UI` | error | `runBlocking {}` on main thread — causes ANR |
-| `THREAD_SLEEP_IN_TEST` | error | `Thread.sleep()` in tests — causes flakiness |
-| `START_ACTIVITY_FOR_RESULT` | error | `.startActivityForResult()` — deprecated, removed from recommended API |
-| `DEPRECATED_CONTEXTUAL_FLOW_ROW` | warning | `ContextualFlowRow` — deprecated in Compose 1.8 |
-| `DEPRECATED_CONTEXTUAL_FLOW_COLUMN` | warning | `ContextualFlowColumn` — deprecated in Compose 1.8 |
-| `DEPRECATED_NAV_CONTROLLER_NEW_CODE` | warning | `rememberNavController()` — Navigation 2 API, Nav3 stable Nov 2025 |
-| `DEPRECATED_NAV_HOST` | warning | `NavHost(` — Navigation 2 API |
-| `DEPRECATED_INTENTSERVICE` | warning | `IntentService` — deprecated API 30 |
-| `DEPRECATED_HANDLER_THREAD` | warning | `HandlerThread` — deprecated API 30 |
-| `DEPRECATED_SHARED_PREFERENCES` | warning | `getSharedPreferences` / `SharedPreferences` — blocks main thread |
-| `DEPRECATED_LIVEDATA_NEW_CODE` | warning | `MutableLiveData<` / `liveData {` — prefer StateFlow in new code |
-| `DEPRECATED_BOTTOM_APP_BAR_M3E` | warning | `BottomAppBar(` — superseded by DockedToolbar in M3 Expressive |
-| `GRADLE_KAPT_NEW_PROJECT` | warning | `kapt "` — slower than KSP, deprecated for most Jetpack libs |
-| `DEPRECATED_ACCOUNT_MANAGER` | warning | `AccountManager` — deprecated, use CredentialManager |
-| `INFO_HARDCODED_DISPATCH_MAIN` | info | `Dispatchers.Main` — makes unit tests harder |
-| `INFO_GRADLE_HARDCODED_VERSION` | info | Hardcoded version in `implementation("group:id:1.2.3")` |
-| `INFO_ON_BACK_PRESSED_OVERRIDE` | info | `override fun onBackPressed()` — legacy, no predictive back gesture |
-| `API37_STATIC_FINAL_REFLECTION` | error | `field.isAccessible = true` on static final fields — `IllegalAccessException` on API 37+ |
-| `API37_SMS_RECEIVER_OTP` | warning | `SMS_RECEIVED` broadcast for OTP — delayed 3 hours on API 37+ targets |
-| `UNCONFINED_DISPATCHER_COMPOSE_TEST` | warning | `UnconfinedTestDispatcher()` — Compose 1.11+ defaults to `StandardTestDispatcher`, may hang/mis-assert |
-| `NEW_FRAGMENT_CLASS_COMPOSE_FIRST` | info | New `class X : Fragment(` — Views are maintenance-mode as of May 2026, Compose is the default for new screens |
+| Rule ID | Severity | Fires when targetSdk > | What it catches |
+|---------|----------|------------------------|-----------------|
+| `REMOVED_ASYNCTASK` | error | — | `AsyncTask` usage — removed in API 33 |
+| `REMOVED_TEST_COROUTINE_DISPATCHER` | error | — | `TestCoroutineDispatcher` — removed in coroutines-test 1.8+ |
+| `REMOVED_TEST_COROUTINE_SCOPE` | error | — | `TestCoroutineScope` — removed in coroutines-test 1.8+ |
+| `GLOBALSCOPE_LAUNCH` | error | — | `GlobalScope.launch` — lifecycle leak |
+| `GLOBALSCOPE_ASYNC` | error | — | `GlobalScope.async` — lifecycle leak |
+| `XML_SCREEN_ORIENTATION_LOCK` | error | 35 | `android:screenOrientation` locks — ignored on ≥600dp from targetSdk 36 (fires when targetSdk ≥ 36 or unset) |
+| `XML_RESIZE_DISABLED` | error | 35 | `android:resizeableActivity="false"` — ignored on ≥600dp from targetSdk 36 |
+| `RUNBLOCKING_UI` | error | — | `runBlocking {}` on main thread — causes ANR |
+| `THREAD_SLEEP_IN_TEST` | error | — | `Thread.sleep()` in tests — causes flakiness |
+| `START_ACTIVITY_FOR_RESULT` | error | — | `.startActivityForResult()` — deprecated, removed from recommended API |
+| `DEPRECATED_CONTEXTUAL_FLOW_ROW` | warning | — | `ContextualFlowRow` — deprecated in Compose 1.8 |
+| `DEPRECATED_CONTEXTUAL_FLOW_COLUMN` | warning | — | `ContextualFlowColumn` — deprecated in Compose 1.8 |
+| `DEPRECATED_NAV_CONTROLLER_NEW_CODE` | warning | — | `rememberNavController()` — Navigation 2 API, Nav3 stable Nov 2025 |
+| `DEPRECATED_NAV_HOST` | warning | — | `NavHost(` — Navigation 2 API |
+| `DEPRECATED_INTENTSERVICE` | warning | — | `IntentService` — deprecated API 30 |
+| `DEPRECATED_HANDLER_THREAD` | warning | — | `HandlerThread` — deprecated API 30 |
+| `DEPRECATED_SHARED_PREFERENCES` | warning | — | `getSharedPreferences` / `SharedPreferences` — blocks main thread |
+| `DEPRECATED_LIVEDATA_NEW_CODE` | warning | — | `MutableLiveData<` / `liveData {` — prefer StateFlow in new code |
+| `DEPRECATED_BOTTOM_APP_BAR_M3E` | warning | — | `BottomAppBar(` — superseded by DockedToolbar in M3 Expressive |
+| `GRADLE_KAPT_NEW_PROJECT` | warning | — | `kapt("…")`, `kapt "…"`, `kotlin("kapt")`, `id("kotlin-kapt")` — slower than KSP |
+| `DEPRECATED_ACCOUNT_MANAGER` | warning | — | `AccountManager` — deprecated, use CredentialManager |
+| `INFO_HARDCODED_DISPATCH_MAIN` | info | — | `Dispatchers.Main` — makes unit tests harder |
+| `INFO_GRADLE_HARDCODED_VERSION` | info | — | Hardcoded version in `implementation("group:id:1.2.3")` |
+| `INFO_ON_BACK_PRESSED_OVERRIDE` | info | — | `override fun onBackPressed()` — legacy, no predictive back gesture |
+| `API37_STATIC_FINAL_REFLECTION` | error | 36 | `.isAccessible = true` — mutating static final fields throws on API 37 targets |
+| `API37_SMS_RECEIVER_OTP` | warning | 36 | `SMS_RECEIVED` for OTP — withheld 3 hours on API 37 targets |
+| `UNCONFINED_DISPATCHER_COMPOSE_TEST` | warning | — | `UnconfinedTestDispatcher()` — Compose 1.11+ defaults to `StandardTestDispatcher`, may hang/mis-assert |
+| `NEW_FRAGMENT_CLASS_COMPOSE_FIRST` | info | — | New `class X : Fragment(` — Views are maintenance-mode as of May 2026, Compose is the default for new screens |
+| `API37_MESSAGEQUEUE_REFLECTION` | error | 36 | Reflection into `MessageQueue` private members — lock-free MessageQueue on API 37 |
+| `API37_NATIVE_LIB_SYSTEM_LOAD` | warning | 36 | `System.load(` — library must be read-only on API 37 targets |
+| `API37_SET_REQUESTED_ORIENTATION` | warning | 36 | `setRequestedOrientation(` / `requestedOrientation =` — ignored on ≥600dp at API 37 (games exempt) |
+| `XML_ASPECT_RATIO_IGNORED` | warning | 36 | `android:minAspectRatio` / `maxAspectRatio` — no effect on large screens at API 37 |
+| `API37_LOCAL_NETWORK_ACCESS` | warning | 36 | `NsdManager`, `MulticastSocket`, `MulticastLock` — need `ACCESS_LOCAL_NETWORK` on API 37 |
+| `CAMERAX_ANDROID17_CRASH` | error | — | `androidx.camera:camera-*` below 1.5.2 — crashes on Android 17 devices (all targets) |
 
 ---
 
@@ -249,7 +256,7 @@ Response tells you: type, whether runtime request is needed, Play Store restrict
 
 ### UC-05 — My app will target API 36 — what do I need to change?
 
-**The problem:** Google Play requires all apps to target API 36 by August 2026. Android 16 introduced breaking changes that affect orientation handling, resizability, predictive back, and native library memory alignment. AI tools do not know the full scope.
+**The problem:** Since August 31, 2026, Google Play requires new apps and updates to target API 36 (extension available to November 1, 2026). Android 16 introduced breaking changes that affect orientation handling, resizability, predictive back, and native library memory alignment. AI tools do not know the full scope.
 
 **The tool:** `android_api36_compliance`
 
@@ -298,14 +305,14 @@ Apps with native libraries must compile for 16 KB memory page alignment. Android
 
 **The tool:** `android_debugger`
 
-**Source:** `src/tools/debugger.ts` — searches `issuetracker.google.com` with a 1-hour TTL cache
+**Source:** `src/tools/debugger.ts` — parses the trace, retrieves matching official documentation via `src/docs-search.ts`, and links (does not fetch) the matching `issuetracker.google.com` query
 
 **Example prompt:**
 ```
 I'm getting: java.lang.IllegalStateException: Fragment not attached to a context
 ```
 
-The tool queries the official Android Issue Tracker for the exact exception and returns known bug reports, their status, and any official workarounds documented by the Android team.
+The tool returns the parsed exception class, message and top frame, the closest official documentation pages (wrapped as untrusted content), and a link to the Issue Tracker search for that exception. Issue Tracker content is public, user-submitted text and its search page renders client-side, so since 2.1.0 AndroJack links it rather than fetching it into the agent's context.
 
 ---
 
@@ -456,8 +463,8 @@ fun testLoadingState() {
 **Source:** `src/tools/kmp.ts`
 
 ```
-Android-only Room:  androidx.room:room-runtime (androidMain only)
-KMP Room:           androidx.room:room-runtime (commonMain, requires sqlite-bundled on iOS)
+Room 3 (stable 3.0.3, recommended for new projects):  androidx.room3:room3-runtime — SQLiteDriver required, KMP-first
+Room 2 (stable 2.8.5):                                androidx.room:room-runtime  — commonMain + sqlite-bundled on iOS
 ```
 
 The tool returns the complete `build.gradle.kts` structure for the KMP Room setup — including the `ksp(libs.room.compiler)` target for each platform, the `sqlite-bundled` dependency for iOS, and the `expect/actual` database builder pattern.
@@ -471,7 +478,7 @@ The tool returns the complete `build.gradle.kts` structure for the KMP Room setu
 
 ### UC-12 — My app uses screen orientation lock — will it pass Play Store review?
 
-**The problem:** `android:screenOrientation="portrait"` passes current Play Store review but will fail from August 2026 when API 36 targeting is mandatory for all apps.
+**The problem:** Since August 31, 2026, Play requires targetSdk 36 for new apps and updates. On targetSdk 36+ the system ignores `android:screenOrientation` on ≥600dp screens, and on targetSdk 37 the temporary opt-out is gone (games via `android:appCategory="game"` remain exempt).
 
 **The tools:** `android_code_validator` (catches the XML flag) + `android_api36_compliance` (explains the mandate)
 
@@ -494,8 +501,8 @@ The tool returns the complete `build.gradle.kts` structure for the KMP Room setu
   message:  "android:screenOrientation locks break Android 16 / API 36 compliance on ≥600dp devices.",
   replacement: "Remove the screenOrientation attribute. Use WindowSizeClass to handle orientation layouts in code.",
   docUrl:   "https://developer.android.com/about/versions/16/behavior-changes-16",
-  notes:    "Play Store mandates API 36 targeting by August 2026. Fails large-screen quality checks.",
-  minSdkAbove: 29,
+  notes:    "Play Store mandates API 36 targeting since August 31, 2026. On API 37 targets the Android 16 opt-out is gone; games (android:appCategory=\"game\") remain exempt.",
+  minSdkAbove: 35,
 }
 ```
 
@@ -631,7 +638,7 @@ The rule engine catches **deprecated APIs**, **removed APIs**, **dangerous patte
 
 ### UC-16 — Is my code safe to run on Android 17 / API 37?
 
-**The problem:** Android 17 reached platform stability March 26, 2026. Three code patterns that work today will break on API 37 targets: `static final` reflection, unguarded LAN socket connections, and SMS broadcast receivers for OTP.
+**The problem:** Android 17 has been stable since June 16, 2026. Several code patterns break on API 37 targets: `static final` reflection, unguarded local-network access, SMS broadcast receivers for OTP, `MessageQueue` reflection, writable native libraries passed to `System.load()`, and orientation locks on large screens. CameraX below 1.5.2 crashes on Android 17 devices regardless of target.
 
 **The tool:** `android_api17_compliance`
 
@@ -649,16 +656,19 @@ What breaks when I target Android 17?
 {
   id:       "API37_STATIC_FINAL_REFLECTION",
   severity: "error",
-  pattern:  /field\.isAccessible\s*=\s*true[\s\S]{0,200}field\.set\s*\(/g,
-  message:  "Modifying static final fields via reflection throws IllegalAccessException on API 37+.",
-  replacement: "Use constructor injection or dependency injection instead of mutating static finals.",
+  pattern:  /\.isAccessible\s*=\s*true/g,
+  message:  "field.isAccessible = true on a static final field throws IllegalAccessException on Android 17 (API 37+) targets...",
+  replacement: "Replace reflected static final mutation with constructor injection or a provider/factory pattern...",
+  minSdkAbove: 36,  // only for apps targeting API 37+
 }
+// Also: API37_MESSAGEQUEUE_REFLECTION, API37_NATIVE_LIB_SYSTEM_LOAD, API37_SET_REQUESTED_ORIENTATION,
+//       XML_ASPECT_RATIO_IGNORED, API37_LOCAL_NETWORK_ACCESS, CAMERAX_ANDROID17_CRASH
 ```
 
 **Actual response includes:**
 
 1. Static final reflection — `IllegalAccessException` on API 37, JNI crash
-2. `ACCESS_LOCAL_NETWORK` — new dangerous permission for any LAN socket connection
+2. `ACCESS_LOCAL_NETWORK` — runtime permission (NEARBY_DEVICES group) or a system-mediated picker for LAN access
 3. SMS OTP delay — 3-hour withholding; migrate to `SmsRetriever.startSmsUserConsent()`
 4. Large-screen opt-out removed at API 37 — games (`android:appCategory="game"`) remain exempt
 5. Lock-free `MessageQueue` and read-only `System.load()` native libraries
@@ -688,14 +698,41 @@ Do I need to do anything for Android developer verification?
 |------|-----------|
 | March 2026 | Verification rolled out to all developers via Play Console
               and the new Android Developer Console |
-| September 30, 2026 | Enforcement begins — Brazil, Indonesia, Singapore,
-                        Thailand |
+| September 30, 2026 | Enforcement began (live) — Brazil, Indonesia,
+                        Singapore, Thailand |
 | 2027 and beyond | Global expansion to all certified Android devices |
 ```
 
 The tool distinguishes four paths depending on your distribution model — Play Store (likely auto-registered), non-Play distribution (manual registration via Android Developer Console), CI/CD bulk registration (via the Developer ID Status API), and enterprise/managed-device apps (exempt, with a caveat about mixed distribution scenarios).
 
 **Query topics:** `'timeline'` (full rollout dates), `'registration'` (how to register per distribution model), `'enterprise'` (managed-device exemptions, advanced sideloading flow), `'studio'` (Android Studio IDE registration-status integration).
+
+---
+
+### UC-18 — Enforce the same rules on every pull request
+
+**The problem:** The validator only helps when an agent remembers to call it. Code written by hand, by a different agent, or by an agent that skipped the gate reaches review unchecked.
+
+**The tool:** `androjack-mcp validate` (CLI, not an MCP tool)
+
+**Source:** `src/validate-cli.ts` — reuses `validateAndroidCode()` from `src/tools/validator.ts`, so CI and the agent see identical rule IDs.
+
+```bash
+npx -y androjack-mcp@2.1.0 validate app/src --target-sdk=37
+npx -y androjack-mcp@2.1.0 validate . --target-sdk=37 --format=sarif > androjack.sarif
+```
+
+- Scans `.kt`, `.kts`, `.gradle`, `.xml`; skips `build/`, `.gradle/`, `node_modules/`; never follows symlinks.
+- Exit `0` = clean (or `--fail-on=never`), `1` = errors (or warnings with `--fail-on=warning`), `2` = usage error.
+- `--format=sarif` produces SARIF 2.1.0 for GitHub code scanning, so violations appear inline on the PR.
+
+**Example output (text):**
+```
+src/B.kt:2:13: error GLOBALSCOPE_LAUNCH: GlobalScope.launch leaks coroutines — not bound to any lifecycle...
+    fix: Use viewModelScope.launch (ViewModel), lifecycleScope.launch (Activity/Fragment), or rememberCoroutineScope() (Compose).
+    see: https://developer.android.com/kotlin/coroutines/coroutines-best-practices#create-coroutines-data-layer
+AndroJack 2.1.0: 1 file(s) checked against 34 rules — 1 error(s), 0 warning(s), 0 info.
+```
 
 ---
 
@@ -726,9 +763,12 @@ The tool distinguishes four paths depending on your distribution model — Play 
 | `android_code_validator` | `src/tools/validator.ts` + `src/rules/android-rules.ts` |
 | `android_api17_compliance` | `src/tools/android17-compliance.ts` |
 | `android_developer_verification` | `src/tools/developer-verification.ts` |
-| Rule engine | `src/rules/android-rules.ts` (28 rules) |
+| Rule engine | `src/rules/android-rules.ts` (34 rules) |
+| CI gate | `src/validate-cli.ts` — `npx androjack-mcp validate` (text / JSON / SARIF) |
+| Doc retrieval | `src/docs-search.ts` + `src/docs-index.ts` + `src/integrations/developer-knowledge.ts` |
+| Resources | `androjack://rules`, `androjack://rules/{ruleId}`, `androjack://server-info` (`src/server-factory.ts`) |
 | Response cache | `src/cache.ts` (LRU, per-hostname TTL) |
-| Content sanitizer (v2.0) | `src/content-sanitizer.ts` — untrusted-content boundary for externally-fetched text |
+| Content sanitizer | `src/content-sanitizer.ts` — untrusted-content boundary applied to all externally-fetched text (2.1.0) |
 
 ---
 

@@ -110,27 +110,26 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   Room: {
     status: "stable",
     docUrl: "https://developer.android.com/training/data-storage/room",
-    notes: "Room 2.7.x is stable and the recommended version for production. " +
-      "Room 3.0-alpha01 (March 2026) is a major breaking version — it drops SupportSQLite APIs " +
-      "and replaces them with SQLiteDriver/SQLiteConnection from androidx.sqlite. " +
-      "Do NOT use Room 3.0-alpha in production apps. Stay on Room 2.7.x until stable.",
+    notes: "Two stable lines (verified 2026-10-14): Room 3 (androidx.room3, 3.0.3) — SupportSQLite removed, " +
+      "SQLiteDriver required, KMP-first; and Room 2 (androidx.room, 2.8.5) — still maintained. " +
+      "Start new projects on Room 3; migrate 2.x apps via the official 2-to-3 guide. " +
+      "Room 3 release notes: https://developer.android.com/jetpack/androidx/releases/room3",
   },
   SupportSQLiteDatabase: {
     status: "deprecated",
-    since: "Room 3.0-alpha01 (March 2026)",
-    replacement: "SQLiteConnection from androidx.sqlite (androidx.sqlite:sqlite-bundled)",
-    docUrl: "https://developer.android.com/jetpack/androidx/releases/room",
-    notes: "Removed in Room 3.0. RoomDatabase.Callback.onCreate(db: SupportSQLiteDatabase) " +
-      "is replaced by onCreate(db: SQLiteConnection). Only relevant when migrating to Room 3.0+. " +
-      "Room 2.7.x still uses SupportSQLiteDatabase — no action needed until you upgrade.",
+    since: "Room 3.0 (stable; androidx.room3)",
+    replacement: "SQLiteConnection / SQLiteDriver from androidx.sqlite",
+    docUrl: "https://developer.android.com/training/data-storage/room/migration-2-to-3",
+    notes: "Not available in Room 3 (androidx.room3). Room 2.x (androidx.room) still uses it. " +
+      "Rewrite callbacks against SQLiteConnection when migrating — see the 2-to-3 migration guide.",
   },
   SupportSQLiteOpenHelper: {
     status: "deprecated",
-    since: "Room 3.0-alpha01 (March 2026)",
+    since: "Room 3.0 (stable; androidx.room3)",
     replacement: "SQLiteDriver API from androidx.sqlite",
-    docUrl: "https://developer.android.com/jetpack/androidx/releases/room",
-    notes: "Removed in Room 3.0. Custom SupportSQLiteOpenHelper implementations " +
-      "must migrate to the SQLiteDriver contract. Only relevant for Room 3.0+ migrations.",
+    docUrl: "https://developer.android.com/training/data-storage/room/migration-2-to-3",
+    notes: "Not available in Room 3 (androidx.room3). Custom SupportSQLiteOpenHelper implementations " +
+      "must move to the SQLiteDriver contract when migrating from Room 2.x.",
   },
   WorkManager: {
     status: "stable",

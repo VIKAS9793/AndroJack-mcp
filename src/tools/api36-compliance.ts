@@ -292,8 +292,8 @@ Source: https://developer.android.com/guide/navigation/custom-back/predictive-ba
     t.includes("handoff") || t.includes("npu")
   ) {
     return (
-      "## Android 17 / API 37 — Use the android_api37_compliance tool\n\n" +
-      "Android 17 reached platform stability on March 26, 2026. For API 37-specific " +
+      "## Android 17 / API 37 — Use the android_api17_compliance tool\n\n" +
+      "Android 17 (API 37) has been stable since June 16, 2026. For API 37-specific " +
       "breaking changes (static final reflection, ACCESS_LOCAL_NETWORK, SMS OTP delay, " +
       "Handoff API, NPU feature declaration), call **android_api17_compliance** directly.\n\n" +
       "Source: https://developer.android.com/about/versions/17"

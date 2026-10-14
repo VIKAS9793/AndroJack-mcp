@@ -72,3 +72,32 @@ test('REL-06 tool descriptions never hardcode a rule count that differs from the
     assert.equal(Number(m[1]), ANDROID_RULES.length);
   }
 });
+
+test('REL-07 every tool name mentioned in src or docs is a real registered tool', async () => {
+  const { readdirSync, statSync } = await import('node:fs');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const known = new Set([...TOOL_NAMES, 'androjack_grounding_gate']);
+  const rootDir = fileURLToPath(root);
+  const files = [];
+  (function walk(dir) {
+    for (const name of readdirSync(dir)) {
+      if (['node_modules', 'build', '.git', 'release-2.1.0'].includes(name)) continue;
+      const p = path.join(dir, name);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (/\.(ts|md)$/.test(name)) files.push(p);
+    }
+  })(rootDir);
+  // Historical records legitimately name the bad references they document.
+  const historical = new Set(['CHANGELOG.md', path.join('docs', 'agent-context', 'bugs.md')]);
+  const unknown = [];
+  for (const file of files) {
+    if (historical.has(path.relative(rootDir, file))) continue;
+    const text = readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/`(android_[a-z0-9_]+)`|\*\*(android_[a-z0-9_]+)\*\*|"(android_[a-z0-9_]+)"/g)) {
+      const name = m[1] ?? m[2] ?? m[3];
+      if (!known.has(name)) unknown.push(`${path.relative(rootDir, file)}: ${name}`);
+    }
+  }
+  assert.deepEqual(unknown, []);
+});

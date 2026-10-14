@@ -108,7 +108,7 @@ Source: https://kotlinlang.org/docs/multiplatform/multiplatform-ios-integration-
 [versions]
 kotlin = "2.1.0"
 ktor = "3.1.0"
-room = "2.7.0"           # Room KMP stable since 2.7
+room = "2.8.5"           # Room 2 line (androidx.room), KMP since 2.7 — new projects: Room 3 (androidx.room3 3.0.3)
 kotlinxCoroutines = "1.10.1"
 kotlinxSerialization = "1.8.0"
 kotlinxDatetime = "0.6.2"
@@ -342,55 +342,56 @@ Source: https://kotlinlang.org/docs/multiplatform-expect-actual.html
 
   if (t.includes("room") || t.includes("database") || t.includes("db")) {
     const room3Warning = `
-## ⚠️ Room 3.0 Alpha Warning (March 13, 2026)
-Source: https://developer.android.com/jetpack/androidx/releases/room
+## Room 3 — now stable (verified 2026-10-14)
+Source: https://developer.android.com/jetpack/androidx/releases/room3
 
-Room 3.0-alpha01 was released March 13, 2026. It is a **major breaking version**.
+| Line | Current stable | Package | Status |
+|------|----------------|---------|--------|
+| **Room 3** | **3.0.3** (Sept 9, 2026); 3.1.0-alpha01 in preview | \`androidx.room3:room3-*\` | Stable — new major version |
+| Room 2 | 2.8.5 (Sept 9, 2026) | \`androidx.room:room-*\` | Stable, still maintained |
 
-### Breaking Changes in Room 3.0
+Room 3 is a **new artifact group and package** (\`androidx.room3\`), not a version bump of
+\`androidx.room\`. Both lines can coexist during a migration.
 
-**1. SupportSQLite APIs dropped** — Room 3.0 is fully backed by \`androidx.sqlite\`
-driver APIs. The \`SupportSQLiteOpenHelper\`, \`SupportSQLiteDatabase\`, and
-\`SupportSQLiteStatement\` APIs are removed.
+### What changed in Room 3
+
+**1. SupportSQLite APIs removed** — Room 3 runs entirely on the \`androidx.sqlite\`
+driver APIs. RoomDatabase no longer exposes \`SupportSQLiteDatabase\` /
+\`SupportSQLiteOpenHelper\`, and a \`SQLiteDriver\` is **required** when building the database
+(\`setDriver(BundledSQLiteDriver())\` or \`AndroidSQLiteDriver\`).
+
+**2. KMP-first** — the driver architecture works on Android, iOS, desktop and adds JS/WASM targets.
+
+**3. Escape hatch** — \`androidx.room3:room3-sqlite-wrapper\` keeps some SupportSQLite behaviour
+available while you migrate.
 
 \`\`\`kotlin
-// ❌ Room 2.x — SupportSQLite (removed in Room 3.0)
-class MyCallback : RoomDatabase.Callback() {
-  override fun onCreate(db: SupportSQLiteDatabase) {  // SupportSQLiteDatabase removed
-    db.execSQL("INSERT INTO ...")
-  }
-}
-
-// ✅ Room 3.0 — SQLiteDriver APIs
-class MyCallback : RoomDatabase.Callback() {
-  override fun onCreate(db: SQLiteConnection) {       // SQLiteConnection from androidx.sqlite
-    db.execSQL("INSERT INTO ...")
-  }
+// build.gradle.kts — Room 3 (KSP, not kapt)
+dependencies {
+    implementation("androidx.room3:room3-runtime:3.0.3")
+    ksp("androidx.room3:room3-compiler:3.0.3")
+    implementation("androidx.sqlite:sqlite-bundled:<check gradle_dependency_checker>")
 }
 \`\`\`
 
-**2. JavaScript and WASM targets added** — Room 3.0 adds support for KMP JS and
-WASM targets alongside existing Android, iOS, Linux, macOS, Windows.
-
-**3. Driver-backed architecture** — SQLiteDriver is KMP-compatible and removes
-Room's dependency on Android's SupportSQLite API.
-
-### Migration Decision
+### Migration decision
 
 | Your situation | Action |
-|---------------|--------|
-| New KMP project, 2026 | Wait for Room 3.0 stable OR use Room 2.7.x |
-| Existing Room 2.x project | Stay on Room 2.7.x until 3.0 is stable |
-| Using \`SupportSQLiteDatabase\` callbacks | Plan migration to \`SQLiteConnection\` |
+|----------------|--------|
+| New project (Android or KMP) | Start on Room 3 |
+| Existing Room 2.x app | Fine to stay on 2.8.x; migrate when you can budget it — follow the official guide |
+| Uses \`SupportSQLiteDatabase\` callbacks / custom open helpers | Must be rewritten against \`SQLiteConnection\` / \`SQLiteDriver\` before moving to Room 3 |
 
-Room 2.7.x remains stable and supported. Do NOT migrate production apps to 3.0-alpha.
-
-Source: https://developer.android.com/jetpack/androidx/releases/room
+Migration guide: https://developer.android.com/training/data-storage/room/migration-2-to-3
+> Check the migration guide for exact callback and builder signatures — do not guess them.
 `;
     return roomKmp + "\n\n---\n\n" + room3Warning;
   }
   if (t.includes("room 3") || t.includes("room3") || t.includes("supportsqlite") || t.includes("breaking")) {
-    return `## Room 3.0 Alpha — Breaking Changes\nSource: https://developer.android.com/jetpack/androidx/releases/room\n\nRoom 3.0-alpha01 released March 13, 2026. SupportSQLite APIs removed. Use Room 2.7.x in production.\n\nQuery 'room' for full migration details.`;
+    return `## Room 3 (stable 3.0.3)\nSource: https://developer.android.com/jetpack/androidx/releases/room3\n\n` +
+      `Room 3 is stable in the new \`androidx.room3\` package. SupportSQLite APIs are removed and a SQLiteDriver is required. ` +
+      `Room 2.8.x (\`androidx.room\`) remains supported.\n\nMigration guide: https://developer.android.com/training/data-storage/room/migration-2-to-3\n\n` +
+      `Query 'room' for the full comparison.`;
   }
   if (t.includes("ktor") || t.includes("network") || t.includes("http") || t.includes("retrofit")) return ktor;
   if (t.includes("expect") || t.includes("actual") || t.includes("platform")) return expectActual;
