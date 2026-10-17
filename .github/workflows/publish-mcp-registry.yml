@@ -45,6 +45,7 @@ jobs:
         run: |
           ./mcp-publisher login github-oidc
           # Catch duplicate version error to avoid failing the CI run on re-runs/re-tags
+          set -o pipefail
           ./mcp-publisher publish --server-path .mcp/server.json 2>&1 | tee publish.log || {
             if grep -q "cannot publish duplicate version" publish.log; then
               echo "INFO: Version is already published to the MCP Registry. Proceeding."
