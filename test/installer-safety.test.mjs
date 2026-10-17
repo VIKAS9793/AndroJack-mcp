@@ -11,6 +11,18 @@ import path from 'node:path';
 const { installToPath } = await import('../build/install.js');
 const { parseJsonc } = await import('../build/config-file.js');
 
+// Windows refuses symlinks without Developer Mode or admin rights; skip rather than fail there.
+async function symlinkOrSkip(t, target, link) {
+  try {
+    await symlink(target, link);
+    return true;
+  } catch (err) {
+    if (err.code !== 'EPERM' || process.platform !== 'win32') throw err;
+    t.skip('symlinks need Developer Mode on Windows');
+    return false;
+  }
+}
+
 const cursor = { id: 'cursor', name: 'Cursor', configKey: 'mcpServers', format: 'standard' };
 const vscode = { id: 'vscode', name: 'VS Code', configKey: 'servers', format: 'vscode' };
 
@@ -59,7 +71,7 @@ test('INS-03 a non-object server block is not clobbered', async () => {
   }
 });
 
-test('INS-04 symlinked configs are written through the link; permissions are preserved', async () => {
+test('INS-04 symlinked configs are written through the link; permissions are preserved', async (t) => {
   const dir = await tmp();
   try {
     await mkdir(path.join(dir, 'dotfiles'));
@@ -67,7 +79,7 @@ test('INS-04 symlinked configs are written through the link; permissions are pre
     const link = path.join(dir, 'mcp.json');
     await writeFile(real, '{ "mcpServers": { "a": { "command": "x", "env": { "TOKEN": "secret" } } } }');
     await chmod(real, 0o600);
-    await symlink(real, link);
+    if (!(await symlinkOrSkip(t, real, link))) return;
     const r = installToPath(link, cursor);
     assert.equal(r.success, true, r.message);
     assert.ok((await lstat(link)).isSymbolicLink(), 'link preserved');

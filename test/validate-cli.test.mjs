@@ -14,6 +14,18 @@ const ENTRY = fileURLToPath(new URL('../build/index.js', import.meta.url));
 const { parseValidateArgs, languageForFile } = await import('../build/validate-cli.js');
 const { ANDROID_RULES } = await import('../build/rules/android-rules.js');
 
+// Windows refuses symlinks without Developer Mode or admin rights; skip rather than fail there.
+async function symlinkOrSkip(t, target, link) {
+  try {
+    await symlink(target, link);
+    return true;
+  } catch (err) {
+    if (err.code !== 'EPERM' || process.platform !== 'win32') throw err;
+    t.skip('symlinks need Developer Mode on Windows');
+    return false;
+  }
+}
+
 function run(args, cwd) {
   return new Promise((resolve) => {
     execFile(process.execPath, [ENTRY, 'validate', ...args], { cwd, env: { ...process.env, ANDROJACK_OFFLINE: '1' } },
@@ -94,7 +106,7 @@ test('CLI-05 JSON output carries totals and per-file reports', async () => {
   }
 });
 
-test('CLI-06 Gradle output dirs, node_modules and walked symlinks are skipped; nested build packages are not', async () => {
+test('CLI-06 Gradle output dirs, node_modules and walked symlinks are skipped; nested build packages are not', async (t) => {
   const root = await makeProject({
     'app/build.gradle.kts': 'plugins { id("com.android.application") }',
     'app/build/gen/G.kt': 'GlobalScope.launch { }',
@@ -103,7 +115,7 @@ test('CLI-06 Gradle output dirs, node_modules and walked symlinks are skipped; n
     'app/src/com/example/build/Ok.kt': 'class Ok',
   });
   try {
-    await symlink(path.join(root, 'outside'), path.join(root, 'app', 'src', 'link'));
+    if (!(await symlinkOrSkip(t, path.join(root, 'outside'), path.join(root, 'app', 'src', 'link')))) return;
     const r = await run(['app'], root);
     assert.equal(r.code, 0, r.stdout + r.stderr);
     assert.match(r.stdout, /2 file\(s\) checked/);
@@ -113,10 +125,10 @@ test('CLI-06 Gradle output dirs, node_modules and walked symlinks are skipped; n
   }
 });
 
-test('CLI-06b an explicitly named path is always checked, even a symlink or a build dir', async () => {
+test('CLI-06b an explicitly named path is always checked, even a symlink or a build dir', async (t) => {
   const root = await makeProject({ 'real/Bad.kt': 'GlobalScope.launch { }', 'build/Gen.kt': 'GlobalScope.launch { }' });
   try {
-    await symlink(path.join(root, 'real'), path.join(root, 'linked'));
+    if (!(await symlinkOrSkip(t, path.join(root, 'real'), path.join(root, 'linked')))) return;
     assert.equal((await run(['linked'], root)).code, 1);
     assert.equal((await run(['build'], root)).code, 1);
   } finally {
