@@ -44,7 +44,7 @@ test('REL-03 README install commands and badges pin the current version', () => 
   for (const v of pins) assert.equal(v, pkg.version);
   for (const b64 of current.matchAll(/(?:params|config)=([A-Za-z0-9+/=]{20,})\)/g)) {
     const decoded = Buffer.from(b64[1], 'base64').toString('utf8');
-    assert.match(decoded, new RegExp(`androjack-mcp@${pkg.version.replace(/\./g, '\\.')}`), decoded);
+    assert.ok(decoded.includes(`androjack-mcp@${pkg.version}`), decoded);
   }
   const badge = current.match(/img\.shields\.io\/badge\/AndroJack_MCP-v(\d+\.\d+\.\d+)-/);
   assert.equal(badge?.[1], pkg.version, 'version badge');

@@ -205,9 +205,12 @@ function digest(value: string): Buffer {
 /** Constant-time bearer check — hashing first equalises buffer lengths. */
 export function isAuthorized(authorizationHeader: string | undefined, expectedToken: string | undefined): boolean {
   if (!expectedToken) return true;
-  const match = /^Bearer\s+(.+)$/i.exec(authorizationHeader ?? "");
-  if (!match) return false;
-  return timingSafeEqual(digest(match[1]!.trim()), digest(expectedToken));
+  const header = authorizationHeader ?? "";
+  const scheme = /^Bearer[ \t]+/i.exec(header);
+  if (!scheme) return false;
+  const token = header.slice(scheme[0].length).trim();
+  if (!token) return false;
+  return timingSafeEqual(digest(token), digest(expectedToken));
 }
 
 function parseIdleMs(raw: string | undefined): number | undefined {

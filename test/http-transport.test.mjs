@@ -43,6 +43,17 @@ test('HTTP-02 isAuthorized is a no-op without a configured token', () => {
   assert.equal(isAuthorized('Basic eA==', 'x'), false);
 });
 
+test('HTTP-13 bearer parsing rejects empty tokens and stays linear on whitespace floods', () => {
+  assert.equal(isAuthorized('Bearer', 'x'), false);
+  assert.equal(isAuthorized('Bearer    ', 'x'), false);
+  assert.equal(isAuthorized('Bearerx', 'x'), false);
+  assert.equal(isAuthorized('Bearer\tx', 'x'), true);
+  const flood = 'Bearer' + ' '.repeat(200_000) + '\n';
+  const start = performance.now();
+  assert.equal(isAuthorized(flood, 'x'), false);
+  assert.ok(performance.now() - start < 50, 'whitespace flood must not take quadratic time');
+});
+
 test('HTTP-03 idle sessions are evicted (no permanent 503 lock-out)', async () => {
   const h = await start({ sessionIdleMs: 150 });
   try {

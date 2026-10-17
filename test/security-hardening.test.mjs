@@ -207,7 +207,7 @@ test('FIX-01 whitespace-only lines no longer consume the excerpt budget', () => 
 test('SEC-17 credential headers are not forwarded to a different origin on redirect', async () => {
   docCache.clear();
   process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY = 'secret-key';
-  const calls = stubFetch((url) => url.startsWith('https://developerknowledge.googleapis.com')
+  const calls = stubFetch((url) => new URL(url).origin === 'https://developerknowledge.googleapis.com'
     ? new Response(null, { status: 302, headers: { location: 'https://developer.android.com/collect' } })
     : new Response(JSON.stringify({ results: [] }), { status: 200 }));
   try {
@@ -299,7 +299,7 @@ test('SEC-24 boundary spoofing: separator-less, doubled separators, spaced slash
 test('SEC-25 non-credential headers survive a cross-origin redirect', async () => {
   docCache.clear();
   process.env.ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY = 'k';
-  const calls = stubFetch((url) => url.startsWith('https://developerknowledge.googleapis.com')
+  const calls = stubFetch((url) => new URL(url).origin === 'https://developerknowledge.googleapis.com'
     ? new Response(null, { status: 302, headers: { location: 'https://developer.android.com/x' } })
     : new Response(JSON.stringify({ results: [] }), { status: 200 }));
   try {
