@@ -83,9 +83,13 @@ jobs:
           fi
           
           # Run vsce publish but catch authorization/PAT failures to avoid failing the pipeline if manual uploads are used
+          set -o pipefail
           npx @vscode/vsce publish --packagePath "$PACKAGE_PATH" 2>&1 | tee publish_vsce.log || {
             if grep -qE "Personal Access Token verification has failed|not authorized" publish_vsce.log; then
               echo "WARNING: VS Code Marketplace authentication failed (PAT expired or invalid). Skipping publish step (assuming manual upload was performed)."
+              exit 0
+            elif grep -qiE "already exists" publish_vsce.log; then
+              echo "INFO: This version is already on the Marketplace (manual upload). Nothing to publish."
               exit 0
             else
               echo "ERROR: VS Code Marketplace publish failed."
