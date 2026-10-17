@@ -1,5 +1,13 @@
 User-facing release notes for **AndroJack MCP for VS Code**.
 
+## 2.1.0
+
+- **v2.1.0 Release Sync:** Extension now launches `androjack-mcp@2.1.0`.
+- **Doc search works:** the core server's documentation search now returns real official documentation (Google Developer Knowledge API with an optional key, or a verified index of official pages). In 2.0.0 it returned no content.
+- **Security:** redirect allowlist bypass closed, all fetched content wrapped as untrusted, 7 dependency advisories fixed.
+- **Validator:** 34 rules (6 new Android 17 rules), comments no longer cause false failures, structured output.
+- **Corrections:** Android 17 games exemption, Handoff API, Room 3 (stable), Play target-API status.
+
 ## 2.0.0
 
 - **v2.0.0 Release Sync:** Extension now launches the hardened `androjack-mcp@2.0.0` release.

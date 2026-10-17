@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 
+// Pinned MCP server release. Keep equal to package.json "version" — CI checks both.
+const MCP_PACKAGE = 'androjack-mcp@2.1.0';
+
 export function activate(context: vscode.ExtensionContext) {
     console.log('AndroJack MCP extension is now active!');
 
@@ -19,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Provide a static definition referencing our single configured server
             return [{
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@2.0.0'],
+                args: ['-y', MCP_PACKAGE],
                 env: { ...process.env } as Record<string, string>,
                 stderr: 'inherit',
                 label: 'AndroJack MCP: Verified Android Docs'
@@ -39,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             return {
                 command: 'npx',
-                args: ['-y', 'androjack-mcp@2.0.0'],
+                args: ['-y', MCP_PACKAGE],
                 env: safeEnv,
                 // Allow standard error tracking
                 stderr: 'inherit',
