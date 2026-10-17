@@ -26,7 +26,7 @@ const { createAndroJackServer } = await import('../../build/server-factory.js');
 
 // Context-window budget for tools/list. Every connected client pays this on
 // every session; growth must be a deliberate decision, not drift.
-const TOOLS_LIST_BUDGET_BYTES = 30_000;
+const TOOLS_LIST_BUDGET_BYTES = 22_000;
 
 async function connectStdio(extraEnv = {}) {
   const transport = new StdioClientTransport({

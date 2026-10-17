@@ -21,10 +21,11 @@ import ora from "ora";
 import * as clack from "@clack/prompts";
 import { isDirectExecution } from "./cli-entry.js";
 import { VERSIONED_PACKAGE } from "./version.js";
+import { isPlainObject, parseJsonc, writeFileAtomic } from "./config-file.js";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-interface IdeTarget {
+export interface IdeTarget {
   id: string;
   name: string;
   configPaths: string[];   // ordered by preference
@@ -36,7 +37,7 @@ interface IdeTarget {
   ideInstalledPaths?: string[];
 }
 
-interface InstallResult {
+export interface InstallResult {
   ide: string;
   success: boolean;
   path?: string;
@@ -231,14 +232,17 @@ function mergeConfig(existing: Record<string, unknown>, target: IdeTarget): Reco
   const serverBlock =
     target.format === "vscode" ? SERVER_CONFIG_VSCODE : SERVER_CONFIG_STANDARD;
 
-  const existingBlock = (existing[key] as Record<string, unknown>) ?? {};
+  const existingBlock = existing[key] === undefined ? {} : existing[key];
+  if (!isPlainObject(existingBlock)) {
+    throw new Error(`"${key}" in the existing config is not an object; refusing to modify it.`);
+  }
   return {
     ...existing,
     [key]: { ...existingBlock, androjack: serverBlock },
   };
 }
 
-function installToPath(configPath: string, target: IdeTarget): InstallResult {
+export function installToPath(configPath: string, target: IdeTarget): InstallResult {
   try {
     const dir = path.dirname(configPath);
 
@@ -250,18 +254,34 @@ function installToPath(configPath: string, target: IdeTarget): InstallResult {
 
     if (fs.existsSync(configPath)) {
       const raw = fs.readFileSync(configPath, "utf-8");
-      let existing: Record<string, unknown> = {};
+      let existing: unknown;
       try {
-        existing = JSON.parse(raw) as Record<string, unknown>;
+        existing = parseJsonc(raw);
       } catch {
-        fs.writeFileSync(configPath + ".backup", raw);
+        // Never overwrite a file we cannot read: it may hold other MCP servers.
+        return {
+          ide: target.name,
+          success: false,
+          path: configPath,
+          message: `Not modified: ${configPath} is not valid JSON/JSONC. Fix it or add AndroJack manually (see config/ examples).`,
+        };
       }
+      if (!isPlainObject(existing)) {
+        return {
+          ide: target.name,
+          success: false,
+          path: configPath,
+          message: `Not modified: ${configPath} does not contain a JSON object.`,
+        };
+      }
+      // Keep the user's original bytes (comments included) before rewriting.
+      fs.writeFileSync(`${configPath}.androjack-backup`, raw, { mode: fs.statSync(configPath).mode & 0o777 });
       finalConfig = mergeConfig(existing, target);
     } else {
       finalConfig = buildConfig(target);
     }
 
-    fs.writeFileSync(configPath, JSON.stringify(finalConfig, null, 2) + "\n", "utf-8");
+    writeFileAtomic(configPath, JSON.stringify(finalConfig, null, 2) + "\n");
 
     return {
       ide: target.name,

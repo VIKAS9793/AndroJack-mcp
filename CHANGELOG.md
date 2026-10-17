@@ -24,6 +24,9 @@ This release is mostly about closing the gap between what AndroJack claimed and 
   - **Unterminated spoofed closing tags** (`</UNTRUSTED_EXTERNAL_CONTENT` followed by a newline) are now redacted.
   - **Body limits:** the 1 MiB request cap now applies to every transport (it previously covered only `initialize`; stateless and existing sessions fell back to 4 MiB), and stateless mode caps concurrent requests (503 + `Retry-After`).
   - **Slow-body hold-open:** outbound reads now have a deadline covering the body, not just the headers; the Developer Knowledge response is streamed with a byte cap instead of being buffered first.
+  - **Role-tag spoofing:** `< /assistant>`, `[ /system ]` and similar whitespace variants are now redacted in fetched content; line separators and C1 control characters are stripped from inline text.
+  - **Installer:** IDE config files are parsed as JSONC; an unparseable or non-object config is never overwritten. Writes are atomic (temp file + rename), keep the original file mode, and follow symlinks to the real file. A backup is written to `<config>.androjack-backup`.
+  - **Memory:** the response cache is bounded by bytes (32 MB) as well as entry count; a single oversized entry is not cached.
 - **Privacy note:** with `ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY` set, `android_debugger` sends the exception class and message words to Google's API as the search query. Stack-trace messages can contain file paths or user data. Leave the key unset (or use `ANDROJACK_OFFLINE=1`) when that is not acceptable.
 
 ### Fixed
@@ -76,17 +79,18 @@ This release is mostly about closing the gap between what AndroJack claimed and 
 - Play target-API section updated: the August 31, 2026 requirement is in force (extension to November 1, 2026; Wear/Automotive 35, TV/XR 34; existing apps 35+ for new users).
 - Developer verification: enforcement live since September 30, 2026 in Brazil, Indonesia, Singapore, Thailand.
 
+- **Token budgeting.** Tool descriptions rewritten: `tools/list` is ~20.5 KB, down from ~28.5 KB. Within one session, a repeated identical result from a documentation tool is replaced by a short pointer to the earlier call, and documentation pages already sent are not resent. Every such tool takes `refresh: true` to force the full output. The validator, component-status and API-level tools are never deduplicated. The untrusted-content notice is printed once per response instead of once per result.
+- Android XR status: Compose for XR 1.0.0-beta01, SceneCore and ARCore for Jetpack XR 1.0.0-rc02; the version catalog uses `androidx.xr.arcore:arcore`.
+
 ### Docs & contributor process
 
-- **`CLAUDE.md` + `docs/agent-context/`** (`architecture.md`, `bugs.md`, `release.md`): component ownership, hard rules for agents, an 18-entry bug log (symptom → root cause → fix → prevention rule), and the npm-first multi-branch release process.
 - `CONTRIBUTING.md`: rule and content contribution requirements, local test commands, release order.
-- Product docs (`product-management/`) updated: competitive analysis rewritten around Google's first-party stack (Developer Knowledge API, Android CLI 1.0, skills), roadmap re-scoped (v2.1.0 shipped, original v2.1.0 items moved to v2.2.0, SDK v2 to 3.0), PRD/metrics/JTBD/stories facts corrected.
 
 ### Tests
 
-- 85 → 173 tests (+1 opt-in live test). The 11 tests added for the review findings were confirmed to fail on the pre-fix code. New suites: `security-hardening`, `validator-engine`, `validate-cli`, `http-transport`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
+- 85 → 196 tests (+1 opt-in live test). The 11 tests added for the review findings were confirmed to fail on the pre-fix code. New suites: `security-hardening`, `token-budget`, `installer-safety`, `validator-engine`, `validate-cli`, `http-transport`, `release-integrity`, and **`test/uat/uat.test.mjs`** — 17 black-box acceptance scenarios that launch the built server and drive it through the official MCP SDK client over stdio and Streamable HTTP. Hermetic by default (`ANDROJACK_OFFLINE=1`); `ANDROJACK_UAT_LIVE=1` adds a live retrieval check. Plan and traceability: `test/uat/UAT_PLAN.md`.
 - Two existing assertions were changed because they asserted content that is not in the official docs: the Handoff test asserted the non-existent `android.intent.action.HANDOFF`, and the NPU test asserted an unverified feature string. They now assert the official API names.
-- UAT-03 caps `tools/list` at 30 KB (currently ~28.5 KB ≈ 7k tokens) so context cost cannot grow by accident.
+- UAT-03 caps `tools/list` at 22 KB (currently ~20.5 KB ≈ 5k tokens) so context cost cannot grow by accident.
 
 ### Behaviour changes when upgrading from 2.0.x
 

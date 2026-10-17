@@ -17,7 +17,8 @@
  */
 
 import { secureFetch, extractPageText } from "./http.js";
-import { sanitizeInlineText, wrapUntrustedContent } from "./content-sanitizer.js";
+import { sanitizeInlineText, UNTRUSTED_NOTICE, wrapUntrustedContent } from "./content-sanitizer.js";
+import { callContext } from "./session-memo.js";
 import { matchDocIndex } from "./docs-index.js";
 import {
   isDeveloperKnowledgeEnabled,
@@ -32,6 +33,8 @@ export interface DocResult {
   /** Wrapped in an untrusted-content boundary; empty in offline mode. */
   excerpt: string;
   provider: DocProvider;
+  /** True when this page was already excerpted earlier in the session. */
+  alreadySent?: boolean;
 }
 
 export interface DocSearchOutcome {
@@ -56,9 +59,29 @@ function labelFor(url: string): string {
  * Fetches one allowlisted documentation page and returns its main text,
  * wrapped as untrusted content. Throws on network/allowlist failure.
  */
-export async function fetchOfficialPage(url: string, maxChars = 2000): Promise<string> {
+export async function fetchOfficialPage(url: string, maxChars = 2000, notice = true): Promise<string> {
   const html = await secureFetch(url);
-  return wrapUntrustedContent(url, extractPageText(html, maxChars), labelFor(url));
+  return wrapUntrustedContent(url, extractPageText(html, maxChars), labelFor(url), { notice });
+}
+
+/**
+ * Marks results whose page was already excerpted earlier in this MCP session
+ * and drops their excerpt (unless the call asked for refresh), then records
+ * the rest as sent.
+ */
+function applySessionDedupe(outcome: DocSearchOutcome): DocSearchOutcome {
+  const ctx = callContext.getStore();
+  if (!ctx) return outcome;
+  for (const r of outcome.results) {
+    if (!r.excerpt) continue;
+    if (!ctx.refresh && ctx.memo.hasUrl(r.url)) {
+      r.excerpt = "";
+      r.alreadySent = true;
+    } else {
+      ctx.memo.recordUrl(r.url);
+    }
+  }
+  return outcome;
 }
 
 /**
@@ -88,18 +111,18 @@ export async function searchOfficialDocs(
     try {
       const chunks = await searchDeveloperKnowledge(trimmed, limit);
       if (chunks.length > 0) {
-        return {
+        return applySessionDedupe({
           results: chunks.map((c) => ({
             // Title and URL are rendered outside the untrusted block, so they
             // must be neutralised here: a raw title could carry a spoofed
             // boundary or instructions.
             title: sanitizeInlineText(c.title) || "Untitled document",
             url: new URL(c.url).href,
-            excerpt: wrapUntrustedContent(c.url, c.content.slice(0, maxChars), "Google Developer Knowledge API"),
-            provider: "google-developer-knowledge",
+            excerpt: wrapUntrustedContent(c.url, c.content.slice(0, maxChars), "Google Developer Knowledge API", { notice: false }),
+            provider: "google-developer-knowledge" as const,
           })),
           notes,
-        };
+        });
       }
       notes.push("Google Developer Knowledge API returned no Android results; using AndroJack's curated index.");
     } catch (err) {
@@ -120,7 +143,7 @@ export async function searchOfficialDocs(
     return { results: [], notes };
   }
 
-  const settled = await Promise.allSettled(matches.map((m) => fetchOfficialPage(m.url, maxChars)));
+  const settled = await Promise.allSettled(matches.map((m) => fetchOfficialPage(m.url, maxChars, false)));
   const results: DocResult[] = [];
   settled.forEach((outcome, i) => {
     const match = matches[i]!;
@@ -133,17 +156,20 @@ export async function searchOfficialDocs(
     }
   });
 
-  return { results, notes };
+  return applySessionDedupe({ results, notes });
 }
 
 /** Renders a DocSearchOutcome as Markdown for tool output. */
 export function formatDocResults(outcome: DocSearchOutcome): string {
   const parts: string[] = [];
+  if (outcome.results.some((r) => r.excerpt)) parts.push(`> ${UNTRUSTED_NOTICE}`);
   for (const r of outcome.results) {
-    parts.push(
-      `### ${r.title}\n**Source:** ${r.url}\n` +
-      (r.excerpt ? `\n${r.excerpt}` : `\n_(Open the source link — excerpt not fetched.)_`)
-    );
+    const body = r.excerpt
+      ? `\n${r.excerpt}`
+      : r.alreadySent
+        ? `\n_Excerpt already provided earlier in this session (not resent). Call again with refresh: true if it is no longer in your context._`
+        : `\n_(Open the source link — excerpt not fetched.)_`;
+    parts.push(`### ${r.title}\n**Source:** ${r.url}\n${body}`);
   }
   if (outcome.notes.length > 0) {
     parts.push(outcome.notes.map((n) => `> ℹ️ ${n}`).join("\n"));

@@ -1,6 +1,6 @@
 // Tool 19: Android XR Guide
-// Android XR SDK reached Developer Preview 3 in December 2025.
-// Samsung Galaxy XR launched October 2025. 5+ devices expected in 2026.
+// Jetpack XR libraries are in beta/RC (verified 2026-10-14).
+// Samsung Galaxy XR launched October 2025.
 // AI tools generate standard Compose code for XR — technically works but misses all spatial APIs.
 
 export async function androidXrGuide(topic: string): Promise<string> {
@@ -11,13 +11,13 @@ export async function androidXrGuide(topic: string): Promise<string> {
 Source: https://developer.android.com/xr
 Source: https://developer.android.com/develop/xr/jetpack-xr-sdk
 
-## Status (February 2026)
+## Status (verified 2026-10-14 against the Jetpack release pages)
 
 | Component | Status |
 |-----------|--------|
-| Android XR SDK | Developer Preview 3 (Dec 2025) |
-| Jetpack Compose for XR | Developer Preview 3 |
-| ARCore for XR | Developer Preview 3 |
+| Jetpack Compose for XR (\`androidx.xr.compose\`) | 1.0.0-beta01 (Sept 23, 2026) |
+| Jetpack SceneCore (\`androidx.xr.scenecore\`) | 1.0.0-rc02 (Oct 7, 2026) |
+| ARCore for Jetpack XR (\`androidx.xr.arcore\`) | 1.0.0-rc02 (Oct 7, 2026) |
 | Samsung Galaxy XR | Launched October 2025 |
 | Additional 2026 XR devices | Samsung AR glasses, XREAL, Warby Parker, Gentle Monster |
 
@@ -53,12 +53,12 @@ Source: https://developer.android.com/develop/xr/get-started
 \`\`\`toml
 # libs.versions.toml
 [versions]
-xr-compose = "1.0.0-alpha03"   # Check developer.android.com/xr for latest
-arcore-xr = "1.0.0-alpha03"
+xr-compose = "1.0.0-beta01"    # Confirm with gradle_dependency_checker before pinning
+arcore-xr = "1.0.0-rc02"
 
 [libraries]
 compose-xr = { group = "androidx.xr.compose", name = "compose", version.ref = "xr-compose" }
-arcore-xr = { group = "com.google.ar", name = "core-xr", version.ref = "arcore-xr" }
+arcore-xr = { group = "androidx.xr.arcore", name = "arcore", version.ref = "arcore-xr" }
 
 [plugins]
 # No special plugin needed — standard Android plugin works

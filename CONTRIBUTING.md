@@ -42,7 +42,6 @@ npm test                    # build + unit, regression, and UAT suites (hermetic
 npm run test:uat:live       # adds a live developer.android.com retrieval check
 npx @modelcontextprotocol/inspector node build/index.js
 ```
-Agent-assisted contributors: read [`CLAUDE.md`](CLAUDE.md) and [`docs/agent-context/`](docs/agent-context/) first.
 
 ## 🚢 Release Process (maintainers)
 Order matters — the MCP Registry validates the version against npm.

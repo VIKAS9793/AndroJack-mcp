@@ -8,21 +8,9 @@
 <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" />
 <img src="https://img.shields.io/badge/MCP-Protocol-blueviolet?style=for-the-badge" />
 
+<a href="https://www.npmjs.com/package/androjack-mcp/v/2.1.0"><img alt="AndroJack MCP version 2.1.0" src="https://img.shields.io/badge/AndroJack_MCP-v2.1.0-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=0B1F14" height="64" /></a>
+
 ### *An MCP server that equips your AI coding assistant with live, verified Android knowledge — so it builds from official sources, not from memory.*
-
-<br/>
-
-[![npm version](https://img.shields.io/npm/v/androjack-mcp?color=0A7AFF&style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/androjack-mcp)
-[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-0A7AFF?style=flat-square&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode)
-[![GitHub stars](https://img.shields.io/github/stars/VIKAS9793/AndroJack-mcp?style=flat-square&logo=github&color=0A7AFF)](https://github.com/VIKAS9793/AndroJack-mcp/stargazers)
-[![npm downloads](https://img.shields.io/npm/dm/androjack-mcp?style=flat-square&logo=npm&color=0A7AFF)](https://www.npmjs.com/package/androjack-mcp)
-[![Tools](https://img.shields.io/badge/tools-23-orange?style=flat-square)](#-what-androjack-covers--23-tools)
-[![MCP Spec](https://img.shields.io/badge/MCP-2025--11--25-blueviolet?style=flat-square)](https://modelcontextprotocol.io)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=flat-square&logo=node.js)](https://nodejs.org)
-[![Android API](https://img.shields.io/badge/Android-API%2021--37-34A853?style=flat-square&logo=android)](https://developer.android.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Security Policy](https://img.shields.io/badge/security-policy-0A7AFF?style=flat-square&logo=github)](SECURITY.md)
 
 <br/>
 
@@ -43,7 +31,6 @@
 
 **VS Code distribution:** Also live on the VS Code Marketplace as [AndroJack MCP for VS Code](https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode).
 
-**PM / APM docs:** Product strategy, JTBD, personas, roadmap, user stories, competitive analysis, and GTM materials live under [product-management/README.md](product-management/README.md).
 
 </div>
 
@@ -455,7 +442,8 @@ Google now ships its own agent stack for Android. Being straight about the overl
 - **No more confident wrong answers:** `Row` → "DEPRECATED", `Task` → "REMOVED" registry false positives fixed; Android 17 games exemption corrected; fabricated Handoff API removed; Room 3 is stable (was described as alpha); Google Maven alphas no longer labelled "Latest Stable"; 19 dead documentation links replaced.
 - **Validator:** comments ignored (ends agent fix-loops), Kotlin DSL `kapt(...)` detected, API 37 thresholds corrected, 6 new Android 17 rules (34 total), structured output.
 - **New:** `androjack-mcp validate` CLI (text/JSON/SARIF) for CI; MCP resources for the rule catalogue; full tool annotations; AppFunctions guidance; Android Studio Rabbit 1 / AGP 9.4.
-- **Tests:** 85 → 173 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
+- **Lower token cost:** `tools/list` ~28.5 KB → ~20.5 KB; repeated identical results in a session are replaced by a short pointer (pass `refresh: true` to get them again).
+- **Tests:** 85 → 196 (+1 opt-in live), including a 17-scenario black-box UAT suite driven through the real MCP SDK client. See [`test/uat/UAT_PLAN.md`](test/uat/UAT_PLAN.md).
 
 Full details: [CHANGELOG.md](CHANGELOG.md).
 

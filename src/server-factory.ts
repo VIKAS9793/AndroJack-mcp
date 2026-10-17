@@ -24,6 +24,7 @@ import { ANDROID_RULES } from "./rules/android-rules.js";
 import { validateAndroidCode, formatValidationReport } from "./tools/validator.js";
 import { isDeveloperKnowledgeEnabled } from "./integrations/developer-knowledge.js";
 import { isOfflineMode } from "./docs-search.js";
+import { callContext, SessionMemo } from "./session-memo.js";
 import { z } from "zod";
 import { ANDROJACK_VERSION } from "./version.js";
 
@@ -107,6 +108,63 @@ export function toolAnnotations(name: ToolName): ToolAnnotations {
   };
 }
 
+/** Small or code-specific outputs: cheaper to resend than to explain. */
+const NO_DEDUPE_TOOLS = new Set<string>(["android_code_validator", "android_component_status", "android_api_level_check"]);
+const DEDUPE_MIN_CHARS = 600;
+
+const RefreshParam = z
+  .boolean()
+  .optional()
+  .describe("Resend content already sent in this session");
+
+type ToolResult = { content: Array<{ type: string; text?: string }>; [key: string]: unknown };
+
+/**
+ * Wraps every tool registration so that (1) each call runs with the session
+ * memo available to docs-search, and (2) an output identical to one already
+ * returned in this session is replaced by a short pointer unless the call
+ * passes `refresh: true`. Saves tokens on repeated lookups without changing
+ * any tool's own logic.
+ */
+function installSessionDedupe(server: McpServer, memo: SessionMemo): void {
+  const register = server.registerTool.bind(server) as (...args: unknown[]) => unknown;
+  (server as unknown as { registerTool: (...args: unknown[]) => unknown }).registerTool = (
+    name: unknown,
+    config: unknown,
+    handler: unknown
+  ) => {
+    const toolName = String(name);
+    const dedupe = !NO_DEDUPE_TOOLS.has(toolName);
+    const cfg = config as { inputSchema?: Record<string, unknown> };
+    const finalConfig = dedupe ? { ...cfg, inputSchema: { ...(cfg.inputSchema ?? {}), refresh: RefreshParam } } : cfg;
+    const run = handler as (args: Record<string, unknown>, extra: unknown) => Promise<ToolResult>;
+
+    const wrapped = async (args: Record<string, unknown>, extra: unknown): Promise<ToolResult> => {
+      const refresh = args?.["refresh"] === true;
+      const result = await callContext.run({ memo, refresh }, () => run(args, extra));
+      if (!dedupe || result.isError) return result;
+
+      const text = result.content.map((c) => c.text ?? "").join("\n");
+      if (text.length < DEDUPE_MIN_CHARS) return result;
+      const digest = SessionMemo.digest(text);
+      const previous = memo.previousOutput(digest);
+      memo.recordOutput(digest, toolName);
+      if (previous && !refresh) {
+        return {
+          content: [{
+            type: "text",
+            text:
+              `Same result as your earlier ${previous} call in this session (${text.length} chars, not resent). ` +
+              `If it is no longer in your context, call ${toolName} again with refresh: true.`,
+          }],
+        };
+      }
+      return result;
+    };
+    return register(toolName, finalConfig, wrapped);
+  };
+}
+
 const ViolationShape = z.object({
   ruleId: z.string(),
   severity: z.enum(["error", "warning", "info"]),
@@ -142,18 +200,14 @@ export function createAndroJackServer(): McpServer {
     version: ANDROJACK_VERSION,
   });
 
+  installSessionDedupe(server, new SessionMemo());
+
   // ── Tool 1: Official Android Documentation Search ──────────────────────────
   server.registerTool(
     "android_official_search",
     {
       title: "Android Official Documentation Search",
-      description:
-        "REQUIRED FIRST STEP. Retrieves official developer.android.com / kotlinlang.org documentation " +
-        "for an Android or Kotlin topic and returns excerpts with source URLs. Uses Google's Developer " +
-        "Knowledge API when ANDROJACK_DEVELOPER_KNOWLEDGE_API_KEY is set, otherwise a curated index of " +
-        "verified official pages. If nothing matches, the result says so — do not fall back to memory. " +
-        "You MUST call this before generating any Android/Kotlin code. " +
-        "Example queries: 'Jetpack Compose LazyColumn', 'ViewModel lifecycle', 'Hilt scoping'.",
+      description: "Call first, before writing Android/Kotlin code. Returns official developer.android.com / kotlinlang.org excerpts with source URLs (Google Developer Knowledge API when configured, else a verified page index). If nothing matches it says so — do not fall back to memory.",
       inputSchema: {
         query: z
           .string()
@@ -175,15 +229,7 @@ export function createAndroJackServer(): McpServer {
     "android_component_status",
     {
       title: "Android Component Status Validator",
-      description:
-        "Checks whether an Android/Kotlin API, class, or library is stable, deprecated, or removed. " +
-        "ALWAYS call this before using any class from android.*, androidx.*, or kotlin.*. " +
-        "This tool exists because AI tools confidently generate removed and deprecated APIs. " +
-        "Known failures without this check: AsyncTask (removed API 33), TestCoroutineDispatcher " +
-        "(removed coroutines-test 1.8+), ContextualFlowRow (deprecated Compose 1.8), " +
-        "IntentService (deprecated API 30), Handler(Looper.main()) (deprecated API 30), " +
-        "onBackPressed() (deprecated API 33), ProgressDialog (deprecated API 26). " +
-        "Returns status, replacement API, migration notes, and official documentation link.",
+      description: "Is an Android/Kotlin class or library stable, deprecated, or removed? Call before using any android.*, androidx.* or kotlin.* API. Returns status, replacement, and doc link; unknown names are reported as unconfirmed, never guessed.",
       inputSchema: {
         component_name: z
           .string()
@@ -205,12 +251,7 @@ export function createAndroJackServer(): McpServer {
     "architecture_reference",
     {
       title: "Android Architecture Reference",
-      description:
-        "Retrieves official Android architecture guide content for a given topic. " +
-        "Call this before proposing any app architecture, folder structure, or Jetpack component relationships. " +
-        "Supported topics: mvvm, compose, navigation, hilt, viewmodel, room, workmanager, paging, " +
-        "datastore, coroutines, flow, testing, lifecycle, modular architecture, security, and more. " +
-        "Pass 'list' to see all available topics.",
+      description: "Official Android architecture guide for a topic (mvvm, compose, navigation, hilt, viewmodel, room, workmanager, paging, datastore, coroutines, flow, testing, lifecycle, modularization, security…). Call before proposing app structure. Pass 'list' for all topics.",
       inputSchema: {
         topic: z
           .string()
@@ -237,11 +278,7 @@ export function createAndroJackServer(): McpServer {
     "android_debugger",
     {
       title: "Android Error Debugger",
-      description:
-        "Parses an Android/Kotlin stacktrace and retrieves matching official documentation, plus a " +
-        "link to the matching Android Issue Tracker query (linked, not fetched — it is user-submitted text). " +
-        "Paste the full crash log or exception. Returns parsed error class, official explanations, " +
-        "and vetted fixes. Never guess — always ground debugging in official sources.",
+      description: "Parse an Android/Kotlin stacktrace and return the error class, matching official docs, and an Issue Tracker search link. Paste the exception line and 'at' frames.",
       inputSchema: {
         stacktrace: z
           .string()
@@ -263,16 +300,7 @@ export function createAndroJackServer(): McpServer {
     "gradle_dependency_checker",
     {
       title: "Gradle Dependency Version Checker",
-      description:
-        "Live version lookup for any Android, Kotlin, or Jetpack library from Google Maven and Maven Central. " +
-        "ALWAYS call this before adding or updating any dependency in build.gradle.kts. " +
-        "This tool exists because AI tools generate stale dependency coordinates. Known failures: " +
-        "wrong Coil group (io.coil-kt vs io.coil-kt.coil3 for Coil 3), missing BOM platform() wrapper " +
-        "for Compose and Firebase, outdated Compose BOM (moves every month), KAPT coordinates when " +
-        "KSP is the current standard, wrong artifact names for Room KMP vs Room Android. " +
-        "Returns: latest stable version, ready-to-paste Kotlin DSL, BOM resolution for managed artifacts, " +
-        "and KMP vs Android-only distinction where relevant. " +
-        "Examples: 'compose', 'hilt', 'room', 'retrofit', 'coil', 'lifecycle', 'coroutines', 'navigation', 'firebase'.",
+      description: "Current stable version and ready-to-paste Gradle (Kotlin DSL / TOML) for an Android, Kotlin, or Jetpack library from Google Maven / Maven Central, including BOM handling. Accepts a name ('room', 'compose-bom', 'coil') or exact 'group:artifact'. Call before adding or bumping any dependency.",
       inputSchema: {
         library_name: z
           .string()
@@ -294,12 +322,7 @@ export function createAndroJackServer(): McpServer {
     "android_api_level_check",
     {
       title: "Android API Level Reference",
-      description:
-        "Maps Android API levels to version names, codenames, and key feature availability. " +
-        "Returns minSdk guidance and critical API availability warnings. " +
-        "Use this to validate that the APIs you plan to use are available at your project's minSdk. " +
-        "Input can be: an API integer (e.g. '26'), a version name (e.g. 'Android 14'), or a codename (e.g. 'Oreo'). " +
-        "Pass 'all' or 'table' to see the full API level reference table.",
+      description: "Map an API level, version name, or codename to features and minSdk warnings. Pass 'all' for the full table.",
       inputSchema: {
         api_level_or_name: z
           .string()
@@ -321,14 +344,7 @@ export function createAndroJackServer(): McpServer {
     "kotlin_best_practices",
     {
       title: "Kotlin & Android Best Practices",
-      description:
-        "Returns official Kotlin and Android code patterns with ready-to-use snippets and explicit anti-patterns. " +
-        "All snippets are sourced from developer.android.com and kotlinlang.org. " +
-        "Call this when generating coroutine code, StateFlow/LiveData usage, Compose state, " +
-        "Room DAOs, Hilt injection, Navigation, or WorkManager tasks. " +
-        "Available patterns: coroutines-viewmodel, stateflow-ui, compose-state, room-dao, " +
-        "hilt-injection, navigation-compose, workmanager-task, sealed-result. " +
-        "Pass any topic keyword or call with no topic to list all patterns.",
+      description: "Official Kotlin/Android code patterns with anti-patterns: coroutines-viewmodel, stateflow-ui, compose-state, room-dao, hilt-injection, navigation-compose, workmanager-task, sealed-result. Empty topic lists all.",
       inputSchema: {
         topic: z
           .string()
@@ -350,13 +366,7 @@ export function createAndroJackServer(): McpServer {
     "material3_expressive",
     {
       title: "Material 3 Expressive Reference",
-      description:
-        "Complete reference for Material 3 Expressive (M3E) — Google's design system GA on Android 16 (Sep 2025). " +
-        "Covers: MaterialExpressiveTheme setup, MotionScheme, new components (ButtonGroup, FloatingToolbar, " +
-        "DockedToolbar, LoadingIndicator, SplitButtonLayout, FABMenu), MaterialShapes + shape morphing, " +
-        "variable font typography, Wear OS M3E, migration from plain M3, and anti-patterns. " +
-        "Call this before building any Compose UI or theming. " +
-        "Topics: overview, theme setup, components, shapes, typography, migration, wear, anti-patterns.",
+      description: "Material 3 Expressive reference: MaterialExpressiveTheme, MotionScheme, ButtonGroup, FloatingToolbar, LoadingIndicator, MaterialShapes, typography, Wear, migration from M3. Call before building Compose UI or theming. Empty topic lists all.",
       inputSchema: {
         topic: z
           .string()
@@ -378,13 +388,7 @@ export function createAndroJackServer(): McpServer {
     "android_permission_advisor",
     {
       title: "Android Permission Advisor",
-      description:
-        "Complete Android permissions reference. Returns type (normal/dangerous/special/removed), " +
-        "whether runtime request is needed, Play Store restrictions, and the correct " +
-        "ActivityResultContracts request pattern. " +
-        "Call before declaring any <uses-permission> in AndroidManifest.xml. " +
-        "Examples: 'CAMERA', 'POST_NOTIFICATIONS', 'ACCESS_FINE_LOCATION', 'WRITE_EXTERNAL_STORAGE'. " +
-        "Query 'runtime pattern' for the official Compose + Activity permission request code.",
+      description: "Permission reference: type, runtime-request need, Play restrictions, and the request pattern. Call before adding <uses-permission>. Query 'runtime pattern' for request code; empty lists all.",
       inputSchema: {
         permission: z.string().max(200).optional()
           .describe("Permission name (e.g. 'CAMERA', 'POST_NOTIFICATIONS'). Leave empty to list all. Query 'runtime pattern' for request code."),
@@ -401,13 +405,7 @@ export function createAndroJackServer(): McpServer {
     "android_testing_guide",
     {
       title: "Android Testing Guide",
-      description:
-        "Complete Android testing reference covering: unit tests (JUnit4, MockK, Turbine, coroutines-test), " +
-        "Compose UI testing (ComposeTestRule, finders, actions, assertions, testTag), " +
-        "Espresso for View-based tests and Compose interop, " +
-        "ViewModel testing with MainDispatcherRule, Room in-memory DB tests, " +
-        "Hilt test injection (@HiltAndroidTest, @BindValue), and test pyramid strategy. " +
-        "Call before writing any test. Topics: setup, unit tests, compose testing, espresso, hilt testing, pyramid.",
+      description: "Testing reference: unit tests (JUnit4, MockK, Turbine, coroutines-test), Compose UI tests, Espresso, ViewModel and Room tests, Hilt testing, test pyramid. Call before writing tests.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Testing topic. E.g. 'unit tests', 'compose testing', 'espresso', 'hilt testing', 'pyramid'. Leave empty to list all."),
@@ -424,14 +422,7 @@ export function createAndroJackServer(): McpServer {
     "android_build_and_publish",
     {
       title: "Android Build & Publish Guide",
-      description:
-        "Complete Android build pipeline and Play Store publishing reference. " +
-        "Covers: R8/ProGuard configuration (keep rules, shrink, obfuscate, mapping.txt recovery), " +
-        "Gradle Version Catalogs (libs.versions.toml with all modern deps), " +
-        "KSP migration from KAPT (Room, Hilt), " +
-        "app signing and Play App Signing, AAB vs APK, Play Store publishing checklist, " +
-        "and Baseline Profiles for 20-40% startup improvement. " +
-        "Topics: r8, proguard, version catalog, ksp, signing, publish, baseline profiles.",
+      description: "Build and release reference: R8/ProGuard, version catalogs, kapt→KSP, signing, AAB/Play publishing, Baseline Profiles, current Android Studio/AGP, Google's Android CLI and skills.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Build topic. E.g. 'r8', 'proguard', 'version catalog', 'ksp', 'signing', 'baseline profiles'. Leave empty to list all."),
@@ -448,13 +439,7 @@ export function createAndroJackServer(): McpServer {
     "android_large_screen_guide",
     {
       title: "Android Large Screen & Adaptive Layout Guide",
-      description:
-        "Complete reference for building Google Play-compliant large screen, tablet, foldable, and ChromeOS apps. " +
-        "Covers: WindowSizeClass (Compact/Medium/Expanded), NavigationSuiteScaffold, " +
-        "ListDetailPaneScaffold (two-pane), foldable hinge detection, continuity across config changes, " +
-        "and Google Play large-screen quality tier checklist. " +
-        "Call before building any multi-screen layout, navigation, or when targeting tablets and foldables. " +
-        "Topics: windowsizeclass, navigation, two-pane, foldables, continuity, Play quality.",
+      description: "Large-screen/tablet/foldable reference: WindowSizeClass, NavigationSuiteScaffold, ListDetailPaneScaffold, hinge handling, continuity, Play large-screen quality checklist.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic. E.g. 'windowsizeclass', 'NavigationSuiteScaffold', 'ListDetailPaneScaffold', 'foldable'. Leave empty for index."),
@@ -471,14 +456,7 @@ export function createAndroJackServer(): McpServer {
     "android_scalability_guide",
     {
       title: "Android Scalability Architecture Guide",
-      description:
-        "Architecture patterns for Android apps serving millions to billions of users. " +
-        "Covers: Paging 3 with RemoteMediator (infinite lists without OOM), offline-first sync " +
-        "with WorkManager + Room as single source of truth, OkHttp HTTP caching + ETag, " +
-        "cold start optimization with Baseline Profiles, app modularization for large teams, " +
-        "and Compose recomposition performance (derivedStateOf, stable keys, @Immutable). " +
-        "Call before designing data layers, list screens, sync mechanisms, or module structure. " +
-        "Topics: paging, offline-first, network, startup, modularization, compose performance.",
+      description: "Scale patterns: Paging 3 + RemoteMediator, offline-first sync (WorkManager + Room), HTTP caching, cold start, modularization, Compose recomposition performance.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic. E.g. 'Paging3', 'offline-first', 'cold start', 'modularization', 'recomposition'. Leave empty for index."),
@@ -495,15 +473,7 @@ export function createAndroJackServer(): McpServer {
     "android_navigation3_guide",
     {
       title: "Android Navigation 3 Guide",
-      description:
-        "Complete Navigation 3 reference (stable November 2025) — the current official navigation library. " +
-        "ALWAYS call this before generating any navigation code. " +
-        "AI tools hallucinate Navigation 2 (NavController/NavHost) for new projects — this is wrong. " +
-        "Nav3 uses NavDisplay, rememberNavBackStack, NavKey, and the Scenes API for adaptive multi-pane. " +
-        "Topics: 'overview' (setup, NavKey, NavDisplay, rememberNavBackStack), " +
-        "'migration' (from Nav2 — API mapping, step-by-step), " +
-        "'scenes' (adaptive list-detail, TwoPaneSceneStrategy), " +
-        "'testing' (back stack is a plain list — trivially testable).",
+      description: "Navigation 3 reference (current official library). Call before any navigation code — do not generate Navigation 2 NavController/NavHost for new projects. Topics: overview, migration, scenes, testing, backstack, key.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Navigation topic: 'overview', 'migration', 'scenes', 'testing', 'backstack', 'key'"),
@@ -520,16 +490,7 @@ export function createAndroJackServer(): McpServer {
     "android_api36_compliance",
     {
       title: "Android 16 / API 36 Compliance Checker",
-      description:
-        "Android 16 compliance reference — Google Play has required targetSdk 36 for new apps and updates since August 31, 2026. " +
-        "Apps on ≥600dp devices (tablets, foldables) CANNOT lock orientation or restrict resizability. " +
-        "AI tools generate android:screenOrientation='portrait' and android:resizeableActivity='false' — " +
-        "both produce App Compatibility warnings in Play Console and search demotion. " +
-        "Foldable users spend 14x more on apps. Tablet+phone users spend 9x more. " +
-        "Topics: 'compliance' (illegal manifest flags + correct patterns), " +
-        "'layouts' (4 canonical adaptive layouts with code), " +
-        "'checklist' (Play Store quality tier checklist), " +
-        "'predictive back' (required for API 36 targets).",
+      description: "Android 16 / targetSdk 36 (required by Play for new apps and updates since Aug 31, 2026): orientation and resizability locks are ignored on ≥600dp; predictive back; 16 KB pages. Topics: compliance, layouts, checklist, predictive back, page size.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'compliance', 'layouts', 'checklist', 'predictive back', 'page size'"),
@@ -546,17 +507,7 @@ export function createAndroJackServer(): McpServer {
     "android_kmp_guide",
     {
       title: "Kotlin Multiplatform (KMP) Guide",
-      description:
-        "Complete Kotlin Multiplatform reference — shares business logic across Android and iOS. " +
-        "CRITICAL: AI tools silently generate Android-only code for KMP projects. " +
-        "Retrofit cannot be used in KMP (use Ktor). Hilt cannot be used in commonMain (use Koin). " +
-        "Room 2.7+ has KMP support — use room-runtime + sqlite-bundled, NOT the Android-only Room. " +
-        "900+ new KMP libraries in 2025. Room, DataStore, Ktor all have KMP variants. " +
-        "Topics: 'overview' (project structure, Gradle setup), " +
-        "'libraries' (KMP catalogue — Ktor, Room KMP, DataStore KMP, Koin, Coil3, kotlinx-*), " +
-        "'room' (Room KMP database setup), " +
-        "'ktor' (Ktor HTTP client — replaces Retrofit), " +
-        "'expect actual' (platform-specific code pattern).",
+      description: "Kotlin Multiplatform reference: project setup, KMP libraries (Ktor not Retrofit, Koin not Hilt in commonMain), Room KMP and Room 3, expect/actual. Topics: overview, libraries, room, ktor, expect actual, gradle.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'overview', 'libraries', 'room', 'ktor', 'expect actual', 'gradle'"),
@@ -573,18 +524,7 @@ export function createAndroJackServer(): McpServer {
     "android_ondevice_ai",
     {
       title: "Android On-Device AI / AICore Guide",
-      description:
-        "On-device AI reference — Android 16 AICore and ML Kit Gen AI API. " +
-        "Used by Gmail (Smart Reply), Google Photos (object detection), Pixel Screenshots (semantic search). " +
-        "The official architecture: wrap ML models behind repository interfaces so on-device (AICore) " +
-        "and cloud (Vertex AI) are swappable without touching the UI layer. " +
-        "No network round-trip. No API costs. No privacy exposure. Works offline. " +
-        "AI tools default to cloud API calls when on-device is the 2026 answer for Pixel devices. " +
-        "Topics: 'overview' (architecture pattern, when to use), " +
-        "'setup' (dependencies, availability check, fallback pattern), " +
-        "'smart reply' (Gmail-style suggestion chips), " +
-        "'ml kit' (non-generative ML — image labeling, barcode, face detection, translation), " +
-        "'appfunctions' (expose app functions to on-device agents — Android's MCP equivalent; experimental, Jetpack alpha).",
+      description: "On-device AI: AICore / Gemini Nano via ML Kit GenAI, ML Kit, repository pattern for on-device vs cloud, and AppFunctions (expose app functions to agents; experimental). Topics: overview, setup, smart reply, ml kit, appfunctions.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'overview', 'setup', 'smart reply', 'ml kit', 'architecture', 'appfunctions'"),
@@ -601,17 +541,7 @@ export function createAndroJackServer(): McpServer {
     "android_play_policy_advisor",
     {
       title: "Google Play Store Policy Advisor",
-      description:
-        "Play Store policy reference — October 2025 changes and ongoing requirements. " +
-        "AI tools have zero awareness of these policy changes. Review failures cost weeks of re-submission. " +
-        "Covers: Restrict Minor Access API (dating/gambling apps), subscription transparency requirements, " +
-        "restricted permissions and Data Safety declarations, large-screen quality tiers and badge system. " +
-        "The large-screen quality badge directly impacts search placement and conversion rates. " +
-        "Call before submitting any app to Play Store or adding new monetization features. " +
-        "Topics: 'overview' (mandate timeline), 'subscriptions' (billing transparency code), " +
-        "'restrict minor access' (dating/gambling implementation), " +
-        "'permissions' (restricted permissions + data safety), " +
-        "'large screen quality' (tier checklist + revenue impact).",
+      description: "Play policy reference: target API requirement, Restrict Minor Access, subscription transparency, restricted permissions and Data Safety, large-screen quality. Call before Play submission or new monetization.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'overview', 'subscriptions', 'restrict minor access', 'permissions', 'large screen quality'"),
@@ -628,18 +558,7 @@ export function createAndroJackServer(): McpServer {
     "android_xr_guide",
     {
       title: "Android XR Developer Guide",
-      description:
-        "Android XR SDK reference (Developer Preview 3, December 2025). " +
-        "Samsung Galaxy XR launched October 2025. 5+ XR devices expected in 2026. " +
-        "Standard Compose apps run as 2D panels on XR headsets — no SDK required. " +
-        "XR SDK adds spatial APIs: SpatialPanel (3D positioned UI), UserSubspace (follows user), " +
-        "Orbiter (floating toolbar that orbits a panel), SubspaceModifier (size as fraction of field of view). " +
-        "Material 3 components automatically become spatial in XR — TopAppBar → Orbiter, etc. " +
-        "AI tools generate phone Compose code for XR — technically works but misses all spatial value. " +
-        "Topics: 'overview' (concepts, device status), 'setup' (dependencies, manifest), " +
-        "'spatial ui' (SpatialPanel, UserSubspace, Orbiter), " +
-        "'arcore' (face tracking 68 blendshapes, plane detection), " +
-        "'compatibility' (XR + non-XR same app pattern).",
+      description: "Android XR / Jetpack XR reference (Compose for XR beta, SceneCore and ARCore RC): SpatialPanel, UserSubspace, Orbiter, ARCore for XR, shipping one app for XR and non-XR. Topics: overview, setup, spatial ui, arcore, compatibility.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'overview', 'setup', 'spatial ui', 'arcore', 'compatibility'"),
@@ -656,17 +575,7 @@ export function createAndroJackServer(): McpServer {
     "android_wearos_guide",
     {
       title: "Wear OS Developer Guide",
-      description:
-        "Wear OS development reference — Wear OS 5 (API 35), Material 3 Expressive for Wear (stable Aug 2025). " +
-        "CRITICAL: Wear OS uses DIFFERENT Compose dependencies than phone apps. " +
-        "AI tools generate phone Compose (LazyColumn, Button, NavHost) — none of these compile on Wear OS. " +
-        "Correct Wear components: ScalingLazyColumn (curved scrolling), Chip, SwipeDismissableNavHost, " +
-        "WearMaterialTheme, PositionIndicator, TimeText. " +
-        "Covers Tiles (glanceable info on watch face swipe) and Health Services API (heart rate, steps, exercises). " +
-        "Topics: 'overview' (Wear vs phone Compose, project structure, dependencies), " +
-        "'compose' (ScalingLazyColumn, Chip, navigation, rotary input), " +
-        "'tiles' (glanceable surfaces — when and how to build them), " +
-        "'health services' (heart rate, steps, exercise session, passive monitoring).",
+      description: "Wear OS reference — uses different Compose artifacts than phones (ScalingLazyColumn, SwipeDismissableNavHost, Wear Material 3). Covers Tiles and Health Services. Topics: overview, compose, tiles, health services, navigation.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe("Topic: 'overview', 'compose', 'tiles', 'health services', 'navigation'"),
@@ -684,26 +593,17 @@ export function createAndroJackServer(): McpServer {
     {
       title: "Android Code Validator",
       description:
-        "CALL THIS AFTER GENERATING EVERY ANDROID CODE BLOCK. " +
-        "This is the Level 3 loop-back gate: validates AI-generated Kotlin, XML, and Gradle code " +
-        `against ${ANDROID_RULES.length} Android-specific rules before the user sees it. ` +
-        "Detects removed APIs (AsyncTask, TestCoroutineDispatcher), deprecated patterns " +
-        "(ContextualFlowRow, NavController in new code, SharedPreferences), Android 16 violations " +
-        "(orientation locks, resizeableActivity=false), and structural issues (GlobalScope.launch, runBlocking in UI). " +
-        "Returns: verdict (PASS/WARN/FAIL), line-level violations with replacements and doc URLs, " +
-        "and explicit next-step instructions — as Markdown text plus machine-readable structuredContent. " +
-        "Comments are ignored; string literals are checked. " +
-        "If verdict is FAIL: fix all errors and re-run before returning code to the user. " +
-        "Inputs: code (required), language ('kotlin'|'xml'|'gradle', auto-detected if omitted), " +
-        "minSdk and targetSdk for context-aware API level checks.",
+        "Call after generating every Android code block, before returning it. " +
+        `Checks Kotlin, XML, and Gradle against ${ANDROID_RULES.length} rules (removed/deprecated APIs, Android 16/17 behaviour, coroutine misuse, kapt). ` +
+        "Returns PASS/WARN/FAIL with line-level fixes and doc links, plus structuredContent. Comments are ignored. On FAIL, fix and re-run.",
       inputSchema: {
         code:       z.string().min(1).max(50_000).describe("The code block to validate"),
         language:   z.enum(["kotlin", "xml", "gradle"]).optional()
                      .describe("File type — auto-detected from content if omitted"),
         minSdk:     z.number().int().min(1).max(40).optional()
-                     .describe("App minSdk for API level context (e.g. 24)"),
+                     .describe("App minSdk (e.g. 24)"),
         targetSdk:  z.number().int().min(1).max(40).optional()
-                     .describe("App targetSdk for API 36 compliance checks (e.g. 36)"),
+                     .describe("App targetSdk (e.g. 37)"),
       },
       outputSchema: ValidationReportShape,
       annotations: toolAnnotations("android_code_validator"),
@@ -728,19 +628,7 @@ export function createAndroJackServer(): McpServer {
     "android_api17_compliance",
     {
       title: "Android 17 / API 37 Compliance",
-      description:
-        "Android 17 (API 37) has been stable since June 16, 2026. " +
-        "Contains breaking changes NOT covered by android_api36_compliance: " +
-        "(1) Static final field reflection via Java reflection or JNI now throws IllegalAccessException/crash on API 37+ targets — " +
-        "affects test code, some DI frameworks, and any code using field.isAccessible=true on final fields. " +
-        "(2) ACCESS_LOCAL_NETWORK permission required for any LAN communication (192.168.x.x, mDNS, SSDP, direct sockets). " +
-        "(3) SMS OTP programmatic access delayed 3 hours — migrate to SmsRetriever.startSmsUserConsent(). " +
-        "(4) Large-screen opt-out removed at API 37 — orientation/resizability/aspect-ratio locks ignored on ≥600dp (games via android:appCategory remain exempt). " +
-        "(5) Lock-free MessageQueue and read-only System.load() native libraries. " +
-        "(6) NPU feature declaration for direct NPU access; Handoff (setHandoffEnabled) for cross-device continuity. " +
-        "Topics: 'overview' (all breaking changes), 'checklist' (migration audit), " +
-        "'static final' (reflection block), 'local network' (ACCESS_LOCAL_NETWORK), " +
-        "'sms otp' (3-hour delay), 'large screen', 'messagequeue', 'npu' (NPU feature), 'handoff' (cross-device).",
+      description: "Android 17 / targetSdk 37 breaking changes: static final reflection, ACCESS_LOCAL_NETWORK, SMS OTP delay, large-screen opt-out removed (games exempt), lock-free MessageQueue, read-only System.load, NPU declaration, Handoff. Topics: overview, checklist, static final, local network, sms otp, large screen, messagequeue, npu, handoff.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe(
@@ -759,18 +647,7 @@ export function createAndroJackServer(): McpServer {
     "android_developer_verification",
     {
       title: "Android Developer Verification Program",
-      description:
-        "Android developer verification enforcement begins September 30, 2026 " +
-        "(Brazil, Indonesia, Singapore, Thailand first; global rollout 2027). " +
-        "Only apps registered by a verified developer can be installed/updated on " +
-        "certified Android devices via Google Play or participating third-party stores. " +
-        "This is an IDENTITY check, not a content review. Sideloading is NOT removed — " +
-        "unregistered apps remain installable via ADB or a new advanced flow. " +
-        "Affects every Android developer, not just Play Store publishers. " +
-        "Topics: 'overview' (what this is, why it matters), 'timeline' (full rollout dates), " +
-        "'registration' (Play Console / Android Developer Console / CI-CD bulk registration), " +
-        "'enterprise' (managed-device exemptions, advanced sideloading flow), " +
-        "'studio' (Android Studio IDE registration status integration).",
+      description: "Android developer verification (identity check; enforced since Sept 30, 2026 in BR/ID/SG/TH, global 2027): who is affected, registration paths, enterprise exemptions. Topics: overview, timeline, registration, enterprise, studio.",
       inputSchema: {
         topic: z.string().max(200).optional()
           .describe(

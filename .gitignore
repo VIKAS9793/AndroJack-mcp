@@ -35,3 +35,11 @@ out/
 .mcpregistry_*
 VERIFICATION_CHECKLIST.md
 release-2.1.0/
+
+# Internal working docs (kept local, never committed)
+CLAUDE.md
+docs/agent-context/
+product-management/
+release-*/
+.stryker-tmp*/
+reports/

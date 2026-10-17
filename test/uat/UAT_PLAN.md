@@ -20,7 +20,7 @@ developer.android.com, Google Maven or Google APIs being reachable. UAT-L1 is th
 |----|------------|----------------------|---------------|
 | UAT-01 | As a developer, when I connect a client I see AndroJack's tools | `tools/list` equals the published `TOOL_NAMES` contract exactly | Contract drift |
 | UAT-02 | As a client, I can decide auto-approval safely | Every tool has a title, a description, and `readOnlyHint` / `destructiveHint:false` / `idempotentHint` / `openWorldHint` | Missing annotations (2.0) |
-| UAT-03 | As a developer, AndroJack does not eat my context window | `tools/list` ≤ 30 KB | Context growth |
+| UAT-03 | As a developer, AndroJack does not eat my context window | `tools/list` ≤ 22 KB | Context growth |
 | UAT-04 | As an agent, correctly migrated code passes even with migration comments | Kotlin with `// replaced AsyncTask … GlobalScope.launch` → `PASS` | Comment false-FAIL fix loop |
 | UAT-05 | As an agent, I get machine-readable violations | Removed API → `FAIL`, `structuredContent.violations[]` with ruleId, line, https docUrl | Structured output |
 | UAT-06 | As an agent targeting API 37, I'm warned about Android 17 breakage | Orientation lock + aspect ratio in manifest and CameraX 1.4.x in Gradle are flagged | New API 37 rules |

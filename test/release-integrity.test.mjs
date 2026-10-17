@@ -46,6 +46,9 @@ test('REL-03 README install commands and badges pin the current version', () => 
     const decoded = Buffer.from(b64[1], 'base64').toString('utf8');
     assert.match(decoded, new RegExp(`androjack-mcp@${pkg.version.replace(/\./g, '\\.')}`), decoded);
   }
+  const badge = current.match(/img\.shields\.io\/badge\/AndroJack_MCP-v(\d+\.\d+\.\d+)-/);
+  assert.equal(badge?.[1], pkg.version, 'version badge');
+  assert.ok(current.includes(`androjack-mcp/v/${pkg.version}"`), 'version badge links to the current npm version');
 });
 
 test('REL-04 README current-state counts match the code', () => {
