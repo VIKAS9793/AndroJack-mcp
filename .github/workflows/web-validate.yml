@@ -40,7 +40,7 @@ jobs:
           grep -F "\"softwareVersion\": \"$VERSION\"" index.html
           grep -F "npx androjack-mcp@$VERSION install" index.html
           grep -F "VIKAS9793.androjack-vscode@$VERSION" index.html
-          grep -F "const displayVersion = (version && version >= '$VERSION') ? version : '$VERSION';" index.html
+          grep -F "const FALLBACK_VERSION = '$VERSION';" index.html
           grep -F "npm install -g androjack-mcp@$VERSION" llms.txt
           grep -F "vikas9793.androjack-vscode@$VERSION" llms.txt
 

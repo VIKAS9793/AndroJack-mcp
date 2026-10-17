@@ -1,22 +1,30 @@
 # AndroJack MCP
 
-> AndroJack MCP is a hardened 22-tool Model Context Protocol (MCP) server
-> that provides documentation-grounded verification for AI-assisted
-> Android development. It prevents AI hallucinations by grounding
-> responses in official Android, Jetpack, Kotlin, and Firebase docs.
+> AndroJack MCP is a read-only Model Context Protocol (MCP) server with 23 tools
+> for AI-assisted Android development. It grounds answers in official Android and
+> Kotlin documentation and enforces 34 Android validation rules on generated code,
+> both inside the AI assistant and in CI.
 
 ## What it does
 
-- Verifies AI-generated Android code against official documentation
-- Supports 22 specialised tools across Kotlin, Jetpack Compose,
-  Material Design 3, Room, Hilt, Coroutines, Flow, and Firebase
-- Distributed as an npm package and VS Code extension
-- Integrates with Claude (via MCP), Cursor, Windsurf, and Kiro
+- Validates AI-generated Kotlin, XML, and Gradle code against 34 Android rules
+  (removed and deprecated APIs, Android 16/17 behaviour changes, Compose-first,
+  KSP over kapt), with PASS/WARN/FAIL verdicts and structured output
+- Runs the same rules in CI: `npx androjack-mcp validate --format=sarif`
+- Retrieves official documentation (Google's Developer Knowledge API with an
+  optional key, or a verified index of developer.android.com / kotlinlang.org pages)
+- Looks up current library versions from Google Maven and Maven Central
+- Covers Android 17 / API 37, Play target-API requirements, developer verification,
+  Navigation 3, Material 3 Expressive, large screens, KMP and Room 3, Wear OS, XR,
+  on-device AI and AppFunctions
+- Distributed as an npm package and a VS Code extension
+- Works with any MCP client: Claude, Cursor, VS Code / Copilot, Windsurf, Kiro,
+  Android Studio, Antigravity
 
 ## Who it's for
 
 Android developers using AI coding assistants who want reliable,
-documentation-backed code suggestions — not hallucinated APIs.
+documentation-backed code — not hallucinated or deprecated APIs.
 
 ## Key Links
 
@@ -29,30 +37,19 @@ documentation-backed code suggestions — not hallucinated APIs.
 
 ### npm (MCP server)
 ```
-npm install -g androjack-mcp@2.0.0
+npm install -g androjack-mcp@2.1.0
 ```
+or run without installing: `npx androjack-mcp@2.1.0 install`
 
 ### VS Code Extension
 Search `AndroJack MCP` in the VS Code Extensions panel,
-or install via: `ext install vikas9793.androjack-vscode@2.0.0`
+or install via: `ext install vikas9793.androjack-vscode@2.1.0`
 
-## Supported Tool Categories
-
-1. Kotlin language verification
-2. Jetpack Compose UI verification
-3. Material Design 3 component verification
-4. Android Lifecycle & ViewModel verification
-5. Room database schema verification
-6. Hilt dependency injection verification
-7. Coroutines & Flow verification
-8. Firebase integration verification
-9. Navigation Component verification
+### CI
+```
+npx androjack-mcp@2.1.0 validate . --target-sdk=37 --format=sarif
+```
 
 ## Contact / Author
 
 Built by Vikas — APM, AI product builder, open-source developer.
-
-## Optional: llms-full.txt
-
-A comprehensive version with full tool documentation is available at:
-https://androjack-web.netlify.app/llms-full.txt

@@ -50,7 +50,7 @@
       "description": "AI validation tool for Android development that verifies AI-generated code against official documentation to reduce hallucinations and build failures.",
       "url": "https://androjack-web.netlify.app",
       "downloadUrl": "https://www.npmjs.com/package/androjack-mcp",
-      "softwareVersion": "2.0.0",
+      "softwareVersion": "2.1.0",
       "author": {
         "@type": "Person",
         "name": "Vikas"
@@ -69,6 +69,7 @@
         "Documentation grounding",
         "Android SDK verification",
         "MCP protocol support",
+        "CI validation gate with SARIF output",
         "Developer workflow integration"
       ],
       "keywords": [
@@ -628,7 +629,7 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="badges">
-                <span class="badge badge-android">v2.0.0 Hardened Release</span>
+                <span class="badge badge-android">v2.1.0 Release</span>
                 <span class="badge badge-mcp">MCP Protocol Ready</span>
             </div>
 
@@ -653,7 +654,7 @@
                 </div>
                 <div class="qi-body">
                     <div class="qi-command">
-                        <span class="prompt">$</span>npx androjack-mcp@2.0.0 install
+                        <span class="prompt">$</span>npx androjack-mcp@2.1.0 install
                     </div>
                     <button class="btn-copy" id="copy-btn" aria-label="Copy install command">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -705,11 +706,11 @@
                     <div class="command-list">
                         <div class="quick-command">
                             <span class="command-label">npm install</span>
-                            <code><span class="prompt">$</span> npx androjack-mcp@2.0.0 install</code>
+                            <code><span class="prompt">$</span> npx androjack-mcp@2.1.0 install</code>
                         </div>
                         <div class="quick-command">
                             <span class="command-label">VS Code</span>
-                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode@2.0.0</code>
+                            <code><span class="prompt">$</span> code --install-extension VIKAS9793.androjack-vscode@2.1.0</code>
                         </div>
                     </div>
                 </div>
@@ -730,7 +731,7 @@
                                 <p>Best for Claude Desktop, Cursor, Windsurf, Kiro, and direct MCP installs.</p>
                             </div>
                         </div>
-                        <div class="distribution-command">npx androjack-mcp@2.0.0 install</div>
+                        <div class="distribution-command">npx androjack-mcp@2.1.0 install</div>
                         <div class="distribution-actions">
                             <a href="https://www.npmjs.com/package/androjack-mcp" target="_blank"
                                 class="btn btn-primary">Open npm Package</a>
@@ -753,7 +754,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode@2.0.0
+                        <div class="distribution-command">code --install-extension VIKAS9793.androjack-vscode@2.1.0
                         </div>
                         <div class="distribution-actions">
                             <a href="https://marketplace.visualstudio.com/items?itemName=VIKAS9793.androjack-vscode"
@@ -959,7 +960,7 @@
                         </svg>
                     </div>
                     <h3>Level 3 Validator</h3>
-                    <p>Comprehensive verification via a 54-test suite. Blocks discontinued APIs like AsyncTask and ContextualFlowRow instantly.</p>
+                    <p>34 Android rules, run inside your AI assistant and in CI (<code>npx androjack-mcp validate</code>, SARIF for GitHub code scanning). Blocks removed APIs like AsyncTask and ContextualFlowRow before they ship.</p>
                 </div>
                 <div class="glass-card bouncy-card">
                     <div class="icon-wrap mcp-burst">
@@ -1006,8 +1007,8 @@
 
                 <h3>The Solution: Data Grounding Over Inference</h3>
                 <p>AndroJack MCP intercepts the AI's generation process. Before the AI writes a single line of Android
-                    code, AndroJack forces it to query the official Google ecosystem (developer.android.com, issue
-                    trackers, Maven Central). It ensures your AI assistant builds from verified, real-time evidence,
+                    code, AndroJack forces it to query official sources (developer.android.com, Google's Developer
+                    Knowledge API, Google Maven, Maven Central) and then validates the result. It ensures your AI assistant builds from verified, real-time evidence,
                     acting as an elite staff engineer reviewing every technical decision.</p>
             </div>
         </section>
@@ -1026,12 +1027,12 @@
                     </div>
                     <h3>Where AndroJack Shines</h3>
                     <ul class="use-case-list">
-                        <li><strong>Greenfield Projects:</strong> Architecting new apps strictly using Compose 1.8,
-                            Navigation 3, and modern MVI/M3 standards.</li>
+                        <li><strong>Greenfield Projects:</strong> Architecting new apps strictly using current Compose,
+                            Navigation 3, Room 3, and modern MVI/M3 standards.</li>
                         <li><strong>Legacy Modernization:</strong> Eradicating `AsyncTask`, `LiveData`, and XML layouts
                             safely.</li>
-                        <li><strong>Play Store Compliance:</strong> Guaranteeing apps meet the Android 17 (API 37)
-                            large-screen constraints mandated for 2026.</li>
+                        <li><strong>Play Store Compliance:</strong> Meeting Google Play's target API 36 requirement (in
+                            force since August 31, 2026) and the Android 17 (API 37) large-screen rules.</li>
                         <li><strong>Debugging Complex Configurations:</strong> Fixing ProGuard obfuscation rules or deep
                             Gradle dependency conflicts across KMP projects.</li>
                     </ul>
@@ -1197,8 +1198,18 @@
                 const version = extension?.versions?.[0]?.version;
 
                 setMetricNumber('vscode-downloads', installCount);
-                // Fallback to v2.0.0 if API lags or returns older version
-                const displayVersion = (version && version >= '2.0.0') ? version : '2.0.0';
+                // Fall back to the release version if the API lags or returns an older version.
+                // Numeric comparison: a string compare would rank "2.10.0" below "2.9.0".
+                const FALLBACK_VERSION = '2.1.0';
+                const isAtLeast = (a, b) => {
+                    const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
+                    const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+                    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+                        if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) > (pb[i] ?? 0);
+                    }
+                    return true;
+                };
+                const displayVersion = (version && isAtLeast(version, FALLBACK_VERSION)) ? version : FALLBACK_VERSION;
                 setMetricText('vscode-version', `v${displayVersion}`);
             } catch (error) {
                 console.error('Failed to fetch VS Code Marketplace metrics:', error);
@@ -1270,7 +1281,7 @@
             const copyBtn = document.getElementById('copy-btn');
             if (!copyBtn) return;
 
-            const command = "npx androjack-mcp@2.0.0 install";
+            const command = "npx androjack-mcp@2.1.0 install";
             const btnSpan = copyBtn.querySelector('span');
             const originalText = btnSpan.textContent;
 
